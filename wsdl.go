@@ -18,8 +18,8 @@ type WsdlImport struct {
 }
 
 type WsdlType struct {
-	Doc    string       `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
-	Schema []*XsdSchema `xml:"http://www.w3.org/2001/XMLSchema schema"`
+	Doc     string       `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
+	Schemas []*XsdSchema `xml:"http://www.w3.org/2001/XMLSchema schema"`
 }
 
 type WsdlPart struct {

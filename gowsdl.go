@@ -1,17 +1,19 @@
 package main
 
 import (
+	"encoding/xml"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 )
 
 type GoWsdl struct {
-	file, pkg, output string
-	logger            *log.Logger
+	file, pkg string
+	logger    *log.Logger
 }
 
-func NewGoWsdl(file, pkg, output string, logger *log.Logger) (*GoWsdl, error) {
+func NewGoWsdl(file, pkg string, logger *log.Logger) (*GoWsdl, error) {
 	file = strings.TrimSpace(file)
 	if file == "" {
 		logger.Fatalln("WSDL file is required to generate Go proxy")
@@ -22,25 +24,45 @@ func NewGoWsdl(file, pkg, output string, logger *log.Logger) (*GoWsdl, error) {
 		pkg = "main"
 	}
 
-	output = strings.TrimSpace(output)
-	if output == "" {
-		output = "."
-	}
-
 	if logger == nil {
 		logger = log.New(os.Stdout, "", 0)
 	}
 
-	log.Println(file)
-
 	return &GoWsdl{
 		file:   file,
 		pkg:    pkg,
-		output: output,
 		logger: logger,
 	}, nil
 }
 
-func (g *GoWsdl) start() error {
+func (g *GoWsdl) Unmarshal() error {
+	g.logger.Printf("Using %s...\n", g.file)
+
+	//URL or local file?
+	//if URL, download!
+
+	data, err := ioutil.ReadFile(g.file)
+	if err != nil {
+		return err
+	}
+
+	wsdl := Wsdl{}
+	err = xml.Unmarshal(data, &wsdl)
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (g *GoWsdl) GenTypes() ([]byte, error) {
+	return nil, nil
+}
+
+func (g *GoWsdl) GenOperations() ([]byte, error) {
+	return nil, nil
+}
+
+func (g *GoWsdl) GenSoapProxy() ([]byte, error) {
+	return nil, nil
 }
