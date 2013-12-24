@@ -4,15 +4,14 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"log"
 	"os"
-	"sync"
 )
 
 const version = "v0.0.1"
 
 var opts struct {
 	Version    bool   `short:"v" long:"version" description:"Shows gowsdl version"`
-	Package    string `short:"p" long:"package" description:"Package under which code will be generated" default:"gowsdl"`
-	OutputFile string `short:"o" long:"output" description:"File where the generated code will be saved" default:"./myservice.go"`
+	Package    string `short:"p" long:"package" description:"Package under which code will be generated" default:"myservice"`
+	OutputFile string `short:"o" long:"output" description:"File where the generated code will be saved" default:"myservice.go"`
 }
 
 func main() {
@@ -42,57 +41,31 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = gowsdl.Unmarshal()
+	gocode, err := gowsdl.Start()
 	if err != nil {
-		logger.Println(err)
-		os.Exit(1)
+		logger.Fatalln(err)
 	}
 
-	var types, operations, proxy []byte
-	var wg sync.WaitGroup
+	pkg := "./" + opts.Package
+	err = os.Mkdir(pkg, 0744)
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		var err error
-
-		types, err = gowsdl.GenTypes()
+	if perr, ok := err.(*os.PathError); ok && os.IsExist(perr.Err) {
+		logger.Println("Package directory already exist, skipping creation")
+	} else {
 		if err != nil {
 			logger.Fatalln(err)
 		}
-	}()
+	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		var err error
-
-		operations, err = gowsdl.GenOperations()
-		if err != nil {
-			logger.Fatalln(err)
-		}
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		var err error
-
-		proxy, err = gowsdl.GenSoapProxy()
-		if err != nil {
-			logger.Fatalln(err)
-		}
-	}()
-
-	wg.Wait()
-
-	fd, err := os.Create(opts.OutputFile)
+	fd, err := os.Create(pkg + "/" + opts.OutputFile)
 	if err != nil {
 		logger.Fatalln(err)
 	}
 	defer fd.Close()
 
-	fd.Write(types)
-	fd.Write(proxy)
-	fd.Write(operations)
+	fd.Write(gocode["types"])
+	fd.Write(gocode["proxy"])
+	fd.Write(gocode["operations"])
+
+	logger.Println("Done 💩")
 }
