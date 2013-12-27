@@ -4,6 +4,7 @@ import (
 	flags "github.com/jessevdk/go-flags"
 	"log"
 	"os"
+	"runtime"
 )
 
 const version = "v0.0.1"
@@ -14,58 +15,69 @@ var opts struct {
 	OutputFile string `short:"o" long:"output" description:"File where the generated code will be saved" default:"myservice.go"`
 }
 
+var logger *log.Logger
+
+func init() {
+	if os.Getenv("GOMAXPROCS") == "" {
+		runtime.GOMAXPROCS(runtime.NumCPU())
+	}
+
+	log.SetFlags(0)
+	log.SetOutput(os.Stdout)
+	log.SetPrefix("🍀  ")
+}
+
 func main() {
 	args, err := flags.Parse(&opts)
 	if err != nil {
 		os.Exit(1)
 	}
 
-	logger := log.New(os.Stdout, "🍀  ", 0)
-
 	if opts.Version {
-		logger.Println(version)
+		log.Println(version)
 		os.Exit(0)
 	}
 
 	if len(args) == 0 {
-		logger.Fatalln("WSDL file is required to start the party")
+		log.Fatalln("WSDL file is required to start the party")
 	}
 
 	if opts.OutputFile == args[0] {
-		logger.Fatalln("Output file cannot be the same WSDL file")
+		log.Fatalln("Output file cannot be the same WSDL file")
 	}
 
-	gowsdl, err := NewGoWsdl(args[0], opts.Package, logger)
+	gowsdl, err := NewGoWsdl(args[0], opts.Package)
 	if err != nil {
-		logger.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 
 	gocode, err := gowsdl.Start()
 	if err != nil {
-		logger.Fatalln(err)
+		log.Fatalln(err)
 	}
 
 	pkg := "./" + opts.Package
 	err = os.Mkdir(pkg, 0744)
 
 	if perr, ok := err.(*os.PathError); ok && os.IsExist(perr.Err) {
-		logger.Println("Package directory already exist, skipping creation")
+		log.Println("Package directory already exist, skipping creation")
 	} else {
 		if err != nil {
-			logger.Fatalln(err)
+			log.Fatalln(err)
 		}
 	}
 
 	fd, err := os.Create(pkg + "/" + opts.OutputFile)
 	if err != nil {
-		logger.Fatalln(err)
+		log.Fatalln(err)
 	}
 	defer fd.Close()
 
 	fd.Write(gocode["types"])
-	fd.Write(gocode["proxy"])
+	fd.Write(gocode["messages"])
 	fd.Write(gocode["operations"])
+	fd.Write(gocode["proxy"])
 
-	logger.Println("Done 💩")
+	log.Println("Done 💩")
 }
