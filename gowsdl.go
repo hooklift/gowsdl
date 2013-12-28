@@ -168,7 +168,6 @@ func (g *GoWsdl) unmarshal() error {
 }
 
 func (g *GoWsdl) resolveXsdExternals(schema *XsdSchema, url *url.URL) error {
-
 	for _, incl := range schema.Includes {
 		location, err := url.Parse(incl.SchemaLocation)
 		if err != nil {
@@ -215,33 +214,28 @@ func (g *GoWsdl) resolveXsdExternals(schema *XsdSchema, url *url.URL) error {
 		g.resolvedXsdExternals[schemaName] = true
 	}
 
-	// for _, imp := range schema.Imports {
-
-	// }
 	return nil
 }
 
 func (g *GoWsdl) genTypes() ([]byte, error) {
-	//element > complexType
 
+	totalAdts := 0
 	for _, schema := range g.wsdl.Types.Schemas {
-		embed := 0
-		refcount := 0
 		for _, el := range schema.Elements {
-			if el.Type != "" {
-				embed++
-			} else {
-				refcount++
+			if el.Type == "" {
+				log.Printf("%s -> %#v\n\n", strings.TrimSuffix(el.ComplexType.Name, "Type"), el.ComplexType.Sequence)
+				totalAdts++
 			}
 		}
 
-		// log.Printf("embedded types: %d\n", embed)
-		// log.Printf("referenced types: %d\n", refcount)
-		// for _, element := range schema.Elements {
-		// 	g.logger.Printf("Type: %s\n", element.Name)
-		// }
-
+		for _, complexType := range schema.ComplexTypes {
+			log.Printf("%s -> %#v\n\n", strings.TrimSuffix(complexType.Name, "Type"), complexType.Sequence)
+			totalAdts++
+		}
 	}
+
+	log.Printf("Abstract data types: %d\n", totalAdts)
+	log.Printf("Total schemas: %#d\n\n", len(g.wsdl.Types.Schemas))
 
 	return nil, nil
 }
