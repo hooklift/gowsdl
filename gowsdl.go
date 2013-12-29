@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/xml"
 	"errors"
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"text/template"
 )
 
 const maxRecursion uint8 = 5
@@ -218,33 +220,45 @@ func (g *GoWsdl) resolveXsdExternals(schema *XsdSchema, url *url.URL) error {
 }
 
 func (g *GoWsdl) genTypes() ([]byte, error) {
+	//totalAdts := 0
+	// for _, schema := range g.wsdl.Types.Schemas {
+	// 	for _, el := range schema.Elements {
+	// 		if el.Type == "" {
+	// 			// log.Printf("Complex %s -> %#v\n\n", strings.TrimSuffix(el.ComplexType.Name, "Type"), el.ComplexType.Sequence)
+	// 			totalAdts++
+	// 		} else if el.SimpleType != nil {
+	// 			log.Printf("Simple %s -> %#v\n\n", el.SimpleType.Name, el.SimpleType.Retriction)
+	// 		}
+	// 	}
 
-	totalAdts := 0
-	for _, schema := range g.wsdl.Types.Schemas {
-		for _, el := range schema.Elements {
-			if el.Type == "" {
-				log.Printf("%s -> %#v\n\n", strings.TrimSuffix(el.ComplexType.Name, "Type"), el.ComplexType.Sequence)
-				totalAdts++
-			}
-		}
+	// 	for _ /*complexType*/, _ = range schema.ComplexTypes {
+	// 		// log.Printf("Complex %s -> %#v\n\n", strings.TrimSuffix(complexType.Name, "Type"), complexType.Sequence)
+	// 		totalAdts++
+	// 	}
 
-		for _, complexType := range schema.ComplexTypes {
-			log.Printf("%s -> %#v\n\n", strings.TrimSuffix(complexType.Name, "Type"), complexType.Sequence)
-			totalAdts++
-		}
+	// 	for _, simpleType := range schema.SimpleType {
+	// 		log.Printf("Simple %s -> %#v\n\n", simpleType.Name, simpleType.Retriction)
+	// 	}
+	// }
+
+	data := new(bytes.Buffer)
+	tmpl := template.Must(template.New("types").Parse(typesTmpl))
+	err := tmpl.Execute(data, g.wsdl.Types)
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	log.Printf("Abstract data types: %d\n", totalAdts)
-	log.Printf("Total schemas: %#d\n\n", len(g.wsdl.Types.Schemas))
+	//log.Printf("Abstract data types: %d\n", totalAdts)
+	//log.Printf("Total schemas: %#d\n\n", len(g.wsdl.Types.Schemas))
 
-	return nil, nil
+	return data.Bytes(), nil
 }
 
 func (g *GoWsdl) genOperations() ([]byte, error) {
 	for _, pt := range g.wsdl.PortTypes {
-		// for _, o := range pt.Operations {
-		// 	g.logger.Printf("Operation: %s", o.Name)
-		// }
+		for _, _ = range pt.Operations {
+			//log.Printf("Operation %s -> i: %#v, o: %#v, f: %#v", o.Name, o.Input, o.Output, o.Faults)
+		}
 		log.Printf("Total ops: %d\n", len(pt.Operations))
 	}
 

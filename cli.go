@@ -13,6 +13,7 @@ var opts struct {
 	Version    bool   `short:"v" long:"version" description:"Shows gowsdl version"`
 	Package    string `short:"p" long:"package" description:"Package under which code will be generated" default:"myservice"`
 	OutputFile string `short:"o" long:"output" description:"File where the generated code will be saved" default:"myservice.go"`
+	//SkipTlsVerify bool   `short:"sv" long: "skip-tls-verify" description:"Skips TLS verification. It is not recomended for production, use at your own risk"`
 }
 
 var logger *log.Logger
@@ -48,8 +49,7 @@ func main() {
 
 	gowsdl, err := NewGoWsdl(args[0], opts.Package)
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	gocode, err := gowsdl.Start()

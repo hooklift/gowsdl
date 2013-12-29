@@ -41,14 +41,15 @@ type XsdElement struct {
 }
 
 type XsdComplexType struct {
-	XMLName  xml.Name          `xml:"http://www.w3.org/2001/XMLSchema complexType"`
-	Abstract bool              `xml:"abstract,attr"`
-	Name     string            `xml:"name,attr"`
-	Mixed    bool              `xml:"mixed,attr"`
-	Sequence []XsdElement      `xml:"sequence>element"`
-	Choice   []XsdElement      `xml:"choice>element"`
-	All      []XsdElement      `xml:"all>element"`
-	Content  XsdComplexContent `xml:"http://www.w3.org/2001/XMLSchema complexContent"`
+	XMLName        xml.Name          `xml:"http://www.w3.org/2001/XMLSchema complexType"`
+	Abstract       bool              `xml:"abstract,attr"`
+	Name           string            `xml:"name,attr"`
+	Mixed          bool              `xml:"mixed,attr"`
+	Sequence       []XsdElement      `xml:"sequence>element"`
+	Choice         []XsdElement      `xml:"choice>element"`
+	All            []XsdElement      `xml:"all>element"`
+	ComplexContent XsdComplexContent `xml:"http://www.w3.org/2001/XMLSchema complexContent"`
+	SimpleContent  XsdSimpleContent  `xml:"http://www.w3.org/2001/XMLSchema simpleContent"`
 }
 
 type XsdGroup struct {
@@ -64,6 +65,11 @@ type XsdComplexContent struct {
 	Extension XsdExtension `xml:"http://www.w3.org/2001/XMLSchema extension"`
 }
 
+type XsdSimpleContent struct {
+	XMLName   xml.Name     `xml:"http://www.w3.org/2001/XMLSchema simpleContent"`
+	Extension XsdExtension `xml:"http://www.w3.org/2001/XMLSchema extension"`
+}
+
 type XsdExtension struct {
 	XMLName  xml.Name    `xml:"http://www.w3.org/2001/XMLSchema extension"`
 	Base     string      `xml:"base,attr"`
@@ -71,8 +77,8 @@ type XsdExtension struct {
 }
 
 type XsdSimpleType struct {
-	Name       string         `xml:"name,attr"`
-	Retriction XsdRestriction `xml:"http://www.w3.org/2001/XMLSchema restriction"`
+	Name        string         `xml:"name,attr"`
+	Restriction XsdRestriction `xml:"http://www.w3.org/2001/XMLSchema restriction"`
 }
 
 type XsdSequence struct {

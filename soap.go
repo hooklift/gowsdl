@@ -12,8 +12,14 @@ type SoapEnvelope struct {
 }
 
 type SoapHeader struct {
+	Header interface{}
 }
 
 type SoapBody struct {
-	Body interface{}
+	Body  interface{}
+	Fault SoapFault
+}
+
+type SoapFault struct {
+	Fault interface{}
 }
