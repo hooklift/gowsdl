@@ -241,8 +241,13 @@ func (g *GoWsdl) genTypes() ([]byte, error) {
 	// 	}
 	// }
 
+	funcMap := template.FuncMap{
+		"toGoType": toGoType,
+		//"TagDelimiter":   TagDelimiter,
+	}
+
 	data := new(bytes.Buffer)
-	tmpl := template.Must(template.New("types").Parse(typesTmpl))
+	tmpl := template.Must(template.New("types").Funcs(funcMap).Parse(typesTmpl))
 	err := tmpl.Execute(data, g.wsdl.Types)
 	if err != nil {
 		log.Fatalln(err)
@@ -263,6 +268,27 @@ func (g *GoWsdl) genOperations() ([]byte, error) {
 	}
 
 	return nil, nil
+}
+
+var xsd2GoTypes = map[string]string{
+	"string":  "string",
+	"decimal": "float",
+	"integer": "",
+	"boolean": "bool",
+	"date":    "",
+	"time":    "",
+}
+
+func toGoType(xsdType string) string {
+	//Handles name space, ie. xsd:string, xs:string
+	r := strings.Split(xsdType, ":")
+	type_ := r[0]
+
+	if len(r) == 2 {
+		type_ = r[1]
+	}
+
+	return xsd2GoTypes[type_]
 }
 
 func (g *GoWsdl) genMessages() ([]byte, error) {

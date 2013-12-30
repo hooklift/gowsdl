@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	flags "github.com/jessevdk/go-flags"
+	"go/format"
 	"log"
 	"os"
 	"runtime"
@@ -74,10 +76,23 @@ func main() {
 	}
 	defer fd.Close()
 
-	fd.Write(gocode["types"])
-	fd.Write(gocode["messages"])
-	fd.Write(gocode["operations"])
-	fd.Write(gocode["proxy"])
+	data := new(bytes.Buffer)
+	data.Write(gocode["types"])
+	data.Write(gocode["messages"])
+	data.Write(gocode["operations"])
+	data.Write(gocode["proxy"])
+
+	source, err := format.Source(data.Bytes())
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fd.Write(source)
+
+	// fd.Write(gocode["types"])
+	// fd.Write(gocode["messages"])
+	// fd.Write(gocode["operations"])
+	// fd.Write(gocode["proxy"])
 
 	log.Println("Done 💩")
 }

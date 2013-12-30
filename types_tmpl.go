@@ -9,7 +9,7 @@ import (
 {{range .Schemas}}
 	{{range .SimpleType}}
 		{{$name := .Name}}
-		type {{.Name}} string
+		type {{.Name}} {{toGoType .Restriction.Base}}
 		const (
 			{{with .Restriction}}
 				{{range .Enumeration}}
