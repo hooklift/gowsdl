@@ -295,18 +295,26 @@ func replaceReservedWords(identifier string) string {
 }
 
 var xsd2GoTypes = map[string]string{
-	"string":   "string",
-	"decimal":  "float64",
-	"integer":  "int64",
-	"int":      "int32",
-	"short":    "int16",
-	"byte":     "int8",
-	"long":     "int64",
-	"boolean":  "bool",
-	"dateTime": "time.Time",
-	"date":     "time.Time",
-	"time":     "time.Time",
-	"anyType":  "interface{}",
+	"string":        "string",
+	"float":         "float32",
+	"double":        "float64",
+	"decimal":       "float64",
+	"integer":       "int32",
+	"int":           "int32",
+	"short":         "int16",
+	"byte":          "int8",
+	"long":          "int64",
+	"boolean":       "bool",
+	"dateTime":      "time.Time",
+	"date":          "time.Time",
+	"time":          "time.Time",
+	"base64Binary":  "[]byte",
+	"hexBinary":     "[]byte",
+	"unsignedInt":   "uint32",
+	"unsignedShort": "uint16",
+	"unsignedByte":  "byte",
+	"unsignedLong":  "uint64",
+	"anyType":       "interface{}",
 }
 
 func toGoType(xsdType string) string {
