@@ -84,15 +84,11 @@ func main() {
 
 	source, err := format.Source(data.Bytes())
 	if err != nil {
+		fd.Write(data.Bytes())
 		log.Fatalln(err)
 	}
 
 	fd.Write(source)
-
-	// fd.Write(gocode["types"])
-	// fd.Write(gocode["messages"])
-	// fd.Write(gocode["operations"])
-	// fd.Write(gocode["proxy"])
 
 	log.Println("Done 💩")
 }

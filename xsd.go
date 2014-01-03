@@ -45,7 +45,7 @@ type XsdComplexType struct {
 	Abstract       bool              `xml:"abstract,attr"`
 	Name           string            `xml:"name,attr"`
 	Mixed          bool              `xml:"mixed,attr"`
-	Sequence       []XsdElement      `xml:"sequence>element"`
+	Sequence       XsdSequence       `xml:"http://www.w3.org/2001/XMLSchema sequence"`
 	Choice         []XsdElement      `xml:"choice>element"`
 	All            []XsdElement      `xml:"all>element"`
 	ComplexContent XsdComplexContent `xml:"http://www.w3.org/2001/XMLSchema complexContent"`
@@ -55,7 +55,7 @@ type XsdComplexType struct {
 type XsdGroup struct {
 	Name     string       `xml:"name, attr"`
 	Ref      string       `xml:"ref,attr"`
-	Sequence []XsdElement `xml:"http://www.w3.org/2001/XMLSchema sequence"`
+	Sequence XsdSequence  `xml:"http://www.w3.org/2001/XMLSchema sequence"`
 	Choice   []XsdElement `xml:"http://www.w3.org/2001/XMLSchema choice"`
 	All      []XsdElement `xml:"http://www.w3.org/2001/XMLSchema all"`
 }
@@ -73,7 +73,7 @@ type XsdSimpleContent struct {
 type XsdExtension struct {
 	XMLName  xml.Name    `xml:"http://www.w3.org/2001/XMLSchema extension"`
 	Base     string      `xml:"base,attr"`
-	Sequence XsdSequence `xml:"http://www.w3.org/2001/XMLSchema extension sequence"`
+	Sequence XsdSequence `xml:"http://www.w3.org/2001/XMLSchema sequence"`
 }
 
 type XsdSimpleType struct {

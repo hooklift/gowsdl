@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -15,6 +16,8 @@ import (
 	"strings"
 	"sync"
 	"text/template"
+	"time"
+	"unicode"
 )
 
 const maxRecursion uint8 = 5
@@ -35,11 +38,18 @@ func init() {
 	}
 }
 
+var timeout = time.Duration(30 * time.Second)
+
+func dialTimeout(network, addr string) (net.Conn, error) {
+	return net.DialTimeout(network, addr, timeout)
+}
+
 func downloadFile(url string) ([]byte, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
 		},
+		Dial: dialTimeout,
 	}
 	client := &http.Client{Transport: tr}
 
@@ -220,41 +230,19 @@ func (g *GoWsdl) resolveXsdExternals(schema *XsdSchema, url *url.URL) error {
 }
 
 func (g *GoWsdl) genTypes() ([]byte, error) {
-	//totalAdts := 0
-	// for _, schema := range g.wsdl.Types.Schemas {
-	// 	for _, el := range schema.Elements {
-	// 		if el.Type == "" {
-	// 			// log.Printf("Complex %s -> %#v\n\n", strings.TrimSuffix(el.ComplexType.Name, "Type"), el.ComplexType.Sequence)
-	// 			totalAdts++
-	// 		} else if el.SimpleType != nil {
-	// 			log.Printf("Simple %s -> %#v\n\n", el.SimpleType.Name, el.SimpleType.Retriction)
-	// 		}
-	// 	}
-
-	// 	for _ /*complexType*/, _ = range schema.ComplexTypes {
-	// 		// log.Printf("Complex %s -> %#v\n\n", strings.TrimSuffix(complexType.Name, "Type"), complexType.Sequence)
-	// 		totalAdts++
-	// 	}
-
-	// 	for _, simpleType := range schema.SimpleType {
-	// 		log.Printf("Simple %s -> %#v\n\n", simpleType.Name, simpleType.Retriction)
-	// 	}
-	// }
-
 	funcMap := template.FuncMap{
-		"toGoType": toGoType,
-		//"TagDelimiter":   TagDelimiter,
+		"toGoType":             toGoType,
+		"stripns":              stripns,
+		"replaceReservedWords": replaceReservedWords,
+		"makeFieldPublic":      makeFieldPublic,
 	}
 
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("types").Funcs(funcMap).Parse(typesTmpl))
 	err := tmpl.Execute(data, g.wsdl.Types)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
-
-	//log.Printf("Abstract data types: %d\n", totalAdts)
-	//log.Printf("Total schemas: %#d\n\n", len(g.wsdl.Types.Schemas))
 
 	return data.Bytes(), nil
 }
@@ -270,17 +258,78 @@ func (g *GoWsdl) genOperations() ([]byte, error) {
 	return nil, nil
 }
 
+var reservedWords = map[string]string{
+	"break":       "break_",
+	"default":     "default_",
+	"func":        "func_",
+	"interface":   "interface_",
+	"select":      "select_",
+	"case":        "case_",
+	"defer":       "defer_",
+	"go":          "go_",
+	"map":         "map_",
+	"struct":      "struct_",
+	"chan":        "chan_",
+	"else":        "else_",
+	"goto":        "goto_",
+	"package":     "package_",
+	"switch":      "switch_",
+	"const":       "const_",
+	"fallthrough": "fallthrough_",
+	"if":          "if_",
+	"range":       "range_",
+	"type":        "type_",
+	"continue":    "continue_",
+	"for":         "for_",
+	"import":      "import_",
+	"return":      "return_",
+	"var":         "var_",
+}
+
+func replaceReservedWords(identifier string) string {
+	value := reservedWords[identifier]
+	if value != "" {
+		return value
+	}
+	return identifier
+}
+
 var xsd2GoTypes = map[string]string{
-	"string":  "string",
-	"decimal": "float",
-	"integer": "",
-	"boolean": "bool",
-	"date":    "",
-	"time":    "",
+	"string":   "string",
+	"decimal":  "float64",
+	"integer":  "int64",
+	"int":      "int32",
+	"short":    "int16",
+	"byte":     "int8",
+	"long":     "int64",
+	"boolean":  "bool",
+	"dateTime": "time.Time",
+	"date":     "time.Time",
+	"time":     "time.Time",
+	"anyType":  "interface{}",
 }
 
 func toGoType(xsdType string) string {
 	//Handles name space, ie. xsd:string, xs:string
+	r := strings.Split(xsdType, ":")
+
+	type_ := r[0]
+
+	if len(r) == 2 {
+		type_ = r[1]
+	}
+
+	value := xsd2GoTypes[type_]
+
+	if value != "" {
+		return value
+	}
+
+	return "*" + type_
+}
+
+//TODO: Add namespace support instead of stripping it
+func stripns(xsdType string) string {
 	r := strings.Split(xsdType, ":")
 	type_ := r[0]
 
@@ -288,7 +337,13 @@ func toGoType(xsdType string) string {
 		type_ = r[1]
 	}
 
-	return xsd2GoTypes[type_]
+	return type_
+}
+
+func makeFieldPublic(field_ string) string {
+	field := []rune(field_)
+	field[0] = unicode.ToUpper(field[0])
+	return string(field)
 }
 
 func (g *GoWsdl) genMessages() ([]byte, error) {
