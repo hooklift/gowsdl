@@ -33,6 +33,7 @@ type XsdElement struct {
 	Name        string          `xml:"name,attr"`
 	Nillable    bool            `xml:"nillable,attr"`
 	Type        string          `xml:"type,attr"`
+	Ref         string          `xml:"ref,attr"`
 	MinOccurs   string          `xml:"minOccurs,attr"`
 	MaxOccurs   string          `xml:"maxOccurs,attr"`
 	ComplexType *XsdComplexType `xml:"http://www.w3.org/2001/XMLSchema complexType"` //local

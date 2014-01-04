@@ -237,6 +237,9 @@ func (g *GoWsdl) genTypes() ([]byte, error) {
 		"makeFieldPublic":      makeFieldPublic,
 	}
 
+	//TODO resolve element refs in place.
+	//g.resolveElementsRefs()
+
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("types").Funcs(funcMap).Parse(typesTmpl))
 	err := tmpl.Execute(data, g.wsdl.Types)
@@ -247,15 +250,32 @@ func (g *GoWsdl) genTypes() ([]byte, error) {
 	return data.Bytes(), nil
 }
 
+// func (g *GoWsdl) resolveElementsRefs() error {
+// 	for _, schema := range g.wsdl.Types.Schemas {
+// 		for _, globalEl := range schema.Elements {
+// 			for _, localEl := range globalEl.ComplexType.Sequence.Elements {
+
+// 			}
+// 		}
+// 	}
+// }
+
 func (g *GoWsdl) genOperations() ([]byte, error) {
-	for _, pt := range g.wsdl.PortTypes {
-		for _, _ = range pt.Operations {
-			//log.Printf("Operation %s -> i: %#v, o: %#v, f: %#v", o.Name, o.Input, o.Output, o.Faults)
-		}
-		log.Printf("Total ops: %d\n", len(pt.Operations))
+	funcMap := template.FuncMap{
+		"toGoType":             toGoType,
+		"stripns":              stripns,
+		"replaceReservedWords": replaceReservedWords,
+		"makeFieldPublic":      makeFieldPublic,
 	}
 
-	return nil, nil
+	data := new(bytes.Buffer)
+	tmpl := template.Must(template.New("operations").Funcs(funcMap).Parse(opsTmpl))
+	err := tmpl.Execute(data, g.wsdl.PortTypes)
+	if err != nil {
+		return nil, err
+	}
+
+	return data.Bytes(), nil
 }
 
 var reservedWords = map[string]string{
@@ -296,6 +316,7 @@ func replaceReservedWords(identifier string) string {
 
 var xsd2GoTypes = map[string]string{
 	"string":        "string",
+	"token":         "string",
 	"float":         "float32",
 	"double":        "float64",
 	"decimal":       "float64",
@@ -350,6 +371,10 @@ func stripns(xsdType string) string {
 
 func makeFieldPublic(field_ string) string {
 	field := []rune(field_)
+	if len(field) == 0 {
+		return field_
+	}
+
 	field[0] = unicode.ToUpper(field[0])
 	return string(field)
 }
