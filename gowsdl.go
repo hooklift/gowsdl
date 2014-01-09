@@ -266,6 +266,7 @@ func (g *GoWsdl) genOperations() ([]byte, error) {
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makeFieldPublic":      makeFieldPublic,
+		"findType":             g.findType,
 	}
 
 	data := new(bytes.Buffer)
@@ -355,6 +356,37 @@ func toGoType(xsdType string) string {
 	}
 
 	return "*" + type_
+}
+
+//I'm not very proud of this function but
+//it works for now and performance doesn't
+//seem critical at this point
+func (g *GoWsdl) findType(message string) string {
+	message = stripns(message)
+	for _, msg := range g.wsdl.Messages {
+		if msg.Name != message {
+			continue
+		}
+
+		//Assumes document/literal wrapped WS-I
+		part := msg.Parts[0]
+		if part.Type != "" {
+			return stripns(part.Type)
+		}
+
+		elRef := stripns(part.Element)
+		for _, schema := range g.wsdl.Types.Schemas {
+			for _, el := range schema.Elements {
+				if elRef == el.Name {
+					if el.Type != "" {
+						return stripns(el.Type)
+					}
+					return el.Name
+				}
+			}
+		}
+	}
+	return ""
 }
 
 //TODO: Add namespace support instead of stripping it

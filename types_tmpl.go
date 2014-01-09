@@ -14,7 +14,6 @@ var typesTmpl = `
 
 {{define "ComplexTypeGlobal"}}
 	{{$name := replaceReservedWords .Name}}
-
 	type {{$name}} struct {
 		{{if ne .ComplexContent.Extension.Base ""}}
 			{{$baseType := .ComplexContent.Extension.Base}}
