@@ -49,7 +49,7 @@ var typesTmpl = `
 
 {{define "Elements"}}
 	{{range .}}
-		{{replaceReservedWords .Name}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}}{{end}}
+		{{replaceReservedWords .Name}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `{{end}}
 {{end}}
 
 {{range .Schemas}}
