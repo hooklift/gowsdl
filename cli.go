@@ -16,7 +16,7 @@ var opts struct {
 	Version    bool   `short:"v" long:"version" description:"Shows gowsdl version"`
 	Package    string `short:"p" long:"package" description:"Package under which code will be generated" default:"myservice"`
 	OutputFile string `short:"o" long:"output" description:"File where the generated code will be saved" default:"myservice.go"`
-	//SkipTlsVerify bool   `short:"sv" long: "skip-tls-verify" description:"Skips TLS verification. It is not recomended for production, use at your own risk"`
+	IgnoreTls  bool   `short:"i" long:"ignore-tls" description:"Ignores invalid TLS certificates. It is not recomended for production. Use at your own risk" default:"false"`
 }
 
 var logger *log.Logger
@@ -50,7 +50,7 @@ func main() {
 		log.Fatalln("Output file cannot be the same WSDL file")
 	}
 
-	gowsdl, err := gen.NewGoWsdl(args[0], opts.Package)
+	gowsdl, err := gen.NewGoWsdl(args[0], opts.Package, opts.IgnoreTls)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -64,7 +64,7 @@ func main() {
 	err = os.Mkdir(pkg, 0744)
 
 	if perr, ok := err.(*os.PathError); ok && os.IsExist(perr.Err) {
-		log.Println("Package directory already exist, skipping creation")
+		log.Printf("Package directory %s already exist, skipping creation\n", pkg)
 	} else {
 		if err != nil {
 			log.Fatalln(err)
@@ -78,10 +78,9 @@ func main() {
 	defer fd.Close()
 
 	data := new(bytes.Buffer)
-	data.Write(gocode["imports"])
+	data.Write(gocode["header"])
 	data.Write(gocode["types"])
 	data.Write(gocode["operations"])
-	data.Write(gocode["proxy"])
 
 	source, err := format.Source(data.Bytes())
 	if err != nil {
