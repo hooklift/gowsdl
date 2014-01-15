@@ -24,6 +24,7 @@ const maxRecursion uint8 = 5
 
 type GoWsdl struct {
 	file, pkg             string
+	ignoreTls             bool
 	wsdl                  *Wsdl
 	resolvedXsdExternals  map[string]bool
 	currentRecursionLevel uint8
@@ -44,10 +45,10 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, timeout)
 }
 
-func downloadFile(url string) ([]byte, error) {
+func downloadFile(url string, ignoreTls bool) ([]byte, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: ignoreTls,
 		},
 		Dial: dialTimeout,
 	}
@@ -67,7 +68,7 @@ func downloadFile(url string) ([]byte, error) {
 	return data, nil
 }
 
-func NewGoWsdl(file, pkg string) (*GoWsdl, error) {
+func NewGoWsdl(file, pkg string, ignoreTls bool) (*GoWsdl, error) {
 	file = strings.TrimSpace(file)
 	if file == "" {
 		log.Fatalln("WSDL file is required to generate Go proxy")
@@ -79,8 +80,9 @@ func NewGoWsdl(file, pkg string) (*GoWsdl, error) {
 	}
 
 	return &GoWsdl{
-		file: file,
-		pkg:  pkg,
+		file:      file,
+		pkg:       pkg,
+		ignoreTls: ignoreTls,
 	}, nil
 }
 
@@ -129,7 +131,7 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 
 	wg.Wait()
 
-	gocode["imports"], err = g.genHeader()
+	gocode["header"], err = g.genHeader()
 	if err != nil {
 		log.Println(err)
 	}
@@ -151,7 +153,7 @@ func (g *GoWsdl) unmarshal() error {
 	} else {
 		log.Printf("Downloading %s...\n", g.file)
 
-		data, err = downloadFile(g.file)
+		data, err = downloadFile(g.file, g.ignoreTls)
 		if err != nil {
 			return err
 		}
@@ -195,7 +197,7 @@ func (g *GoWsdl) resolveXsdExternals(schema *XsdSchema, url *url.URL) error {
 
 		log.Printf("Downloading external schema: %s\n", schemaLocation)
 
-		data, err := downloadFile(schemaLocation)
+		data, err := downloadFile(schemaLocation, g.ignoreTls)
 		newschema := &XsdSchema{}
 
 		err = xml.Unmarshal(data, newschema)
