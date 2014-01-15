@@ -1,4 +1,4 @@
-package main
+package generator
 
 import (
 	"bytes"
@@ -75,7 +75,7 @@ func NewGoWsdl(file, pkg string) (*GoWsdl, error) {
 
 	pkg = strings.TrimSpace(pkg)
 	if pkg == "" {
-		pkg = "main"
+		pkg = "myservice"
 	}
 
 	return &GoWsdl{
@@ -110,17 +110,6 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 		defer wg.Done()
 		var err error
 
-		gocode["messages"], err = g.genMessages()
-		if err != nil {
-			log.Println(err)
-		}
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		var err error
-
 		gocode["operations"], err = g.genOperations()
 		if err != nil {
 			log.Println(err)
@@ -139,6 +128,11 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 	}()
 
 	wg.Wait()
+
+	gocode["imports"], err = g.genHeader()
+	if err != nil {
+		log.Println(err)
+	}
 
 	return gocode, nil
 }
@@ -234,7 +228,7 @@ func (g *GoWsdl) genTypes() ([]byte, error) {
 		"toGoType":             toGoType,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
-		"makeFieldPublic":      makeFieldPublic,
+		"makePublic":           makePublic,
 	}
 
 	//TODO resolve element refs in place.
@@ -265,12 +259,51 @@ func (g *GoWsdl) genOperations() ([]byte, error) {
 		"toGoType":             toGoType,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
-		"makeFieldPublic":      makeFieldPublic,
+		"makePublic":           makePublic,
 		"findType":             g.findType,
+		"findSoapAction":       g.findSoapAction,
 	}
 
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("operations").Funcs(funcMap).Parse(opsTmpl))
+	err := tmpl.Execute(data, g.wsdl.PortTypes)
+	if err != nil {
+		return nil, err
+	}
+
+	return data.Bytes(), nil
+}
+
+func (g *GoWsdl) genHeader() ([]byte, error) {
+	funcMap := template.FuncMap{
+		"toGoType":             toGoType,
+		"stripns":              stripns,
+		"replaceReservedWords": replaceReservedWords,
+		"makePublic":           makePublic,
+		"findType":             g.findType,
+	}
+
+	data := new(bytes.Buffer)
+	tmpl := template.Must(template.New("header").Funcs(funcMap).Parse(headerTmpl))
+	err := tmpl.Execute(data, g.pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return data.Bytes(), nil
+}
+
+func (g *GoWsdl) genSoapProxy() ([]byte, error) {
+	funcMap := template.FuncMap{
+		"toGoType":             toGoType,
+		"stripns":              stripns,
+		"replaceReservedWords": replaceReservedWords,
+		"makePublic":           makePublic,
+		"findType":             g.findType,
+	}
+
+	data := new(bytes.Buffer)
+	tmpl := template.Must(template.New("proxy").Funcs(funcMap).Parse(soapProxyTmpl))
 	err := tmpl.Execute(data, g.wsdl.PortTypes)
 	if err != nil {
 		return nil, err
@@ -389,6 +422,23 @@ func (g *GoWsdl) findType(message string) string {
 	return ""
 }
 
+//TODO Add support for namespaces instead of striping them out
+//TODO improve algorithm complexity if performance turn out to be an issue.
+func (g *GoWsdl) findSoapAction(operation, portType string) string {
+	for _, binding := range g.wsdl.Binding {
+		if stripns(binding.Type) != portType {
+			continue
+		}
+
+		for _, soapOp := range binding.Operations {
+			if soapOp.Name == operation {
+				return soapOp.SoapOperation.SoapAction
+			}
+		}
+	}
+	return ""
+}
+
 //TODO: Add namespace support instead of stripping it
 func stripns(xsdType string) string {
 	r := strings.Split(xsdType, ":")
@@ -401,7 +451,7 @@ func stripns(xsdType string) string {
 	return type_
 }
 
-func makeFieldPublic(field_ string) string {
+func makePublic(field_ string) string {
 	field := []rune(field_)
 	if len(field) == 0 {
 		return field_
@@ -409,12 +459,4 @@ func makeFieldPublic(field_ string) string {
 
 	field[0] = unicode.ToUpper(field[0])
 	return string(field)
-}
-
-func (g *GoWsdl) genMessages() ([]byte, error) {
-	return nil, nil
-}
-
-func (g *GoWsdl) genSoapProxy() ([]byte, error) {
-	return nil, nil
 }

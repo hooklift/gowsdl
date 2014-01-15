@@ -1,4 +1,4 @@
-package main
+package generator
 
 type Wsdl struct {
 	Name            string          `xml:"name,attr"`

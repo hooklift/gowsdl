@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	gen "github.com/c4milo/gowsdl/generator"
 	flags "github.com/jessevdk/go-flags"
 	"go/format"
 	"log"
@@ -49,7 +50,7 @@ func main() {
 		log.Fatalln("Output file cannot be the same WSDL file")
 	}
 
-	gowsdl, err := NewGoWsdl(args[0], opts.Package)
+	gowsdl, err := gen.NewGoWsdl(args[0], opts.Package)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -77,8 +78,8 @@ func main() {
 	defer fd.Close()
 
 	data := new(bytes.Buffer)
+	data.Write(gocode["imports"])
 	data.Write(gocode["types"])
-	data.Write(gocode["messages"])
 	data.Write(gocode["operations"])
 	data.Write(gocode["proxy"])
 

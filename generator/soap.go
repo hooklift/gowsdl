@@ -1,4 +1,4 @@
-package main
+package generator
 
 import (
 	"encoding/xml"
@@ -6,7 +6,7 @@ import (
 
 type SoapEnvelope struct {
 	XMLName       xml.Name   `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	EncodingStyle string     `xml:"http://schemas.xmlsoap.org/soap/envelope/ encodingStyle,attr"`
+	EncodingStyle string     `xml:"http://schemas.xmlsoap.org/soap/encoding/ encodingStyle,attr"`
 	Header        SoapHeader `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"`
 	Body          SoapBody   `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
 }
@@ -16,10 +16,13 @@ type SoapHeader struct {
 }
 
 type SoapBody struct {
-	Body  interface{}
+	Body  string
 	Fault SoapFault
 }
 
 type SoapFault struct {
-	Fault interface{}
+	faultcode   string `xml:"http://schemas.xmlsoap.org/soap/envelope/ faultcode"`
+	faultstring string `xml:"faultstring"`
+	faulactor   string `xml:"faultactor"`
+	detail      string `xml:"detail"`
 }
