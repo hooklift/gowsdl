@@ -12,36 +12,50 @@ var typesTmpl = `
 	)
 {{end}}
 
+{{define "ComplexContent"}}
+	{{$baseType := toGoType .Extension.Base}}
+	{{ if $baseType }}
+		{{$baseType}}
+	{{end}}
+
+	{{template "Elements" .Extension.Sequence.Elements}}
+	{{template "Attributes" .Extension.Attributes}}
+{{end}}
+
+{{define "Attributes"}}
+	{{range .}}
+		{{ .Name | makePublic}} {{toGoType .Type}}{{end}}
+{{end}}
+
+{{define "SimpleContent"}}
+	Value {{toGoType .Extension.Base}}{{template "Attributes" .Extension.Attributes}}
+{{end}}
+
 {{define "ComplexTypeGlobal"}}
 	{{$name := replaceReservedWords .Name}}
 	type {{$name}} struct {
 		{{if ne .ComplexContent.Extension.Base ""}}
-			{{$baseType := .ComplexContent.Extension.Base}}
-			{{ if $baseType }}
-				*{{stripns $baseType}}
-			{{end}}
-
-			{{template "Elements" .ComplexContent.Extension.Sequence.Elements}}
+			{{template "ComplexContent" .ComplexContent}}
+		{{else if ne .SimpleContent.Extension.Base ""}}
+			{{template "SimpleContent" .SimpleContent}}
 		{{ else }}
 			{{template "Elements" .Sequence.Elements}}
+			{{template "Attributes" .Attributes}}
 		{{end}}
 	}
 {{end}}
 
 {{define "ComplexTypeLocal"}}
 	{{$name := replaceReservedWords .Name}}
-
 	{{with .ComplexType}}
 		type {{$name}} struct {
 			{{if ne .ComplexContent.Extension.Base ""}}
-				{{$baseType := .ComplexContent.Extension.Base}}
-				{{ if $baseType }}
-					*{{stripns $baseType}}
-				{{end}}
-
-				{{template "Elements" .ComplexContent.Extension.Sequence.Elements}}
+				{{template "ComplexContent" .ComplexContent}}
+			{{else if ne .SimpleContent.Extension.Base ""}}
+				{{template "SimpleContent" .SimpleContent}}
 			{{ else }}
 				{{template "Elements" .Sequence.Elements}}
+				{{template "Attributes" .Attributes}}
 			{{end}}
 		}
 	{{end}}

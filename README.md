@@ -29,7 +29,6 @@ Help Options:
 
 ### TODO
 * If WSDL file is local, resolve external XML schemas locally too instead of failing due to not having a URL to download them from.
-* Support <xs:attribute/> elements
 * Resolve XSD element references
 * Support for generating namespaces
 * Make code generation agnostic so generating code to other programming languages is feasible through plugins
