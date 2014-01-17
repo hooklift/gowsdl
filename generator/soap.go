@@ -44,7 +44,7 @@ func NewSoapClient(url string, tls bool) *SoapClient {
 	}
 }
 
-func (s *SoapClient) Call(operation, soapAction string, request, response interface{}) error {
+func (s *SoapClient) Call(soapAction string, request, response interface{}) error {
 	envelope := SoapEnvelope{
 		Header:        SoapHeader{},
 		EncodingStyle: "http://schemas.xmlsoap.org/soap/encoding/",
