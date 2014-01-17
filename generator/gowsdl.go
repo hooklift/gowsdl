@@ -118,17 +118,6 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 		}
 	}()
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		var err error
-
-		gocode["proxy"], err = g.genSoapProxy()
-		if err != nil {
-			log.Println(err)
-		}
-	}()
-
 	wg.Wait()
 
 	gocode["header"], err = g.genHeader()
@@ -288,25 +277,6 @@ func (g *GoWsdl) genHeader() ([]byte, error) {
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("header").Funcs(funcMap).Parse(headerTmpl))
 	err := tmpl.Execute(data, g.pkg)
-	if err != nil {
-		return nil, err
-	}
-
-	return data.Bytes(), nil
-}
-
-func (g *GoWsdl) genSoapProxy() ([]byte, error) {
-	funcMap := template.FuncMap{
-		"toGoType":             toGoType,
-		"stripns":              stripns,
-		"replaceReservedWords": replaceReservedWords,
-		"makePublic":           makePublic,
-		"findType":             g.findType,
-	}
-
-	data := new(bytes.Buffer)
-	tmpl := template.Must(template.New("proxy").Funcs(funcMap).Parse(soapProxyTmpl))
-	err := tmpl.Execute(data, g.wsdl.PortTypes)
 	if err != nil {
 		return nil, err
 	}

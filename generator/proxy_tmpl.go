@@ -1,4 +1,0 @@
-package generator
-
-var soapProxyTmpl = `
-`
