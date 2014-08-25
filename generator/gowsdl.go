@@ -30,7 +30,7 @@ type GoWsdl struct {
 	currentRecursionLevel uint8
 }
 
-var cacheDir = os.TempDir() + "gowsdl-cache"
+var cacheDir = filepath.Join(os.TempDir(), "gowsdl-cache")
 
 func init() {
 	err := os.MkdirAll(cacheDir, 0700)
