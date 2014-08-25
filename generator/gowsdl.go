@@ -35,7 +35,7 @@ var cacheDir = os.TempDir() + "gowsdl-cache"
 func init() {
 	err := os.MkdirAll(cacheDir, 0700)
 	if err != nil {
-		log.Fatalf("Unable to reate cache directory")
+		log.Fatalf("Unable to create cache directory: %s", err.Error())
 	}
 }
 
