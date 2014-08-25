@@ -40,6 +40,8 @@ var typesTmpl = `
 			{{template "SimpleContent" .SimpleContent}}
 		{{ else }}
 			{{template "Elements" .Sequence.Elements}}
+			{{template "Elements" .Choice}}
+			{{template "Elements" .All}}
 			{{template "Attributes" .Attributes}}
 		{{end}}
 	}
@@ -55,6 +57,8 @@ var typesTmpl = `
 				{{template "SimpleContent" .SimpleContent}}
 			{{ else }}
 				{{template "Elements" .Sequence.Elements}}
+				{{template "Elements" .Choice}}
+				{{template "Elements" .All}}
 				{{template "Attributes" .Attributes}}
 			{{end}}
 		}
