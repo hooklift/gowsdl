@@ -345,7 +345,7 @@ var xsd2GoTypes = map[string]string{
 }
 
 func toGoType(xsdType string) string {
-	//Handles name space, ie. xsd:string, xs:string
+	// Handles name space, ie. xsd:string, xs:string
 	r := strings.Split(xsdType, ":")
 
 	type_ := r[0]
@@ -363,26 +363,28 @@ func toGoType(xsdType string) string {
 	return "*" + type_
 }
 
-//I'm not very proud of this function but
-//it works for now and performance doesn't
-//seem critical at this point
+// I'm not very proud of this function but
+// it works for now and performance doesn't
+// seem critical at this point
 func (g *GoWsdl) findType(message string) string {
 	message = stripns(message)
+
 	for _, msg := range g.wsdl.Messages {
 		if msg.Name != message {
 			continue
 		}
 
-		//Assumes document/literal wrapped WS-I
+		// Assumes document/literal wrapped WS-I
 		part := msg.Parts[0]
 		if part.Type != "" {
 			return stripns(part.Type)
 		}
 
 		elRef := stripns(part.Element)
+
 		for _, schema := range g.wsdl.Types.Schemas {
 			for _, el := range schema.Elements {
-				if elRef == el.Name {
+				if strings.EqualFold(elRef, el.Name) {
 					if el.Type != "" {
 						return stripns(el.Type)
 					}
@@ -394,8 +396,8 @@ func (g *GoWsdl) findType(message string) string {
 	return ""
 }
 
-//TODO Add support for namespaces instead of striping them out
-//TODO improve algorithm complexity if performance turn out to be an issue.
+// TODO(c4milo): Add support for namespaces instead of striping them out
+// TODO(c4milo): improve algorithm complexity if performance turns out to be an issue.
 func (g *GoWsdl) findSoapAction(operation, portType string) string {
 	for _, binding := range g.wsdl.Binding {
 		if stripns(binding.Type) != portType {
@@ -411,7 +413,7 @@ func (g *GoWsdl) findSoapAction(operation, portType string) string {
 	return ""
 }
 
-//TODO: Add namespace support instead of stripping it
+// TODO(c4milo): Add namespace support instead of stripping it
 func stripns(xsdType string) string {
 	r := strings.Split(xsdType, ":")
 	type_ := r[0]
