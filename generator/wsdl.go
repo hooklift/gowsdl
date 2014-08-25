@@ -3,13 +3,13 @@ package generator
 type Wsdl struct {
 	Name            string          `xml:"name,attr"`
 	TargetNamespace string          `xml:"targetNamespace,attr"`
-	Imports         []*WsdlImport   `xml:"http://schemas.xmlsoap.org/wsdl/ import"`
-	Doc             string          `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
-	Types           WsdlType        `xml:"http://schemas.xmlsoap.org/wsdl/ types"`
-	Messages        []*WsdlMessage  `xml:"http://schemas.xmlsoap.org/wsdl/ message"`
-	PortTypes       []*WsdlPortType `xml:"http://schemas.xmlsoap.org/wsdl/ portType"`
-	Binding         []*WsdlBinding  `xml:"http://schemas.xmlsoap.org/wsdl/ binding"`
-	Service         []*WsdlService  `xml:"http://schemas.xmlsoap.org/wsdl/ service"`
+	Imports         []*WsdlImport   `xml:"import"`
+	Doc             string          `xml:"documentation"`
+	Types           WsdlType        `xml:"types"`
+	Messages        []*WsdlMessage  `xml:"message"`
+	PortTypes       []*WsdlPortType `xml:"portType"`
+	Binding         []*WsdlBinding  `xml:"binding"`
+	Service         []*WsdlService  `xml:"service"`
 }
 
 type WsdlImport struct {
@@ -18,8 +18,8 @@ type WsdlImport struct {
 }
 
 type WsdlType struct {
-	Doc     string       `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
-	Schemas []*XsdSchema `xml:"http://www.w3.org/2001/XMLSchema schema"`
+	Doc     string       `xml:"documentation"`
+	Schemas []*XsdSchema `xml:"schema"`
 }
 
 type WsdlPart struct {
@@ -30,49 +30,49 @@ type WsdlPart struct {
 
 type WsdlMessage struct {
 	Name  string      `xml:"name,attr"`
-	Doc   string      `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
-	Parts []*WsdlPart `xml:"http://schemas.xmlsoap.org/wsdl/ part"`
+	Doc   string      `xml:"documentation"`
+	Parts []*WsdlPart `xml:"part"`
 }
 
 type WsdlFault struct {
 	Name      string        `xml:"name,attr"`
 	Message   string        `xml:"message,attr"`
-	Doc       string        `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
-	SoapFault WsdlSoapFault `xml:"http://schemas.xmlsoap.org/wsdl/soap/ fault"`
+	Doc       string        `xml:"documentation"`
+	SoapFault WsdlSoapFault `xml:"fault"`
 }
 
 type WsdlInput struct {
 	Name       string            `xml:"name,attr"`
 	Message    string            `xml:"message,attr"`
-	Doc        string            `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
-	SoapBody   WsdlSoapBody      `xml:"http://schemas.xmlsoap.org/wsdl/soap/ body"`
-	SoapHeader []*WsdlSoapHeader `xml:"http://schemas.xmlsoap.org/wsdl/soap/ header"`
+	Doc        string            `xml:"documentation"`
+	SoapBody   WsdlSoapBody      `xml:"body"`
+	SoapHeader []*WsdlSoapHeader `xml:"header"`
 	//Mime       MimeBinding
 }
 
 type WsdlOutput struct {
 	Name       string            `xml:"name,attr"`
 	Message    string            `xml:"message,attr"`
-	Doc        string            `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
-	SoapBody   WsdlSoapBody      `xml:"http://schemas.xmlsoap.org/wsdl/soap/ body"`
-	SoapHeader []*WsdlSoapHeader `xml:"http://schemas.xmlsoap.org/wsdl/soap/ header"`
+	Doc        string            `xml:"documentation"`
+	SoapBody   WsdlSoapBody      `xml:"body"`
+	SoapHeader []*WsdlSoapHeader `xml:"header"`
 	//Mime       MimeBinding
 }
 
 type WsdlOperation struct {
 	Name          string            `xml:"name,attr"`
-	Doc           string            `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
-	Input         WsdlInput         `xml:"http://schemas.xmlsoap.org/wsdl/ input"`
-	Output        WsdlOutput        `xml:"http://schemas.xmlsoap.org/wsdl/ output"`
-	Faults        []*WsdlFault      `xml:"http://schemas.xmlsoap.org/wsdl/ fault"`
+	Doc           string            `xml:"documentation"`
+	Input         WsdlInput         `xml:"input"`
+	Output        WsdlOutput        `xml:"output"`
+	Faults        []*WsdlFault      `xml:"fault"`
 	SoapOperation WsdlSoapOperation `xml:"http://schemas.xmlsoap.org/wsdl/soap/ operation"`
 	HttpOperation WsdlHttpOperation `xml:"http://schemas.xmlsoap.org/wsdl/http/ operation"`
 }
 
 type WsdlPortType struct {
 	Name       string           `xml:"name,attr"`
-	Doc        string           `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
-	Operations []*WsdlOperation `xml:"http://schemas.xmlsoap.org/wsdl/ operation"`
+	Doc        string           `xml:"documentation"`
+	Operations []*WsdlOperation `xml:"operation"`
 }
 
 type WsdlHttpBinding struct {
@@ -95,7 +95,7 @@ type WsdlSoapHeader struct {
 	Use           string                 `xml:"use,attr"`
 	EncodingStyle string                 `xml:"encodingStyle,attr"`
 	Namespace     string                 `xml:"namespace,attr"`
-	HeadersFault  []*WsdlSoapHeaderFault `xml:"http://schemas.xmlsoap.org/wsdl/soap/ headerfault"`
+	HeadersFault  []*WsdlSoapHeaderFault `xml:"headerfault"`
 }
 
 type WsdlSoapHeaderFault struct {
@@ -131,21 +131,21 @@ type WsdlHttpOperation struct {
 type WsdlBinding struct {
 	Name        string           `xml:"name,attr"`
 	Type        string           `xml:"type,attr"`
-	Doc         string           `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
+	Doc         string           `xml:"documentation"`
 	HttpBinding WsdlHttpBinding  `xml:"http://schemas.xmlsoap.org/wsdl/http/ binding"`
 	SoapBinding WsdlSoapBinding  `xml:"http://schemas.xmlsoap.org/wsdl/soap/ binding"`
-	Operations  []*WsdlOperation `xml:"http://schemas.xmlsoap.org/wsdl/ operation"`
+	Operations  []*WsdlOperation `xml:"operation"`
 }
 
 type WsdlPort struct {
 	Name        string          `xml:"name,attr"`
 	Binding     string          `xml:"binding,attr"`
-	Doc         string          `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
-	SoapAddress WsdlSoapAddress `xml:"http://schemas.xmlsoap.org/wsdl/soap/ address"`
+	Doc         string          `xml:"documentation"`
+	SoapAddress WsdlSoapAddress `xml:"address"`
 }
 
 type WsdlService struct {
 	Name  string      `xml:"name,attr"`
-	Doc   string      `xml:"http://schemas.xmlsoap.org/wsdl/ documentation"`
-	Ports []*WsdlPort `xml:"http://schemas.xmlsoap.org/wsdl/ port"`
+	Doc   string      `xml:"documentation"`
+	Ports []*WsdlPort `xml:"port"`
 }
