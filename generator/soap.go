@@ -28,7 +28,7 @@ type SoapBody struct {
 type SoapFault struct {
 	faultcode   string `xml:"http://schemas.xmlsoap.org/soap/envelope/ faultcode"`
 	faultstring string `xml:"faultstring"`
-	faulactor   string `xml:"faultactor"`
+	faultactor  string `xml:"faultactor"`
 	detail      string `xml:"detail"`
 }
 
