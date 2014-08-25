@@ -28,6 +28,7 @@ Help Options:
 ```
 
 ### TODO
+* Add support for filters to allow the user to change the generated code
 * If WSDL file is local, resolve external XML schemas locally too instead of failing due to not having a URL to download them from.
 * Resolve XSD element references
 * Support for generating namespaces
