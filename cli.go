@@ -2,12 +2,13 @@ package main
 
 import (
 	"bytes"
-	gen "github.com/c4milo/gowsdl/generator"
-	flags "github.com/jessevdk/go-flags"
 	"go/format"
 	"log"
 	"os"
 	"runtime"
+
+	gen "github.com/cloudescape/gowsdl/generator"
+	flags "github.com/jessevdk/go-flags"
 )
 
 const version = "v0.0.1"
