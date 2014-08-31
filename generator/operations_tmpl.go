@@ -16,14 +16,18 @@ var opsTmpl = `
 	}
 
 	{{range .Operations}}
+		{{$faults := len .Faults}}
 		{{$requestType := findType .Input.Message}}
 		{{$soapAction := findSoapAction .Name $portType}}
 		{{$output := findType .Output.Message}}
+
+		{{if gt $faults 0}}
 		/**
 		* Error can be either of the following types:
 		* {{range .Faults}}
 		* - {{.Name}} {{.Doc}}{{end}}
 		*/
+		{{end}}
 		func (service *{{$portType}}) {{makePublic .Name}} (request *{{$requestType}}) (*{{$output}}, error) {
 			response := &{{$output}}{}
 			err := service.client.Call("{{$soapAction}}", request, response)
@@ -31,7 +35,7 @@ var opsTmpl = `
 				return nil, err
 			}
 
-			return response, nil			
+			return response, nil
 		}
 	{{end}}
 {{end}}
