@@ -12,6 +12,11 @@ Generates Go code from a WSDL file. This project is originally intended to gener
 * Resolves external XML Schemas recursively, up to 5 recursions.
 * Supports providing WSDL HTTP URL as well as a local WSDL file
 
+### Not supported
+* Setting SOAP headers
+* SOAP 1.2 and HTTP port bindings
+* WS-Security
+
 ### Usage
 ```
 gowsdl [OPTIONS]
