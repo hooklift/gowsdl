@@ -1,0 +1,1777 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.wsdot.wa.gov/ferries/schedule/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://www.wsdot.wa.gov/ferries/schedule/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">The Washington State Ferries schedule web service provides sailing times pertaining to terminal combinations or routes for a particular date.</wsdl:documentation>
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.wsdot.wa.gov/ferries/schedule/">
+      <s:element name="GetActiveScheduledSeasons">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetActiveScheduledSeasonsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetActiveScheduledSeasonsResult" type="tns:ArrayOfSchedBriefResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfSchedBriefResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SchedBriefResponse" nillable="true" type="tns:SchedBriefResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SchedBriefResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ScheduleName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleSeason" type="tns:Season" />
+          <s:element minOccurs="0" maxOccurs="1" name="SchedulePDFUrl" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleStart" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleEnd" type="s:dateTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="Season">
+        <s:restriction base="s:string">
+          <s:enumeration value="Spring" />
+          <s:enumeration value="Summer" />
+          <s:enumeration value="Fall" />
+          <s:enumeration value="Winter" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="APIAccessHeader" type="tns:APIAccessHeader" />
+      <s:complexType name="APIAccessHeader">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="APIAccessCode" type="s:string" />
+        </s:sequence>
+        <s:anyAttribute />
+      </s:complexType>
+      <s:element name="GetAllAlerts">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetAllAlertsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllAlertsResult" type="tns:ArrayOfAlertResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfAlertResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="AlertResponse" nillable="true" type="tns:AlertResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="AlertResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="BulletinID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="BulletinFlag" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="BulletinText" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="CommunicationFlag" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="CommunicationText" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="RouteAlertFlag" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="RouteAlertText" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="HomepageAlertText" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="PublishDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="DisruptionDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="AllRoutesFlag" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="SortSeq" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="AlertTypeID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="AlertType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AlertFullTitle" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AffectedRouteIDs" type="tns:ArrayOfInt" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfInt">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="int" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAllRouteDetails">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TripDateMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="TripDateMsg">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="TripDate" type="s:dateTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAllRouteDetailsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllRouteDetailsResult" type="tns:ArrayOfRouteResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfRouteResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RouteResponse" nillable="true" type="tns:RouteResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RouteResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="RouteID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="RouteAbbrev" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="RegionID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="VesselWatchID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReservationFlag" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="InternationalFlag" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="PassengerOnlyFlag" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="CrossingTime" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AdaNotes" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GeneralRouteNotes" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SeasonalRouteNotes" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Alerts" type="tns:ArrayOfRouteAlert" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfRouteAlert">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RouteAlert" nillable="true" type="tns:RouteAlert" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RouteAlert">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="BulletinID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="BulletinFlag" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="CommunicationFlag" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="PublishDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="AlertDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DisruptionDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AlertFullTitle" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AlertFullText" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAllRoutes">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TripDateMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllRoutesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllRoutesResult" type="tns:ArrayOfRouteBriefResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfRouteBriefResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RouteBriefResponse" nillable="true" type="tns:RouteBriefResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RouteBriefResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="RouteID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="RouteAbbrev" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="RegionID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ServiceDisruptions" type="tns:ArrayOfRouteBriefAlert" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfRouteBriefAlert">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="RouteBriefAlert" nillable="true" type="tns:RouteBriefAlert" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="RouteBriefAlert">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="BulletinID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="BulletinFlag" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="PublishDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="DisruptionDescription" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAllRoutesHavingServiceDisruptions">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TripDateMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllRoutesHavingServiceDisruptionsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllRoutesHavingServiceDisruptionsResult" type="tns:ArrayOfRouteBriefResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllSchedRoutes">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetAllSchedRoutesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllSchedRoutesResult" type="tns:ArrayOfSchedRouteBriefResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfSchedRouteBriefResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SchedRouteBriefResponse" nillable="true" type="tns:SchedRouteBriefResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SchedRouteBriefResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SchedRouteID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ContingencyOnly" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="RouteID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="RouteAbbrev" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SeasonalRouteNotes" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="RegionID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ServiceDisruptions" type="tns:ArrayOfRouteBriefAlert" />
+          <s:element minOccurs="0" maxOccurs="1" name="ContingencyAdj" type="tns:ArrayOfSchedRouteAdj" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfSchedRouteAdj">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SchedRouteAdj" nillable="true" type="tns:SchedRouteAdj" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SchedRouteAdj">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="DateFrom" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="DateThru" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="EventID" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="EventDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="AdjType" type="tns:AdjustmentType" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReplacedBySchedRouteID" nillable="true" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="AdjustmentType">
+        <s:restriction base="s:string">
+          <s:enumeration value="Addition" />
+          <s:enumeration value="Cancellation" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="GetAllTerminals">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TripDateMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllTerminalsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllTerminalsResult" type="tns:ArrayOfTerminalResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfTerminalResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="TerminalResponse" nillable="true" type="tns:TerminalResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TerminalResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="TerminalID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAllTerminalsAndMates">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TripDateMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllTerminalsAndMatesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllTerminalsAndMatesResult" type="tns:ArrayOfTerminalComboResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfTerminalComboResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="TerminalComboResponse" nillable="true" type="tns:TerminalComboResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="TerminalComboResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="DepartingTerminalID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="DepartingDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ArrivingTerminalID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ArrivingDescription" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAllTimeAdj">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetAllTimeAdjResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllTimeAdjResult" type="tns:ArrayOfSchedTimeAdjResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfSchedTimeAdjResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SchedTimeAdjResponse" nillable="true" type="tns:SchedTimeAdjResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SchedTimeAdjResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SchedRouteID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="RouteID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="RouteDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="RouteSortSeq" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SailingID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="SailingDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ActiveSailingDateRange" type="tns:SchedSailingDateRange" />
+          <s:element minOccurs="1" maxOccurs="1" name="SailingDir" type="tns:Direction" />
+          <s:element minOccurs="1" maxOccurs="1" name="JourneyID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="VesselID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="VesselName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="VesselHandicapAccessible" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="VesselPositionNum" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="JourneyTerminalID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TerminalID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="TerminalDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TerminalBriefDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TimeToAdj" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="AdjDateFrom" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="AdjDateThru" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="TidalAdj" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="EventID" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="EventDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="DepArrIndicator" type="tns:TimeType" />
+          <s:element minOccurs="1" maxOccurs="1" name="AdjType" type="tns:AdjustmentType" />
+          <s:element minOccurs="0" maxOccurs="1" name="Annotations" type="tns:ArrayOfSchedAnnotation" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SchedSailingDateRange">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="DateFrom" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="DateThru" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="EventID" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="EventDescription" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="Direction">
+        <s:restriction base="s:string">
+          <s:enumeration value="Westbound" />
+          <s:enumeration value="Eastbound" />
+        </s:restriction>
+      </s:simpleType>
+      <s:simpleType name="TimeType">
+        <s:restriction base="s:string">
+          <s:enumeration value="Departure" />
+          <s:enumeration value="Arrival" />
+        </s:restriction>
+      </s:simpleType>
+      <s:complexType name="ArrayOfSchedAnnotation">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SchedAnnotation" nillable="true" type="tns:SchedAnnotation" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SchedAnnotation">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="AnnotationID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="AnnotationText" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AnnotationIVRText" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="AdjustedCrossingTime" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="AnnotationImg" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TypeDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="SortSeq" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetCacheFlushDate">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetCacheFlushDateResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="GetCacheFlushDateResult" nillable="true" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetRouteDetail">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:RouteMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RouteMsg">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="TripDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="RouteID" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRouteDetailResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRouteDetailResult" type="tns:RouteResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetRouteDetailsByTerminalCombo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TerminalComboMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="TerminalComboMsg">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="TripDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="DepartingTerminalID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ArrivingTerminalID" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetRouteDetailsByTerminalComboResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRouteDetailsByTerminalComboResult" type="tns:ArrayOfRouteResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetRoutesByTerminalCombo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TerminalComboMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetRoutesByTerminalComboResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetRoutesByTerminalComboResult" type="tns:ArrayOfRouteBriefResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetSchedRoutesByScheduledSeason">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:SchedMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SchedMsg">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleID" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetSchedRoutesByScheduledSeasonResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetSchedRoutesByScheduledSeasonResult" type="tns:ArrayOfSchedRouteBriefResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetSchedSailingsBySchedRoute">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:SchedRouteMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SchedRouteMsg">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="SchedRouteID" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetSchedSailingsBySchedRouteResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetSchedSailingsBySchedRouteResult" type="tns:ArrayOfSchedSailingResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfSchedSailingResponse">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SchedSailingResponse" nillable="true" type="tns:SchedSailingResponse" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SchedSailingResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SchedRouteID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="RouteID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SailingID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="SailingDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SailingNotes" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayColNum" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SailingDir" type="tns:Direction" />
+          <s:element minOccurs="0" maxOccurs="1" name="DayOpDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="DayOpUseForHoliday" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ActiveDateRanges" type="tns:ArrayOfSchedSailingDateRange" />
+          <s:element minOccurs="0" maxOccurs="1" name="Journs" type="tns:ArrayOfSchedJourn" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfSchedSailingDateRange">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SchedSailingDateRange" nillable="true" type="tns:SchedSailingDateRange" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfSchedJourn">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SchedJourn" nillable="true" type="tns:SchedJourn" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SchedJourn">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="JourneyID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReservationInd" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="InternationalInd" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="InterislandInd" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="VesselID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="VesselName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="VesselHandicapAccessible" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="VesselPositionNum" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="TerminalTimes" type="tns:ArrayOfSchedTimeTerminal" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfSchedTimeTerminal">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SchedTimeTerminal" nillable="true" type="tns:SchedTimeTerminal" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SchedTimeTerminal">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="JourneyTerminalID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TerminalID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="TerminalDescription" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TerminalBriefDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Time" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="DepArrIndicator" nillable="true" type="tns:TimeType" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsNA" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Annotations" type="tns:ArrayOfSchedAnnotation" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetScheduleByRoute">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:RouteMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetScheduleByRouteResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetScheduleByRouteResult" type="tns:SchedResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="SchedResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ScheduleName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleSeason" type="tns:Season" />
+          <s:element minOccurs="0" maxOccurs="1" name="SchedulePDFUrl" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleStart" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduleEnd" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="AllRoutes" type="tns:ArrayOfInt" />
+          <s:element minOccurs="0" maxOccurs="1" name="TerminalCombos" type="tns:ArrayOfSchedTerminalCombo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfSchedTerminalCombo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SchedTerminalCombo" nillable="true" type="tns:SchedTerminalCombo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SchedTerminalCombo">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="DepartingTerminalID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="DepartingTerminalName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ArrivingTerminalID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ArrivingTerminalName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SailingNotes" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Annotations" type="tns:ArrayOfString" />
+          <s:element minOccurs="0" maxOccurs="1" name="Times" type="tns:ArrayOfSchedTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfSchedTime">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SchedTime" nillable="true" type="tns:SchedTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SchedTime">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="DepartingTime" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="ArrivingTime" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="LoadingRule" type="tns:LoadIndicator" />
+          <s:element minOccurs="1" maxOccurs="1" name="VesselID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="VesselName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="VesselHandicapAccessible" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="VesselPositionNum" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Routes" type="tns:ArrayOfInt" />
+          <s:element minOccurs="0" maxOccurs="1" name="AnnotationIndexes" type="tns:ArrayOfInt" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="LoadIndicator">
+        <s:restriction base="s:string">
+          <s:enumeration value="Passenger" />
+          <s:enumeration value="Vehicle" />
+          <s:enumeration value="Both" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="GetScheduleByTerminalCombo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TerminalComboMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetScheduleByTerminalComboResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetScheduleByTerminalComboResult" type="tns:SchedResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTerminalMates">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TerminalMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="TerminalMsg">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="TripDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="TerminalID" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetTerminalMatesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetTerminalMatesResult" type="tns:ArrayOfTerminalResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTimeAdjByRoute">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:RouteBriefMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RouteBriefMsg">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="RouteID" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetTimeAdjByRouteResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetTimeAdjByRouteResult" type="tns:ArrayOfSchedTimeAdjResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTimeAdjBySchedRoute">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:SchedRouteMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTimeAdjBySchedRouteResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetTimeAdjBySchedRouteResult" type="tns:ArrayOfSchedTimeAdjResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTodaysScheduleByRoute">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:RouteTodayMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RouteTodayMsg">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="RouteID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="OnlyRemainingTimes" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetTodaysScheduleByRouteResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetTodaysScheduleByRouteResult" type="tns:SchedResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetTodaysScheduleByTerminalCombo">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="request" type="tns:TerminalComboTodayMsg" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="TerminalComboTodayMsg">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="DepartingTerminalID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ArrivingTerminalID" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="OnlyRemainingTimes" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetTodaysScheduleByTerminalComboResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetTodaysScheduleByTerminalComboResult" type="tns:SchedResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetValidDateRange">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetValidDateRangeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetValidDateRangeResult" type="tns:ValidDateRangeResponse" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ValidDateRangeResponse">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="DateFrom" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="DateThru" type="s:dateTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ArrayOfSchedBriefResponse" nillable="true" type="tns:ArrayOfSchedBriefResponse" />
+      <s:element name="ArrayOfAlertResponse" nillable="true" type="tns:ArrayOfAlertResponse" />
+      <s:element name="ArrayOfSchedRouteBriefResponse" nillable="true" type="tns:ArrayOfSchedRouteBriefResponse" />
+      <s:element name="ArrayOfSchedTimeAdjResponse" nillable="true" type="tns:ArrayOfSchedTimeAdjResponse" />
+      <s:element name="dateTime" nillable="true" type="s:dateTime" />
+      <s:element name="ValidDateRangeResponse" nillable="true" type="tns:ValidDateRangeResponse" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetActiveScheduledSeasonsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetActiveScheduledSeasons" />
+  </wsdl:message>
+  <wsdl:message name="GetActiveScheduledSeasonsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetActiveScheduledSeasonsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetActiveScheduledSeasonsAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetAllAlertsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllAlerts" />
+  </wsdl:message>
+  <wsdl:message name="GetAllAlertsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllAlertsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllAlertsAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetAllRouteDetailsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllRouteDetails" />
+  </wsdl:message>
+  <wsdl:message name="GetAllRouteDetailsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllRouteDetailsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllRouteDetailsAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetAllRoutesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllRoutes" />
+  </wsdl:message>
+  <wsdl:message name="GetAllRoutesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllRoutesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllRoutesAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetAllRoutesHavingServiceDisruptionsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllRoutesHavingServiceDisruptions" />
+  </wsdl:message>
+  <wsdl:message name="GetAllRoutesHavingServiceDisruptionsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllRoutesHavingServiceDisruptionsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllRoutesHavingServiceDisruptionsAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetAllSchedRoutesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllSchedRoutes" />
+  </wsdl:message>
+  <wsdl:message name="GetAllSchedRoutesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllSchedRoutesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllSchedRoutesAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetAllTerminalsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllTerminals" />
+  </wsdl:message>
+  <wsdl:message name="GetAllTerminalsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllTerminalsResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllTerminalsAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetAllTerminalsAndMatesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllTerminalsAndMates" />
+  </wsdl:message>
+  <wsdl:message name="GetAllTerminalsAndMatesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllTerminalsAndMatesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllTerminalsAndMatesAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetAllTimeAdjSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllTimeAdj" />
+  </wsdl:message>
+  <wsdl:message name="GetAllTimeAdjSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllTimeAdjResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllTimeAdjAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetCacheFlushDateSoapIn">
+    <wsdl:part name="parameters" element="tns:GetCacheFlushDate" />
+  </wsdl:message>
+  <wsdl:message name="GetCacheFlushDateSoapOut">
+    <wsdl:part name="parameters" element="tns:GetCacheFlushDateResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetRouteDetailSoapIn">
+    <wsdl:part name="parameters" element="tns:GetRouteDetail" />
+  </wsdl:message>
+  <wsdl:message name="GetRouteDetailSoapOut">
+    <wsdl:part name="parameters" element="tns:GetRouteDetailResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetRouteDetailAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetRouteDetailsByTerminalComboSoapIn">
+    <wsdl:part name="parameters" element="tns:GetRouteDetailsByTerminalCombo" />
+  </wsdl:message>
+  <wsdl:message name="GetRouteDetailsByTerminalComboSoapOut">
+    <wsdl:part name="parameters" element="tns:GetRouteDetailsByTerminalComboResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetRouteDetailsByTerminalComboAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetRoutesByTerminalComboSoapIn">
+    <wsdl:part name="parameters" element="tns:GetRoutesByTerminalCombo" />
+  </wsdl:message>
+  <wsdl:message name="GetRoutesByTerminalComboSoapOut">
+    <wsdl:part name="parameters" element="tns:GetRoutesByTerminalComboResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetRoutesByTerminalComboAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedRoutesByScheduledSeasonSoapIn">
+    <wsdl:part name="parameters" element="tns:GetSchedRoutesByScheduledSeason" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedRoutesByScheduledSeasonSoapOut">
+    <wsdl:part name="parameters" element="tns:GetSchedRoutesByScheduledSeasonResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedRoutesByScheduledSeasonAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedSailingsBySchedRouteSoapIn">
+    <wsdl:part name="parameters" element="tns:GetSchedSailingsBySchedRoute" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedSailingsBySchedRouteSoapOut">
+    <wsdl:part name="parameters" element="tns:GetSchedSailingsBySchedRouteResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetSchedSailingsBySchedRouteAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetScheduleByRouteSoapIn">
+    <wsdl:part name="parameters" element="tns:GetScheduleByRoute" />
+  </wsdl:message>
+  <wsdl:message name="GetScheduleByRouteSoapOut">
+    <wsdl:part name="parameters" element="tns:GetScheduleByRouteResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetScheduleByRouteAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetScheduleByTerminalComboSoapIn">
+    <wsdl:part name="parameters" element="tns:GetScheduleByTerminalCombo" />
+  </wsdl:message>
+  <wsdl:message name="GetScheduleByTerminalComboSoapOut">
+    <wsdl:part name="parameters" element="tns:GetScheduleByTerminalComboResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetScheduleByTerminalComboAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetTerminalMatesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetTerminalMates" />
+  </wsdl:message>
+  <wsdl:message name="GetTerminalMatesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetTerminalMatesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetTerminalMatesAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetTimeAdjByRouteSoapIn">
+    <wsdl:part name="parameters" element="tns:GetTimeAdjByRoute" />
+  </wsdl:message>
+  <wsdl:message name="GetTimeAdjByRouteSoapOut">
+    <wsdl:part name="parameters" element="tns:GetTimeAdjByRouteResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetTimeAdjByRouteAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetTimeAdjBySchedRouteSoapIn">
+    <wsdl:part name="parameters" element="tns:GetTimeAdjBySchedRoute" />
+  </wsdl:message>
+  <wsdl:message name="GetTimeAdjBySchedRouteSoapOut">
+    <wsdl:part name="parameters" element="tns:GetTimeAdjBySchedRouteResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetTimeAdjBySchedRouteAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetTodaysScheduleByRouteSoapIn">
+    <wsdl:part name="parameters" element="tns:GetTodaysScheduleByRoute" />
+  </wsdl:message>
+  <wsdl:message name="GetTodaysScheduleByRouteSoapOut">
+    <wsdl:part name="parameters" element="tns:GetTodaysScheduleByRouteResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetTodaysScheduleByRouteAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetTodaysScheduleByTerminalComboSoapIn">
+    <wsdl:part name="parameters" element="tns:GetTodaysScheduleByTerminalCombo" />
+  </wsdl:message>
+  <wsdl:message name="GetTodaysScheduleByTerminalComboSoapOut">
+    <wsdl:part name="parameters" element="tns:GetTodaysScheduleByTerminalComboResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetTodaysScheduleByTerminalComboAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetValidDateRangeSoapIn">
+    <wsdl:part name="parameters" element="tns:GetValidDateRange" />
+  </wsdl:message>
+  <wsdl:message name="GetValidDateRangeSoapOut">
+    <wsdl:part name="parameters" element="tns:GetValidDateRangeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetValidDateRangeAPIAccessHeader">
+    <wsdl:part name="APIAccessHeader" element="tns:APIAccessHeader" />
+  </wsdl:message>
+  <wsdl:message name="GetActiveScheduledSeasonsHttpGetIn" />
+  <wsdl:message name="GetActiveScheduledSeasonsHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfSchedBriefResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllAlertsHttpGetIn" />
+  <wsdl:message name="GetAllAlertsHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfAlertResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllSchedRoutesHttpGetIn" />
+  <wsdl:message name="GetAllSchedRoutesHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfSchedRouteBriefResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllTimeAdjHttpGetIn" />
+  <wsdl:message name="GetAllTimeAdjHttpGetOut">
+    <wsdl:part name="Body" element="tns:ArrayOfSchedTimeAdjResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetCacheFlushDateHttpGetIn" />
+  <wsdl:message name="GetCacheFlushDateHttpGetOut">
+    <wsdl:part name="Body" element="tns:dateTime" />
+  </wsdl:message>
+  <wsdl:message name="GetValidDateRangeHttpGetIn" />
+  <wsdl:message name="GetValidDateRangeHttpGetOut">
+    <wsdl:part name="Body" element="tns:ValidDateRangeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetActiveScheduledSeasonsHttpPostIn" />
+  <wsdl:message name="GetActiveScheduledSeasonsHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfSchedBriefResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllAlertsHttpPostIn" />
+  <wsdl:message name="GetAllAlertsHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfAlertResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllSchedRoutesHttpPostIn" />
+  <wsdl:message name="GetAllSchedRoutesHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfSchedRouteBriefResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllTimeAdjHttpPostIn" />
+  <wsdl:message name="GetAllTimeAdjHttpPostOut">
+    <wsdl:part name="Body" element="tns:ArrayOfSchedTimeAdjResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetCacheFlushDateHttpPostIn" />
+  <wsdl:message name="GetCacheFlushDateHttpPostOut">
+    <wsdl:part name="Body" element="tns:dateTime" />
+  </wsdl:message>
+  <wsdl:message name="GetValidDateRangeHttpPostIn" />
+  <wsdl:message name="GetValidDateRangeHttpPostOut">
+    <wsdl:part name="Body" element="tns:ValidDateRangeResponse" />
+  </wsdl:message>
+  <wsdl:portType name="WSF_x0020_ScheduleSoap">
+    <wsdl:operation name="GetActiveScheduledSeasons">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides a brief summary of all scheduled sailing seasons that are currently active / available.</wsdl:documentation>
+      <wsdl:input message="tns:GetActiveScheduledSeasonsSoapIn" />
+      <wsdl:output message="tns:GetActiveScheduledSeasonsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllAlerts">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves all published alerts.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllAlertsSoapIn" />
+      <wsdl:output message="tns:GetAllAlertsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllRouteDetails">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides detailed information for all available routes pertaining to a particular date.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllRouteDetailsSoapIn" />
+      <wsdl:output message="tns:GetAllRouteDetailsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllRoutes">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides all available routes for a particular date.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllRoutesSoapIn" />
+      <wsdl:output message="tns:GetAllRoutesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllRoutesHavingServiceDisruptions">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides all available routes for a particular date where one or more service disruptions are present.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllRoutesHavingServiceDisruptionsSoapIn" />
+      <wsdl:output message="tns:GetAllRoutesHavingServiceDisruptionsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllSchedRoutes">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves the scheduled route(s) for all seasons that are currently active / available.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllSchedRoutesSoapIn" />
+      <wsdl:output message="tns:GetAllSchedRoutesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTerminals">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides all available terminals for a particular date.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllTerminalsSoapIn" />
+      <wsdl:output message="tns:GetAllTerminalsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTerminalsAndMates">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">For a given date, retrieves all available terminal combinations.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllTerminalsAndMatesSoapIn" />
+      <wsdl:output message="tns:GetAllTerminalsAndMatesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTimeAdj">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides a list of all individual time adjustments (additions or cancellations) that are currently active / available.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllTimeAdjSoapIn" />
+      <wsdl:output message="tns:GetAllTimeAdjSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCacheFlushDate">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Most web methods in this service are cached.  If you are also using caching in your user interface, it may be helpful to know the date and time that the cache was last flushed in this web service.</wsdl:documentation>
+      <wsdl:input message="tns:GetCacheFlushDateSoapIn" />
+      <wsdl:output message="tns:GetCacheFlushDateSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetRouteDetail">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves detailed information pertaining to a scheduled route.</wsdl:documentation>
+      <wsdl:input message="tns:GetRouteDetailSoapIn" />
+      <wsdl:output message="tns:GetRouteDetailSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetRouteDetailsByTerminalCombo">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves detailed information for scheduled routes that are associated with a particular terminal combination.</wsdl:documentation>
+      <wsdl:input message="tns:GetRouteDetailsByTerminalComboSoapIn" />
+      <wsdl:output message="tns:GetRouteDetailsByTerminalComboSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetRoutesByTerminalCombo">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves route(s) for a particular date and terminal combination.</wsdl:documentation>
+      <wsdl:input message="tns:GetRoutesByTerminalComboSoapIn" />
+      <wsdl:output message="tns:GetRoutesByTerminalComboSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedRoutesByScheduledSeason">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves scheduled route(s) for a particular active season.</wsdl:documentation>
+      <wsdl:input message="tns:GetSchedRoutesByScheduledSeasonSoapIn" />
+      <wsdl:output message="tns:GetSchedRoutesByScheduledSeasonSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedSailingsBySchedRoute">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves sailings and departure/arrival times that correspond with a particular scheduled route.</wsdl:documentation>
+      <wsdl:input message="tns:GetSchedSailingsBySchedRouteSoapIn" />
+      <wsdl:output message="tns:GetSchedSailingsBySchedRouteSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetScheduleByRoute">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves sailing times associated with a specific route for a particular date.</wsdl:documentation>
+      <wsdl:input message="tns:GetScheduleByRouteSoapIn" />
+      <wsdl:output message="tns:GetScheduleByRouteSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetScheduleByTerminalCombo">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves sailing times associated with a specific departing / arriving terminal combination for a particular date.</wsdl:documentation>
+      <wsdl:input message="tns:GetScheduleByTerminalComboSoapIn" />
+      <wsdl:output message="tns:GetScheduleByTerminalComboSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTerminalMates">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides all available terminals that correspond to a given terminal for a particular date.</wsdl:documentation>
+      <wsdl:input message="tns:GetTerminalMatesSoapIn" />
+      <wsdl:output message="tns:GetTerminalMatesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTimeAdjByRoute">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides a list of individual time adjustments (additions or cancellations) for a particular route.</wsdl:documentation>
+      <wsdl:input message="tns:GetTimeAdjByRouteSoapIn" />
+      <wsdl:output message="tns:GetTimeAdjByRouteSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTimeAdjBySchedRoute">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides a list of individual time adjustments (additions or cancellations) for a particular scheduled route.</wsdl:documentation>
+      <wsdl:input message="tns:GetTimeAdjBySchedRouteSoapIn" />
+      <wsdl:output message="tns:GetTimeAdjBySchedRouteSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTodaysScheduleByRoute">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves sailing times associated with a specific route for the current date.  User may specify if only the times for the remainder of this sailing date are required.</wsdl:documentation>
+      <wsdl:input message="tns:GetTodaysScheduleByRouteSoapIn" />
+      <wsdl:output message="tns:GetTodaysScheduleByRouteSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetTodaysScheduleByTerminalCombo">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves sailing times associated with a specific departing / arriving terminal combination for the current date.  User may specify if only the times for the remainder of this sailing date are required.</wsdl:documentation>
+      <wsdl:input message="tns:GetTodaysScheduleByTerminalComboSoapIn" />
+      <wsdl:output message="tns:GetTodaysScheduleByTerminalComboSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetValidDateRange">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Reveals a valid date range for retrieving schedule data.  This begins with today's date and extends to the end of the most recently posted schedule.</wsdl:documentation>
+      <wsdl:input message="tns:GetValidDateRangeSoapIn" />
+      <wsdl:output message="tns:GetValidDateRangeSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="WSF_x0020_ScheduleHttpGet">
+    <wsdl:operation name="GetActiveScheduledSeasons">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides a brief summary of all scheduled sailing seasons that are currently active / available.</wsdl:documentation>
+      <wsdl:input message="tns:GetActiveScheduledSeasonsHttpGetIn" />
+      <wsdl:output message="tns:GetActiveScheduledSeasonsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllAlerts">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves all published alerts.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllAlertsHttpGetIn" />
+      <wsdl:output message="tns:GetAllAlertsHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllSchedRoutes">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves the scheduled route(s) for all seasons that are currently active / available.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllSchedRoutesHttpGetIn" />
+      <wsdl:output message="tns:GetAllSchedRoutesHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTimeAdj">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides a list of all individual time adjustments (additions or cancellations) that are currently active / available.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllTimeAdjHttpGetIn" />
+      <wsdl:output message="tns:GetAllTimeAdjHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCacheFlushDate">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Most web methods in this service are cached.  If you are also using caching in your user interface, it may be helpful to know the date and time that the cache was last flushed in this web service.</wsdl:documentation>
+      <wsdl:input message="tns:GetCacheFlushDateHttpGetIn" />
+      <wsdl:output message="tns:GetCacheFlushDateHttpGetOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetValidDateRange">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Reveals a valid date range for retrieving schedule data.  This begins with today's date and extends to the end of the most recently posted schedule.</wsdl:documentation>
+      <wsdl:input message="tns:GetValidDateRangeHttpGetIn" />
+      <wsdl:output message="tns:GetValidDateRangeHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="WSF_x0020_ScheduleHttpPost">
+    <wsdl:operation name="GetActiveScheduledSeasons">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides a brief summary of all scheduled sailing seasons that are currently active / available.</wsdl:documentation>
+      <wsdl:input message="tns:GetActiveScheduledSeasonsHttpPostIn" />
+      <wsdl:output message="tns:GetActiveScheduledSeasonsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllAlerts">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves all published alerts.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllAlertsHttpPostIn" />
+      <wsdl:output message="tns:GetAllAlertsHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllSchedRoutes">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Retrieves the scheduled route(s) for all seasons that are currently active / available.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllSchedRoutesHttpPostIn" />
+      <wsdl:output message="tns:GetAllSchedRoutesHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTimeAdj">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Provides a list of all individual time adjustments (additions or cancellations) that are currently active / available.</wsdl:documentation>
+      <wsdl:input message="tns:GetAllTimeAdjHttpPostIn" />
+      <wsdl:output message="tns:GetAllTimeAdjHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCacheFlushDate">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Most web methods in this service are cached.  If you are also using caching in your user interface, it may be helpful to know the date and time that the cache was last flushed in this web service.</wsdl:documentation>
+      <wsdl:input message="tns:GetCacheFlushDateHttpPostIn" />
+      <wsdl:output message="tns:GetCacheFlushDateHttpPostOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetValidDateRange">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">Reveals a valid date range for retrieving schedule data.  This begins with today's date and extends to the end of the most recently posted schedule.</wsdl:documentation>
+      <wsdl:input message="tns:GetValidDateRangeHttpPostIn" />
+      <wsdl:output message="tns:GetValidDateRangeHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WSF_x0020_ScheduleSoap" type="tns:WSF_x0020_ScheduleSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetActiveScheduledSeasons">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetActiveScheduledSeasons" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetActiveScheduledSeasonsAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllAlerts">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllAlerts" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetAllAlertsAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllRouteDetails">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllRouteDetails" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetAllRouteDetailsAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllRoutes">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllRoutes" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetAllRoutesAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllRoutesHavingServiceDisruptions">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllRoutesHavingServiceDisruptions" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetAllRoutesHavingServiceDisruptionsAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllSchedRoutes">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllSchedRoutes" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetAllSchedRoutesAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTerminals">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllTerminals" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetAllTerminalsAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTerminalsAndMates">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllTerminalsAndMates" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetAllTerminalsAndMatesAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTimeAdj">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllTimeAdj" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetAllTimeAdjAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCacheFlushDate">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetCacheFlushDate" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetRouteDetail">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetRouteDetail" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetRouteDetailAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetRouteDetailsByTerminalCombo">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetRouteDetailsByTerminalCombo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetRouteDetailsByTerminalComboAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetRoutesByTerminalCombo">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetRoutesByTerminalCombo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetRoutesByTerminalComboAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedRoutesByScheduledSeason">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetSchedRoutesByScheduledSeason" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetSchedRoutesByScheduledSeasonAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedSailingsBySchedRoute">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetSchedSailingsBySchedRoute" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetSchedSailingsBySchedRouteAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetScheduleByRoute">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetScheduleByRoute" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetScheduleByRouteAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetScheduleByTerminalCombo">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetScheduleByTerminalCombo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetScheduleByTerminalComboAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTerminalMates">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetTerminalMates" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetTerminalMatesAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTimeAdjByRoute">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetTimeAdjByRoute" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetTimeAdjByRouteAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTimeAdjBySchedRoute">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetTimeAdjBySchedRoute" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetTimeAdjBySchedRouteAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTodaysScheduleByRoute">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetTodaysScheduleByRoute" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetTodaysScheduleByRouteAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTodaysScheduleByTerminalCombo">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetTodaysScheduleByTerminalCombo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetTodaysScheduleByTerminalComboAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetValidDateRange">
+      <soap:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetValidDateRange" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+        <soap:header message="tns:GetValidDateRangeAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WSF_x0020_ScheduleSoap12" type="tns:WSF_x0020_ScheduleSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetActiveScheduledSeasons">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetActiveScheduledSeasons" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetActiveScheduledSeasonsAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllAlerts">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllAlerts" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetAllAlertsAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllRouteDetails">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllRouteDetails" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetAllRouteDetailsAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllRoutes">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllRoutes" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetAllRoutesAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllRoutesHavingServiceDisruptions">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllRoutesHavingServiceDisruptions" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetAllRoutesHavingServiceDisruptionsAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllSchedRoutes">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllSchedRoutes" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetAllSchedRoutesAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTerminals">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllTerminals" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetAllTerminalsAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTerminalsAndMates">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllTerminalsAndMates" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetAllTerminalsAndMatesAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTimeAdj">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetAllTimeAdj" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetAllTimeAdjAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCacheFlushDate">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetCacheFlushDate" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetRouteDetail">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetRouteDetail" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetRouteDetailAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetRouteDetailsByTerminalCombo">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetRouteDetailsByTerminalCombo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetRouteDetailsByTerminalComboAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetRoutesByTerminalCombo">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetRoutesByTerminalCombo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetRoutesByTerminalComboAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedRoutesByScheduledSeason">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetSchedRoutesByScheduledSeason" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetSchedRoutesByScheduledSeasonAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetSchedSailingsBySchedRoute">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetSchedSailingsBySchedRoute" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetSchedSailingsBySchedRouteAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetScheduleByRoute">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetScheduleByRoute" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetScheduleByRouteAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetScheduleByTerminalCombo">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetScheduleByTerminalCombo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetScheduleByTerminalComboAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTerminalMates">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetTerminalMates" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetTerminalMatesAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTimeAdjByRoute">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetTimeAdjByRoute" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetTimeAdjByRouteAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTimeAdjBySchedRoute">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetTimeAdjBySchedRoute" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetTimeAdjBySchedRouteAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTodaysScheduleByRoute">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetTodaysScheduleByRoute" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetTodaysScheduleByRouteAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetTodaysScheduleByTerminalCombo">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetTodaysScheduleByTerminalCombo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetTodaysScheduleByTerminalComboAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetValidDateRange">
+      <soap12:operation soapAction="http://www.wsdot.wa.gov/ferries/schedule/GetValidDateRange" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+        <soap12:header message="tns:GetValidDateRangeAPIAccessHeader" part="APIAccessHeader" use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WSF_x0020_ScheduleHttpGet" type="tns:WSF_x0020_ScheduleHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="GetActiveScheduledSeasons">
+      <http:operation location="/GetActiveScheduledSeasons" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllAlerts">
+      <http:operation location="/GetAllAlerts" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllSchedRoutes">
+      <http:operation location="/GetAllSchedRoutes" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTimeAdj">
+      <http:operation location="/GetAllTimeAdj" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCacheFlushDate">
+      <http:operation location="/GetCacheFlushDate" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetValidDateRange">
+      <http:operation location="/GetValidDateRange" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WSF_x0020_ScheduleHttpPost" type="tns:WSF_x0020_ScheduleHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="GetActiveScheduledSeasons">
+      <http:operation location="/GetActiveScheduledSeasons" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllAlerts">
+      <http:operation location="/GetAllAlerts" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllSchedRoutes">
+      <http:operation location="/GetAllSchedRoutes" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllTimeAdj">
+      <http:operation location="/GetAllTimeAdj" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCacheFlushDate">
+      <http:operation location="/GetCacheFlushDate" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetValidDateRange">
+      <http:operation location="/GetValidDateRange" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WSF_x0020_Schedule">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">The Washington State Ferries schedule web service provides sailing times pertaining to terminal combinations or routes for a particular date.</wsdl:documentation>
+    <wsdl:port name="WSF_x0020_ScheduleSoap" binding="tns:WSF_x0020_ScheduleSoap">
+      <soap:address location="http://b2b.wsdot.wa.gov/ferries/schedule/Default.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WSF_x0020_ScheduleSoap12" binding="tns:WSF_x0020_ScheduleSoap12">
+      <soap12:address location="http://b2b.wsdot.wa.gov/ferries/schedule/Default.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WSF_x0020_ScheduleHttpGet" binding="tns:WSF_x0020_ScheduleHttpGet">
+      <http:address location="http://b2b.wsdot.wa.gov/ferries/schedule/Default.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WSF_x0020_ScheduleHttpPost" binding="tns:WSF_x0020_ScheduleHttpPost">
+      <http:address location="http://b2b.wsdot.wa.gov/ferries/schedule/Default.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
