@@ -363,6 +363,8 @@ func toGoType(xsdType string) string {
 	return "*" + type_
 }
 
+// Given a message, finds its type.
+//
 // I'm not very proud of this function but
 // it works for now and performance doesn't
 // seem critical at this point
@@ -375,6 +377,12 @@ func (g *GoWsdl) findType(message string) string {
 		}
 
 		// Assumes document/literal wrapped WS-I
+		if len(msg.Parts) == 0 {
+			// Message does not have parts. This could be a Port
+			// with HTTP binding or SOAP 1.2 binding, which are not currently
+			// supported.
+			continue
+		}
 		part := msg.Parts[0]
 		if part.Type != "" {
 			return stripns(part.Type)
@@ -397,7 +405,7 @@ func (g *GoWsdl) findType(message string) string {
 }
 
 // TODO(c4milo): Add support for namespaces instead of striping them out
-// TODO(c4milo): improve algorithm complexity if performance turns out to be an issue.
+// TODO(c4milo): improve runtime complexity if performance turns out to be an issue.
 func (g *GoWsdl) findSoapAction(operation, portType string) string {
 	for _, binding := range g.wsdl.Binding {
 		if stripns(binding.Type) != portType {
