@@ -7,7 +7,7 @@ import (
 	"os"
 	"runtime"
 
-	gen "github.com/cloudescape/gowsdl/generator"
+	gen "github.com/cloudscape/gowsdl/generator"
 	flags "github.com/jessevdk/go-flags"
 )
 

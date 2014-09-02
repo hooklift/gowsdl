@@ -5,14 +5,21 @@ import (
 	"crypto/tls"
 	"encoding/xml"
 	"io/ioutil"
-	"log"
 	"net/http"
+
+	"gopkg.in/inconshreveable/log15.v2"
 )
+
+var Log = log15.New()
+
+func init() {
+	Log.SetHandler(log15.DiscardHandler())
+}
 
 type SoapEnvelope struct {
 	XMLName       xml.Name   `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
 	EncodingStyle string     `xml:"http://schemas.xmlsoap.org/soap/encoding/ encodingStyle,attr"`
-	Header        SoapHeader `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"`
+	Header        SoapHeader `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header,omitempty"`
 	Body          SoapBody   `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
 }
 
@@ -21,8 +28,8 @@ type SoapHeader struct {
 }
 
 type SoapBody struct {
-	Body  string
-	Fault SoapFault
+	Body  string    `xml:",innerxml"`
+	Fault *SoapFault `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
 }
 
 type SoapFault struct {
@@ -65,6 +72,10 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	//encoder.Indent("  ", "    ")
 
 	err = encoder.Encode(envelope)
+	if err == nil {
+		err = encoder.Flush()
+	}
+	Log.Debug("encoded", "envelope", log15.Lazy{func() string { return buffer.String() }})
 	if err != nil {
 		return err
 	}
@@ -89,6 +100,10 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
+	if len(body) == 0 {
+		Log.Warn("empty response")
+		return nil
+	}
 
 	respEnvelope := &SoapEnvelope{}
 
@@ -98,7 +113,7 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	}
 
 	if respEnvelope.Body.Body == "" {
-		log.Printf("%#v\n", respEnvelope.Body)
+		Log.Warn("empty response body", "envelope", respEnvelope, "body", string(body))
 		return nil
 	}
 
