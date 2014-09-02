@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -35,7 +34,8 @@ var cacheDir = filepath.Join(os.TempDir(), "gowsdl-cache")
 func init() {
 	err := os.MkdirAll(cacheDir, 0700)
 	if err != nil {
-		log.Fatalf("Unable to create cache directory: %s", err.Error())
+		Log.Crit("Create cache directory", "error", err)
+		os.Exit(1)
 	}
 }
 
@@ -71,7 +71,8 @@ func downloadFile(url string, ignoreTls bool) ([]byte, error) {
 func NewGoWsdl(file, pkg string, ignoreTls bool) (*GoWsdl, error) {
 	file = strings.TrimSpace(file)
 	if file == "" {
-		log.Fatalln("WSDL file is required to generate Go proxy")
+		Log.Crit("WSDL file is required to generate Go proxy")
+		os.Exit(2)
 	}
 
 	pkg = strings.TrimSpace(pkg)
@@ -103,7 +104,7 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 
 		gocode["types"], err = g.genTypes()
 		if err != nil {
-			log.Println(err)
+			Log.Error("genTypes", "error", err)
 		}
 	}()
 
@@ -114,7 +115,7 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 
 		gocode["operations"], err = g.genOperations()
 		if err != nil {
-			log.Println(err)
+			Log.Error("genOperations", "error", err)
 		}
 	}()
 
@@ -122,7 +123,7 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 
 	gocode["header"], err = g.genHeader()
 	if err != nil {
-		log.Println(err)
+		Log.Error("genHeader", "error", err)
 	}
 
 	return gocode, nil
@@ -133,14 +134,14 @@ func (g *GoWsdl) unmarshal() error {
 
 	parsedUrl, err := url.Parse(g.file)
 	if parsedUrl.Scheme == "" {
-		log.Printf("Reading file %s...\n", g.file)
+		Log.Info("Reading", "file", g.file)
 
 		data, err = ioutil.ReadFile(g.file)
 		if err != nil {
 			return err
 		}
 	} else {
-		log.Printf("Downloading %s...\n", g.file)
+		Log.Info("Downloading", "file", g.file)
 
 		data, err = downloadFile(g.file, g.ignoreTls)
 		if err != nil {
@@ -184,7 +185,7 @@ func (g *GoWsdl) resolveXsdExternals(schema *XsdSchema, url *url.URL) error {
 			schemaLocation = url.Scheme + "://" + url.Host + schemaLocation
 		}
 
-		log.Printf("Downloading external schema: %s\n", schemaLocation)
+		Log.Info("Downloading external schema", "location", schemaLocation)
 
 		data, err := downloadFile(schemaLocation, g.ignoreTls)
 		newschema := &XsdSchema{}

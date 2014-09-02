@@ -5,9 +5,16 @@ import (
 	"crypto/tls"
 	"encoding/xml"
 	"io/ioutil"
-	"log"
 	"net/http"
+
+	"gopkg.in/inconshreveable/log15.v2"
 )
+
+var Log = log15.New()
+
+func init() {
+	Log.SetHandler(log15.DiscardHandler())
+}
 
 type SoapEnvelope struct {
 	XMLName       xml.Name   `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
@@ -98,7 +105,7 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	}
 
 	if respEnvelope.Body.Body == "" {
-		log.Printf("%#v\n", respEnvelope.Body)
+		Log.Warn("empty response body", "envelope", respEnvelope, "body", string(body))
 		return nil
 	}
 
