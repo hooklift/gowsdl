@@ -28,8 +28,8 @@ type SoapHeader struct {
 }
 
 type SoapBody struct {
-	Body  string
-	Fault SoapFault
+	Body  string    `xml:",innerxml"`
+	Fault SoapFault `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault"`
 }
 
 type SoapFault struct {
@@ -96,6 +96,10 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
+	if len(body) == 0 {
+		Log.Warn("empty response")
+		return nil
+	}
 
 	respEnvelope := &SoapEnvelope{}
 
