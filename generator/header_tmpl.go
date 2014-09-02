@@ -7,7 +7,7 @@ package {{.}}
 // Copyright (c) 2014, Cloudescape. All rights reserved.
 import (
 	"time"
-	gowsdl "github.com/cloudescape/gowsdl/generator"
+	gowsdl "github.com/cloudscape/gowsdl/generator"
 	{{/*range .Imports*/}}
 		{{/*.*/}}
 	{{/*end*/}}
