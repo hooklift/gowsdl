@@ -12,4 +12,7 @@ import (
 		{{/*.*/}}
 	{{/*end*/}}
 )
+
+// against "unused imports"
+var _ time.Time
 `
