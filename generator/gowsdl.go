@@ -253,6 +253,7 @@ func (g *GoWsdl) genOperations() ([]byte, error) {
 		"makePublic":           makePublic,
 		"findType":             g.findType,
 		"findSoapAction":       g.findSoapAction,
+		"findServiceAddress":   g.findServiceAddress,
 	}
 
 	data := new(bytes.Buffer)
@@ -415,6 +416,17 @@ func (g *GoWsdl) findSoapAction(operation, portType string) string {
 		for _, soapOp := range binding.Operations {
 			if soapOp.Name == operation {
 				return soapOp.SoapOperation.SoapAction
+			}
+		}
+	}
+	return ""
+}
+
+func (g *GoWsdl) findServiceAddress(name string) string {
+	for _, service := range g.wsdl.Service {
+		for _, port := range service.Ports {
+			if port.Name == name {
+				return port.SoapAddress.Location
 			}
 		}
 	}
