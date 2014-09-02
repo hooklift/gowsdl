@@ -7,8 +7,8 @@ import (
 	"os"
 	"runtime"
 
-	gen "github.com/tgulacsi/gowsdl/generator"
 	flags "github.com/jessevdk/go-flags"
+	gen "github.com/tgulacsi/gowsdl/generator"
 )
 
 const version = "v0.0.1"

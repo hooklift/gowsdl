@@ -28,7 +28,7 @@ type SoapHeader struct {
 }
 
 type SoapBody struct {
-	Body  string    `xml:",innerxml"`
+	Body  string     `xml:",innerxml"`
 	Fault *SoapFault `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
 }
 

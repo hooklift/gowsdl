@@ -51,6 +51,7 @@ var typesTmpl = `
 	{{$name := replaceReservedWords .Name}}
 	{{with .ComplexType}}
 		type {{$name}} struct {
+			XMLName xml.Name ` + "`xml:\"{{getTargetNamespace}} {{$name}}\"`" + `
 			{{if ne .ComplexContent.Extension.Base ""}}
 				{{template "ComplexContent" .ComplexContent}}
 			{{else if ne .SimpleContent.Extension.Base ""}}
