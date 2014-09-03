@@ -1,5 +1,6 @@
 /*
 WSDL to Go
+
 Generates Go code from a WSDL file. This project is originally intended to generate Go clients for WS-* services.
 
 Features
