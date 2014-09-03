@@ -6,7 +6,9 @@ package {{.}}
 // Do not modify
 // Copyright (c) 2014, Cloudescape. All rights reserved.
 import (
+	"encoding/xml"
 	"time"
+
 	gowsdl "github.com/cloudscape/gowsdl/generator"
 	{{/*range .Imports*/}}
 		{{/*.*/}}
@@ -15,4 +17,5 @@ import (
 
 // against "unused imports"
 var _ time.Time
+var _ xml.Name
 `
