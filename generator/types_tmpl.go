@@ -34,7 +34,7 @@ var typesTmpl = `
 {{define "ComplexTypeGlobal"}}
 	{{$name := replaceReservedWords .Name}}
 	type {{$name}} struct {
-		XMLName xml.Name ` + "`xml:\"{{getTargetNamespace}} {{$name}}\"`" + `
+		XMLName xml.Name ` + "`xml:\"{{targetNamespace}} {{$name}}\"`" + `
 		{{if ne .ComplexContent.Extension.Base ""}}
 			{{template "ComplexContent" .ComplexContent}}
 		{{else if ne .SimpleContent.Extension.Base ""}}
@@ -52,7 +52,7 @@ var typesTmpl = `
 	{{$name := replaceReservedWords .Name}}
 	{{with .ComplexType}}
 		type {{$name}} struct {
-			XMLName xml.Name ` + "`xml:\"{{getTargetNamespace}} {{$name}}\"`" + `
+			XMLName xml.Name ` + "`xml:\"{{targetNamespace}} {{$name}}\"`" + `
 			{{if ne .ComplexContent.Extension.Base ""}}
 				{{template "ComplexContent" .ComplexContent}}
 			{{else if ne .SimpleContent.Extension.Base ""}}
