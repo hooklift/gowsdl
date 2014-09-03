@@ -1,5 +1,8 @@
 /*
+
+
 WSDL to Go
+
 
 Generates Go code from a WSDL file. This project is originally intended to generate Go clients for WS-* services.
 
@@ -19,7 +22,9 @@ Not supported
   * SOAP 1.2 and HTTP port bindings
   * WS-Security
 
+
 Usage
+
 
   gowsdl [OPTIONS]
 
@@ -35,6 +40,8 @@ Usage
 
 
 TODO
+
+
   * Add support for filters to allow the user to change the generated code
   * If WSDL file is local, resolve external XML schemas locally too instead of failing due to not having a URL to download them from.
   * Resolve XSD element references
@@ -43,6 +50,8 @@ TODO
 
 
 License
+
+
   Copyright 2014 Cloudescape
 
   Licensed under the Apache License, Version 2.0 (the "License");
