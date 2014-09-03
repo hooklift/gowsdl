@@ -9,7 +9,7 @@ import (
 	"encoding/xml"
 	"time"
 
-	gowsdl "github.com/cloudscape/gowsdl/generator"
+	gowsdl "github.com/cloudescape/gowsdl/generator"
 	{{/*range .Imports*/}}
 		{{/*.*/}}
 	{{/*end*/}}
