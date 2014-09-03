@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.mnb.hu/webservices/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://www.mnb.hu/webservices/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">MNB curreny exchange rate webservice.</wsdl:documentation>
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.mnb.hu/webservices/">
+      <s:element name="GetInfo">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetInfoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetInfoResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetCurrentExchangeRates">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetCurrentExchangeRatesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetCurrentExchangeRatesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetExchangeRates">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="startDate" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="endDate" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="currencyNames" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetExchangeRatesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetExchangeRatesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDateInterval">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetDateIntervalResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetDateIntervalResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetCurrencies">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetCurrenciesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetCurrenciesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetCurrencyUnits">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="currencyNames" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetCurrencyUnitsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetCurrencyUnitsResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetInfoSoapIn">
+    <wsdl:part name="parameters" element="tns:GetInfo" />
+  </wsdl:message>
+  <wsdl:message name="GetInfoSoapOut">
+    <wsdl:part name="parameters" element="tns:GetInfoResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetCurrentExchangeRatesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetCurrentExchangeRates" />
+  </wsdl:message>
+  <wsdl:message name="GetCurrentExchangeRatesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetCurrentExchangeRatesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetExchangeRatesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetExchangeRates" />
+  </wsdl:message>
+  <wsdl:message name="GetExchangeRatesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetExchangeRatesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetDateIntervalSoapIn">
+    <wsdl:part name="parameters" element="tns:GetDateInterval" />
+  </wsdl:message>
+  <wsdl:message name="GetDateIntervalSoapOut">
+    <wsdl:part name="parameters" element="tns:GetDateIntervalResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetCurrenciesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetCurrencies" />
+  </wsdl:message>
+  <wsdl:message name="GetCurrenciesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetCurrenciesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetCurrencyUnitsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetCurrencyUnits" />
+  </wsdl:message>
+  <wsdl:message name="GetCurrencyUnitsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetCurrencyUnitsResponse" />
+  </wsdl:message>
+  <wsdl:portType name="MNBArfolyamServiceSoap">
+    <wsdl:operation name="GetInfo">
+      <wsdl:input message="tns:GetInfoSoapIn" />
+      <wsdl:output message="tns:GetInfoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrentExchangeRates">
+      <wsdl:input message="tns:GetCurrentExchangeRatesSoapIn" />
+      <wsdl:output message="tns:GetCurrentExchangeRatesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetExchangeRates">
+      <wsdl:input message="tns:GetExchangeRatesSoapIn" />
+      <wsdl:output message="tns:GetExchangeRatesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDateInterval">
+      <wsdl:input message="tns:GetDateIntervalSoapIn" />
+      <wsdl:output message="tns:GetDateIntervalSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrencies">
+      <wsdl:input message="tns:GetCurrenciesSoapIn" />
+      <wsdl:output message="tns:GetCurrenciesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrencyUnits">
+      <wsdl:input message="tns:GetCurrencyUnitsSoapIn" />
+      <wsdl:output message="tns:GetCurrencyUnitsSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="MNBArfolyamServiceSoap" type="tns:MNBArfolyamServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetInfo">
+      <soap:operation soapAction="http://www.mnb.hu/webservices/GetInfo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrentExchangeRates">
+      <soap:operation soapAction="http://www.mnb.hu/webservices/GetCurrentExchangeRates" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetExchangeRates">
+      <soap:operation soapAction="http://www.mnb.hu/webservices/GetExchangeRates" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDateInterval">
+      <soap:operation soapAction="http://www.mnb.hu/webservices/GetDateInterval" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrencies">
+      <soap:operation soapAction="http://www.mnb.hu/webservices/GetCurrencies" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrencyUnits">
+      <soap:operation soapAction="http://www.mnb.hu/webservices/GetCurrencyUnits" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="MNBArfolyamServiceSoap12" type="tns:MNBArfolyamServiceSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetInfo">
+      <soap12:operation soapAction="http://www.mnb.hu/webservices/GetInfo" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrentExchangeRates">
+      <soap12:operation soapAction="http://www.mnb.hu/webservices/GetCurrentExchangeRates" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetExchangeRates">
+      <soap12:operation soapAction="http://www.mnb.hu/webservices/GetExchangeRates" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDateInterval">
+      <soap12:operation soapAction="http://www.mnb.hu/webservices/GetDateInterval" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrencies">
+      <soap12:operation soapAction="http://www.mnb.hu/webservices/GetCurrencies" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrencyUnits">
+      <soap12:operation soapAction="http://www.mnb.hu/webservices/GetCurrencyUnits" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MNBArfolyamService">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">MNB curreny exchange rate webservice.</wsdl:documentation>
+    <wsdl:port name="MNBArfolyamServiceSoap" binding="tns:MNBArfolyamServiceSoap">
+      <soap:address location="http://www.mnb.hu/arfolyamok.asmx" />
+    </wsdl:port>
+    <wsdl:port name="MNBArfolyamServiceSoap12" binding="tns:MNBArfolyamServiceSoap12">
+      <soap12:address location="http://www.mnb.hu/arfolyamok.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
