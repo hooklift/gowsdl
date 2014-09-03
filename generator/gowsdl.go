@@ -221,7 +221,7 @@ func (g *GoWsdl) genTypes() ([]byte, error) {
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           makePublic,
-		"getTargetNamespace":   func() string { return g.wsdl.TargetNamespace },
+		"targetNamespace":      func() string { return g.wsdl.TargetNamespace },
 	}
 
 	//TODO resolve element refs in place.
