@@ -1,0 +1,16 @@
+{
+	"ImportPath": "github.com/cloudescape/gowsdl",
+	"GoVersion": "go1.3.1",
+	"Deps": [
+		{
+			"ImportPath": "github.com/jessevdk/go-flags",
+			"Comment": "v1-200-g7047cf7",
+			"Rev": "7047cf7a8dc6f41e53365420ab62d415055232c6"
+		},
+		{
+			"ImportPath": "gopkg.in/inconshreveable/log15.v2",
+			"Comment": "v2.2",
+			"Rev": "6496dcc0b79933520138fe7ab8bb208877c1e2cd"
+		}
+	]
+}
