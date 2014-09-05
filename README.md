@@ -1,6 +1,6 @@
 # WSDL to Go
 [![GoDoc](https://godoc.org/github.com/cloudescape/gowsdl?status.svg)](https://godoc.org/github.com/cloudescape/gowsdl)
-[![Build Status](https://travis-ci.org/cloudescape/gowsdl.svg?branch=master)](https://travis-ci.org/cloudesc    ape/gowsdl)
+[![Build Status](https://travis-ci.org/cloudescape/gowsdl.svg?branch=master)](https://travis-ci.org/cloudescape/gowsdl)
 
 Generates Go code from a WSDL file. This project is originally intended to generate Go clients for WS-* services.
 
