@@ -1,0 +1,4 @@
+https://www.paypalobjects.com/wsdl/PayPalSvc.wsdl
+https://172.16.103.128/sdk/vim.wsdl
+http://s3.amazonaws.com/ec2-downloads/ec2.wsdl
+http://webservices.amazon.com/AWSECommerceService/AWSECommerceService.wsdl
