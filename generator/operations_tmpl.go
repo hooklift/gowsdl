@@ -27,7 +27,7 @@ var opsTmpl = `
 		{{$soapAction := findSoapAction .Name $portType}}
 		{{$output := findType .Output.Message}}
 
-		{{if ne $soapAction ""}}
+		{{/*if ne $soapAction ""*/}}
 			{{if gt $faults 0}}
 			//
 			// Error can be either of the following types:
@@ -45,7 +45,7 @@ var opsTmpl = `
 
 				return response, nil
 			}
-		{{end}}
+		{{/*end*/}}
 	{{end}}
 {{end}}
 `
