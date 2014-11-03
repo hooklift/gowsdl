@@ -1,0 +1,1776 @@
+<?xml version='1.0' encoding='UTF-8'?><wsdl:definitions name="AwdbWebService" targetNamespace="http://www.wcc.nrcs.usda.gov/ns/awdbWebService" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.wcc.nrcs.usda.gov/ns/awdbWebService" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <wsdl:types>
+<xs:schema elementFormDefault="unqualified" targetNamespace="http://www.wcc.nrcs.usda.gov/ns/awdbWebService" version="1.0" xmlns:tns="http://www.wcc.nrcs.usda.gov/ns/awdbWebService" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:element name="areYouThere" type="tns:areYouThere"/>
+<xs:element name="areYouThereResponse" type="tns:areYouThereResponse"/>
+<xs:element name="getAllForecastsForStation" type="tns:getAllForecastsForStation"/>
+<xs:element name="getAllForecastsForStationResponse" type="tns:getAllForecastsForStationResponse"/>
+<xs:element name="getAveragesData" type="tns:getAveragesData"/>
+<xs:element name="getAveragesDataResponse" type="tns:getAveragesDataResponse"/>
+<xs:element name="getAveragesPeak" type="tns:getAveragesPeak"/>
+<xs:element name="getAveragesPeakResponse" type="tns:getAveragesPeakResponse"/>
+<xs:element name="getCentralTendencyData" type="tns:getCentralTendencyData"/>
+<xs:element name="getCentralTendencyDataResponse" type="tns:getCentralTendencyDataResponse"/>
+<xs:element name="getCentralTendencyPeakData" type="tns:getCentralTendencyPeakData"/>
+<xs:element name="getCentralTendencyPeakDataResponse" type="tns:getCentralTendencyPeakDataResponse"/>
+<xs:element name="getData" type="tns:getData"/>
+<xs:element name="getDataResponse" type="tns:getDataResponse"/>
+<xs:element name="getElement" type="tns:getElement"/>
+<xs:element name="getElementResponse" type="tns:getElementResponse"/>
+<xs:element name="getElements" type="tns:getElements"/>
+<xs:element name="getElementsResponse" type="tns:getElementsResponse"/>
+<xs:element name="getForecast" type="tns:getForecast"/>
+<xs:element name="getForecastConfigurations" type="tns:getForecastConfigurations"/>
+<xs:element name="getForecastConfigurationsResponse" type="tns:getForecastConfigurationsResponse"/>
+<xs:element name="getForecastEquations" type="tns:getForecastEquations"/>
+<xs:element name="getForecastEquationsMultiple" type="tns:getForecastEquationsMultiple"/>
+<xs:element name="getForecastEquationsMultipleResponse" type="tns:getForecastEquationsMultipleResponse"/>
+<xs:element name="getForecastEquationsResponse" type="tns:getForecastEquationsResponse"/>
+<xs:element name="getForecastPeriodAverages" type="tns:getForecastPeriodAverages"/>
+<xs:element name="getForecastPeriodAveragesResponse" type="tns:getForecastPeriodAveragesResponse"/>
+<xs:element name="getForecastPeriodCentralTendency" type="tns:getForecastPeriodCentralTendency"/>
+<xs:element name="getForecastPeriodCentralTendencyResponse" type="tns:getForecastPeriodCentralTendencyResponse"/>
+<xs:element name="getForecastPeriods" type="tns:getForecastPeriods"/>
+<xs:element name="getForecastPeriodsResponse" type="tns:getForecastPeriodsResponse"/>
+<xs:element name="getForecastPoint" type="tns:getForecastPoint"/>
+<xs:element name="getForecastPointResponse" type="tns:getForecastPointResponse"/>
+<xs:element name="getForecastPoints" type="tns:getForecastPoints"/>
+<xs:element name="getForecastPointsResponse" type="tns:getForecastPointsResponse"/>
+<xs:element name="getForecastResponse" type="tns:getForecastResponse"/>
+<xs:element name="getForecastValue" type="tns:getForecastValue"/>
+<xs:element name="getForecastValueResponse" type="tns:getForecastValueResponse"/>
+<xs:element name="getForecasts" type="tns:getForecasts"/>
+<xs:element name="getForecastsByPubDate" type="tns:getForecastsByPubDate"/>
+<xs:element name="getForecastsByPubDateResponse" type="tns:getForecastsByPubDateResponse"/>
+<xs:element name="getForecastsResponse" type="tns:getForecastsResponse"/>
+<xs:element name="getHeightDepths" type="tns:getHeightDepths"/>
+<xs:element name="getHeightDepthsResponse" type="tns:getHeightDepthsResponse"/>
+<xs:element name="getHourlyData" type="tns:getHourlyData"/>
+<xs:element name="getHourlyDataResponse" type="tns:getHourlyDataResponse"/>
+<xs:element name="getInstantaneousData" type="tns:getInstantaneousData"/>
+<xs:element name="getInstantaneousDataResponse" type="tns:getInstantaneousDataResponse"/>
+<xs:element name="getPeakData" type="tns:getPeakData"/>
+<xs:element name="getPeakDataResponse" type="tns:getPeakDataResponse"/>
+<xs:element name="getReservoirMetadata" type="tns:getReservoirMetadata"/>
+<xs:element name="getReservoirMetadataMultiple" type="tns:getReservoirMetadataMultiple"/>
+<xs:element name="getReservoirMetadataMultipleResponse" type="tns:getReservoirMetadataMultipleResponse"/>
+<xs:element name="getReservoirMetadataResponse" type="tns:getReservoirMetadataResponse"/>
+<xs:element name="getStationDataAssuredFlags" type="tns:getStationDataAssuredFlags"/>
+<xs:element name="getStationDataAssuredFlagsResponse" type="tns:getStationDataAssuredFlagsResponse"/>
+<xs:element name="getStationElements" type="tns:getStationElements"/>
+<xs:element name="getStationElementsResponse" type="tns:getStationElementsResponse"/>
+<xs:element name="getStationMetadata" type="tns:getStationMetadata"/>
+<xs:element name="getStationMetadataMultiple" type="tns:getStationMetadataMultiple"/>
+<xs:element name="getStationMetadataMultipleResponse" type="tns:getStationMetadataMultipleResponse"/>
+<xs:element name="getStationMetadataResponse" type="tns:getStationMetadataResponse"/>
+<xs:element name="getStations" type="tns:getStations"/>
+<xs:element name="getStationsResponse" type="tns:getStationsResponse"/>
+<xs:element name="getUnitName" type="tns:getUnitName"/>
+<xs:element name="getUnitNameResponse" type="tns:getUnitNameResponse"/>
+<xs:element name="getUnits" type="tns:getUnits"/>
+<xs:element name="getUnitsResponse" type="tns:getUnitsResponse"/>
+<xs:element name="runDiagnostics" type="tns:runDiagnostics"/>
+<xs:element name="runDiagnosticsResponse" type="tns:runDiagnosticsResponse"/>
+<xs:complexType name="getForecasts">
+    <xs:sequence>
+      <xs:element name="stationTriplet" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element name="forecastPeriod" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastsResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:forecast"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="forecast">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="calculationDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="elementCd" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="exceedenceProbabilities" nillable="true" type="xs:int"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="exceedenceValues" nillable="true" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="forecastPeriod" type="xs:string"/>
+      <xs:element minOccurs="0" name="periodAverage" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="publicationDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="stationTriplet" type="xs:string"/>
+      <xs:element minOccurs="0" name="unitCd" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getStations">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="stationIds" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="stateCds" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="networkCds" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="hucs" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="countyNames" type="xs:string"/>
+      <xs:element minOccurs="0" name="minLatitude" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="maxLatitude" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="minLongitude" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="maxLongitude" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="minElevation" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="maxElevation" type="xs:decimal"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="elementCds" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="ordinals" type="xs:int"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="heightDepths" type="tns:heightDepth"/>
+      <xs:element name="logicalAnd" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="heightDepth">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="unitCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="value" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getStationsResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastsByPubDate">
+    <xs:sequence>
+      <xs:element name="stationTriplet" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element name="forecastPeriod" type="xs:string"/>
+      <xs:element name="beginPublicationDate" type="xs:string"/>
+      <xs:element name="endPublicationDate" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastsByPubDateResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:forecast"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getAveragesData">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="heightDepth" type="tns:heightDepth"/>
+      <xs:element name="duration" type="tns:duration"/>
+      <xs:element name="getFlags" type="xs:boolean"/>
+      <xs:element name="beginMonth" type="xs:int"/>
+      <xs:element name="beginDay" type="xs:int"/>
+      <xs:element name="endMonth" type="xs:int"/>
+      <xs:element name="endDay" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getAveragesDataResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:averagesData"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="averagesData">
+    <xs:sequence>
+      <xs:element name="beginDay" type="xs:int"/>
+      <xs:element name="beginMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="dataSetFlag" type="xs:string"/>
+      <xs:element minOccurs="0" name="duration" type="tns:duration"/>
+      <xs:element name="endDay" type="xs:int"/>
+      <xs:element name="endMonth" type="xs:int"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="flags" nillable="true" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="values" nillable="true" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="runDiagnostics">
+    <xs:sequence/>
+  </xs:complexType>
+<xs:complexType name="runDiagnosticsResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="tns:diagnostics"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="diagnostics">
+    <xs:sequence>
+      <xs:element name="hasSucceeded" type="xs:boolean"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="testResults" nillable="true" type="tns:diagnosticTestResult"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="diagnosticTestResult">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="errorMessage" type="xs:string"/>
+      <xs:element minOccurs="0" name="exception" type="tns:diagnosticException"/>
+      <xs:element name="hasSucceeded" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="testDescription" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="diagnosticException">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="cause" type="tns:diagnosticException"/>
+      <xs:element minOccurs="0" name="exceptionClass" type="xs:string"/>
+      <xs:element minOccurs="0" name="message" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="strackTrace" nillable="true" type="tns:diagnosticStackTraceElement"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="diagnosticStackTraceElement">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="className" type="xs:string"/>
+      <xs:element minOccurs="0" name="fileName" type="xs:string"/>
+      <xs:element name="lineNumber" type="xs:int"/>
+      <xs:element minOccurs="0" name="methodName" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getHourlyData">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element name="ordinal" type="xs:int"/>
+      <xs:element minOccurs="0" name="heightDepth" type="tns:heightDepth"/>
+      <xs:element name="beginDate" type="xs:string"/>
+      <xs:element name="endDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="beginHour" type="xs:int"/>
+      <xs:element minOccurs="0" name="endHour" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getHourlyDataResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:hourlyData"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="hourlyData">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="beginDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="endDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="stationTriplet" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="values" nillable="true" type="tns:hourlyDataValue"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="hourlyDataValue">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="dateTime" type="xs:string"/>
+      <xs:element minOccurs="0" name="flag" type="xs:string"/>
+      <xs:element minOccurs="0" name="value" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastEquations">
+    <xs:sequence>
+      <xs:element name="stationTriplet" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastEquationsResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:forecastEquation"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="forecastEquation">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="comment" type="xs:string"/>
+      <xs:element minOccurs="0" name="dataSource" type="xs:string"/>
+      <xs:element minOccurs="0" name="elementCd" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="equationTerms" nillable="true" type="tns:forecastEquationTerm"/>
+      <xs:element minOccurs="0" name="footnotes" type="xs:string"/>
+      <xs:element minOccurs="0" name="forecastCondition" type="xs:string"/>
+      <xs:element minOccurs="0" name="forecastPeriod" type="xs:string"/>
+      <xs:element minOccurs="0" name="forecastType" type="xs:string"/>
+      <xs:element minOccurs="0" name="function" type="xs:string"/>
+      <xs:element minOccurs="0" name="functionArgument" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="interceptConstant" type="xs:decimal"/>
+      <xs:element name="key" type="xs:int"/>
+      <xs:element minOccurs="0" name="maxOfRecord" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="minOfRecord" type="xs:decimal"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="monthlyCorrelationCoefficients" nillable="true" type="xs:decimal"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="monthlyStderrValues" nillable="true" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="publicationMonthsAndDays" nillable="true" type="tns:monthAndDay"/>
+      <xs:element name="published" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="stationTriplet" type="xs:string"/>
+      <xs:element name="transformErrorsOnly" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="unitCd" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="forecastEquationTerm">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="coefficient" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="dataPeriodDays" type="xs:string"/>
+      <xs:element minOccurs="0" name="dataPeriodMonth" type="xs:string"/>
+      <xs:element minOccurs="0" name="dataYearFlag" type="xs:string"/>
+      <xs:element minOccurs="0" name="stationElement" type="tns:stationElement"/>
+      <xs:element minOccurs="0" name="unitCd" type="xs:string"/>
+      <xs:element name="upstreamForecast" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="stationElement">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="beginDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="dataPrecision" type="xs:int"/>
+      <xs:element minOccurs="0" name="dataSource" type="tns:dataSource"/>
+      <xs:element minOccurs="0" name="duration" type="tns:duration"/>
+      <xs:element minOccurs="0" name="elementCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="endDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="heightDepth" type="tns:heightDepth"/>
+      <xs:element name="ordinal" type="xs:int"/>
+      <xs:element minOccurs="0" name="originalUnitCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="stationTriplet" type="xs:string"/>
+      <xs:element minOccurs="0" name="storedUnitCd" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="monthAndDay">
+    <xs:sequence>
+      <xs:element name="day" type="xs:int"/>
+      <xs:element name="month" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getUnitName">
+    <xs:sequence>
+      <xs:element name="unitCd" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getUnitNameResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getStationMetadataMultiple">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getStationMetadataMultipleResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:stationMetaData"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="stationMetaData">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="actonId" type="xs:string"/>
+      <xs:element minOccurs="0" name="beginDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="countyName" type="xs:string"/>
+      <xs:element minOccurs="0" name="elevation" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="endDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="fipsCountryCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="fipsCountyCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="fipsStateNumber" type="xs:string"/>
+      <xs:element minOccurs="0" name="huc" type="xs:string"/>
+      <xs:element minOccurs="0" name="hud" type="xs:string"/>
+      <xs:element minOccurs="0" name="latitude" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="longitude" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="shefId" type="xs:string"/>
+      <xs:element minOccurs="0" name="stationDataTimeZone" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="stationTimeZone" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="stationTriplet" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastPoint">
+    <xs:sequence>
+      <xs:element name="stationTriplet" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastPointResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="tns:forecastPoint"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="forecastPoint">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="exceedenceProbabilities" nillable="true" type="xs:int"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="responsibleForecaster" type="xs:string"/>
+      <xs:element minOccurs="0" name="stationTriplet" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getStationDataAssuredFlags">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element name="ordinal" type="xs:int"/>
+      <xs:element minOccurs="0" name="heightDepth" type="tns:heightDepth"/>
+      <xs:element name="durationCd" type="xs:string"/>
+      <xs:element name="beginWaterYear" type="xs:int"/>
+      <xs:element name="endWaterYear" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getStationDataAssuredFlagsResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:stationDataAssuredFlags"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="stationDataAssuredFlags">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="assuredFlags" nillable="true" type="xs:string"/>
+      <xs:element minOccurs="0" name="stationTriplet" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastEquationsMultiple">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastEquationsMultipleResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:forecastEquation"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastPeriodCentralTendency">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" name="periods" type="xs:string"/>
+      <xs:element name="centralTendencyType" type="tns:centralTendencyType"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastPeriodCentralTendencyResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:forecastPeriodCentralTendency"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="forecastPeriodCentralTendency">
+    <xs:complexContent>
+      <xs:extension base="tns:forecastPeriodAverage">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="centralTendencyType" type="tns:centralTendencyType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+<xs:complexType name="forecastPeriodAverage">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="flag" type="xs:string"/>
+      <xs:element minOccurs="0" name="forecastPeriod" type="xs:string"/>
+      <xs:element minOccurs="0" name="stationTriplet" type="xs:string"/>
+      <xs:element minOccurs="0" name="value" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastValue">
+    <xs:sequence>
+      <xs:element name="stationTriplet" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element name="forecastPeriod" type="xs:string"/>
+      <xs:element name="probability" type="xs:int"/>
+      <xs:element name="publicationYear" type="xs:int"/>
+      <xs:element name="publicationMonth" type="xs:int"/>
+      <xs:element name="publicationDay" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastValueResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getElement">
+    <xs:sequence>
+      <xs:element name="elementCd" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getElementResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="tns:element"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="element">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="elementCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="storedUnitCd" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastConfigurations">
+    <xs:sequence>
+      <xs:element name="forecaster" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastConfigurationsResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:configuration"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="configuration">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="analysisType" type="xs:string"/>
+      <xs:element name="calibrationEndYear" type="xs:int"/>
+      <xs:element name="calibrationStartYear" type="xs:int"/>
+      <xs:element minOccurs="0" name="comment" type="xs:string"/>
+      <xs:element name="componentsToRetain" type="xs:int"/>
+      <xs:element minOccurs="0" name="creationDate" type="xs:string"/>
+      <xs:element name="dailyForecast" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="dailyForecastThreshold" type="xs:decimal"/>
+      <xs:element name="dailyForecastThresholdRelative" type="xs:boolean"/>
+      <xs:element name="dataForcedSeriallyComplete" type="xs:boolean"/>
+      <xs:element name="degreesOfFreedom" type="xs:int"/>
+      <xs:element minOccurs="0" name="forecastCondition" type="xs:string"/>
+      <xs:element minOccurs="0" name="forecastType" type="xs:string"/>
+      <xs:element minOccurs="0" name="forecaster" type="xs:string"/>
+      <xs:element minOccurs="0" name="functionArgument" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="functionCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="helperDataSource" type="xs:string"/>
+      <xs:element minOccurs="0" name="helperElementCd" type="xs:string"/>
+      <xs:element name="helperEndDay" type="xs:int"/>
+      <xs:element name="helperEndMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="helperEndYearFlag" type="xs:string"/>
+      <xs:element name="helperMixedPastEndDay" type="xs:int"/>
+      <xs:element name="helperMixedPastEndMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="helperMixedPastEndYearFlag" type="xs:string"/>
+      <xs:element name="helperMixedPastStartDay" type="xs:int"/>
+      <xs:element name="helperMixedPastStartMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="helperMixedPastStartYearFlag" type="xs:string"/>
+      <xs:element name="helperPredictorUsed" type="xs:boolean"/>
+      <xs:element name="helperStartDay" type="xs:int"/>
+      <xs:element name="helperStartMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="helperStartYearFlag" type="xs:string"/>
+      <xs:element minOccurs="0" name="helperStationTriplet" type="xs:string"/>
+      <xs:element name="helperUsedInOverlappingYears" type="xs:boolean"/>
+      <xs:element name="helperVarianceMatchedToObserved" type="xs:boolean"/>
+      <xs:element name="jackKnifingUsed" type="xs:boolean"/>
+      <xs:element name="key" type="xs:int"/>
+      <xs:element minOccurs="0" name="minimumR2ForPredictor" type="xs:decimal"/>
+      <xs:element name="minimumYearsForPredictor" type="xs:int"/>
+      <xs:element name="mixedPastEndDay" type="xs:int"/>
+      <xs:element name="mixedPastEndMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="mixedPastEndYearFlag" type="xs:string"/>
+      <xs:element name="mixedPastStartDay" type="xs:int"/>
+      <xs:element name="mixedPastStartMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="mixedPastStartYearFlag" type="xs:string"/>
+      <xs:element name="mixedPastUsed" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element name="numYearsUsed" type="xs:int"/>
+      <xs:element name="optimalWeightingUsed" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="overrideAverage" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="overrideStderr" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="pastFlowRealtime" type="xs:decimal"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="predictorGroups" nillable="true" type="tns:predictorGroup"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="predictors" nillable="true" type="tns:predictor"/>
+      <xs:element minOccurs="0" name="preprocessingConstant" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="preprocessingMultiplier" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="publicationCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="TTestLimit" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="targetDataSource" type="xs:string"/>
+      <xs:element minOccurs="0" name="targetElementCd" type="xs:string"/>
+      <xs:element name="targetEndDay" type="xs:int"/>
+      <xs:element name="targetEndMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="targetEndYearFlag" type="xs:string"/>
+      <xs:element name="targetStartDay" type="xs:int"/>
+      <xs:element name="targetStartMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="targetStartYearFlag" type="xs:string"/>
+      <xs:element minOccurs="0" name="targetStationName" type="xs:string"/>
+      <xs:element minOccurs="0" name="targetStationTriplet" type="xs:string"/>
+      <xs:element name="transformErrorsOnly" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="predictorGroup">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="customStationListName" type="xs:string"/>
+      <xs:element minOccurs="0" name="dataSourceCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="elementCd" type="xs:string"/>
+      <xs:element name="globalMonthChangeAllowed" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="groupName" type="xs:string"/>
+      <xs:element minOccurs="0" name="groupNumber" type="xs:int"/>
+      <xs:element name="negativeWeightAllowed" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="networks" type="xs:string"/>
+      <xs:element minOccurs="0" name="states" type="xs:string"/>
+      <xs:element name="upstreamForecast" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="predictor">
+    <xs:sequence>
+      <xs:element name="endDay" type="xs:int"/>
+      <xs:element name="endMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="endYearFlag" type="xs:string"/>
+      <xs:element name="groupNumber" type="xs:int"/>
+      <xs:element name="predictorNumber" type="xs:int"/>
+      <xs:element name="predictorUsed" type="xs:boolean"/>
+      <xs:element name="startDay" type="xs:int"/>
+      <xs:element name="startMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="startYearFlag" type="xs:string"/>
+      <xs:element minOccurs="0" name="stationTriplet" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getReservoirMetadataMultiple">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getReservoirMetadataMultipleResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:reservoirMetadata"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="reservoirMetadata">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="elevationAtCapacity" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="reservoirCapacity" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="stationTriplet" type="xs:string"/>
+      <xs:element minOccurs="0" name="usableCapacity" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getCentralTendencyPeakData">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="heightDepth" type="tns:heightDepth"/>
+      <xs:element name="duration" type="tns:duration"/>
+      <xs:element name="getFlags" type="xs:boolean"/>
+      <xs:element name="centralTendencyType" type="tns:centralTendencyType"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getCentralTendencyPeakDataResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:centralTendencyPeakData"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="centralTendencyPeakData">
+    <xs:complexContent>
+      <xs:extension base="tns:averagesPeakData">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="centralTendencyType" type="tns:centralTendencyType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+<xs:complexType name="averagesPeakData">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="duration" type="tns:duration"/>
+      <xs:element minOccurs="0" name="flag" type="xs:string"/>
+      <xs:element name="peakDay" type="xs:int"/>
+      <xs:element name="peakMonth" type="xs:int"/>
+      <xs:element minOccurs="0" name="value" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecast">
+    <xs:sequence>
+      <xs:element name="stationTriplet" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element name="forecastPeriod" type="xs:string"/>
+      <xs:element name="publicationDate" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="tns:forecast"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getReservoirMetadata">
+    <xs:sequence>
+      <xs:element name="stationTriplet" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getReservoirMetadataResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="tns:reservoirMetadata"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastPeriodAverages">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" name="periods" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastPeriodAveragesResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:forecastPeriodAverage"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getAllForecastsForStation">
+    <xs:sequence>
+      <xs:element name="stationTriplet" type="xs:string"/>
+      <xs:element name="beginPublicationDate" type="xs:string"/>
+      <xs:element name="endPublicationDate" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getAllForecastsForStationResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:forecastFull"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="forecastFull">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="comment" type="xs:string"/>
+      <xs:element minOccurs="0" name="configuration" type="tns:configuration"/>
+      <xs:element minOccurs="0" name="coordinatedForecastIssueDate" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="coordinatedForecastProbabilities" nillable="true" type="xs:decimal"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="coordinatedForecastValues" nillable="true" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="elementCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="equation" type="tns:forecastEquation"/>
+      <xs:element name="forecastFinal" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="forecastPeriodCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="forecastPeriodName" type="xs:string"/>
+      <xs:element minOccurs="0" name="forecaster" type="xs:string"/>
+      <xs:element minOccurs="0" name="hydrologistForecastIssueDate" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="hydrologistForecastProbabilities" nillable="true" type="xs:decimal"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="hydrologistForecastValues" nillable="true" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="originalForecastIssueDate" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="originalForecastProbabilities" nillable="true" type="xs:decimal"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="originalForecastValues" nillable="true" type="xs:decimal"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="otherAgencyCds" nillable="true" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="otherAgencyForecastValues" nillable="true" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="periodAverage" type="xs:decimal"/>
+      <xs:element minOccurs="0" name="publicationDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="stationTriplet" type="xs:string"/>
+      <xs:element minOccurs="0" name="unitCd" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getStationElements">
+    <xs:sequence>
+      <xs:element name="stationTriplet" type="xs:string"/>
+      <xs:element minOccurs="0" name="beginDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="endDate" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getStationElementsResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:stationElement"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getInstantaneousData">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element name="ordinal" type="xs:int"/>
+      <xs:element minOccurs="0" name="heightDepth" type="tns:heightDepth"/>
+      <xs:element name="beginDate" type="xs:string"/>
+      <xs:element name="endDate" type="xs:string"/>
+      <xs:element name="filter" type="tns:instantaneousDataFilter"/>
+      <xs:element name="unitSystem" type="tns:unitSystem"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getInstantaneousDataResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:instantaneousData"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="instantaneousData">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="beginDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="endDate" type="xs:string"/>
+      <xs:element name="stationId" type="xs:int"/>
+      <xs:element minOccurs="0" name="unitCd" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="values" nillable="true" type="tns:instantaneousDataValue"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="instantaneousDataValue">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="flag" type="xs:string"/>
+      <xs:element minOccurs="0" name="time" type="xs:string"/>
+      <xs:element minOccurs="0" name="value" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getData">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element name="ordinal" type="xs:int"/>
+      <xs:element minOccurs="0" name="heightDepth" type="tns:heightDepth"/>
+      <xs:element name="duration" type="tns:duration"/>
+      <xs:element name="getFlags" type="xs:boolean"/>
+      <xs:element name="beginDate" type="xs:string"/>
+      <xs:element name="endDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="alwaysReturnDailyFeb29" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getDataResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:data"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="data">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="beginDate" type="xs:string"/>
+      <xs:element minOccurs="0" name="duration" type="tns:duration"/>
+      <xs:element minOccurs="0" name="endDate" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="flags" nillable="true" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="values" nillable="true" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getCentralTendencyData">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="heightDepth" type="tns:heightDepth"/>
+      <xs:element name="duration" type="tns:duration"/>
+      <xs:element name="getFlags" type="xs:boolean"/>
+      <xs:element name="beginMonth" type="xs:int"/>
+      <xs:element name="beginDay" type="xs:int"/>
+      <xs:element name="endMonth" type="xs:int"/>
+      <xs:element name="endDay" type="xs:int"/>
+      <xs:element name="centralTendencyType" type="tns:centralTendencyType"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getCentralTendencyDataResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:centralTendencyData"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="centralTendencyData">
+    <xs:complexContent>
+      <xs:extension base="tns:averagesData">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="centralTendencyType" type="tns:centralTendencyType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+<xs:complexType name="getForecastPeriods">
+    <xs:sequence/>
+  </xs:complexType>
+<xs:complexType name="getForecastPeriodsResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:forecastPeriod"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="forecastPeriod">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="description" type="xs:string"/>
+      <xs:element minOccurs="0" name="forecastPeriod" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getHeightDepths">
+    <xs:sequence/>
+  </xs:complexType>
+<xs:complexType name="getHeightDepthsResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:heightDepth"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getStationMetadata">
+    <xs:sequence>
+      <xs:element name="stationTriplet" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getStationMetadataResponse">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="return" type="tns:stationMetaData"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastPoints">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="stationIds" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="stateCds" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="networkCds" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="forecastPointNames" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="hucs" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="forecasters" type="xs:string"/>
+      <xs:element name="logicalAnd" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getForecastPointsResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:forecastPoint"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="areYouThere">
+    <xs:sequence/>
+  </xs:complexType>
+<xs:complexType name="areYouThereResponse">
+    <xs:sequence>
+      <xs:element name="return" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getPeakData">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element name="ordinal" type="xs:int"/>
+      <xs:element minOccurs="0" name="heightDepth" type="tns:heightDepth"/>
+      <xs:element name="duration" type="tns:duration"/>
+      <xs:element name="getFlags" type="xs:boolean"/>
+      <xs:element name="beginYear" type="xs:int"/>
+      <xs:element name="endYear" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getPeakDataResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:peakData"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="peakData">
+    <xs:sequence>
+      <xs:element name="beginYear" type="xs:int"/>
+      <xs:element minOccurs="0" name="duration" type="tns:duration"/>
+      <xs:element name="endYear" type="xs:int"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="flags" nillable="true" type="xs:string"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="peakDays" nillable="true" type="xs:int"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="peakMonths" nillable="true" type="xs:int"/>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="values" nillable="true" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getAveragesPeak">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="stationTriplets" type="xs:string"/>
+      <xs:element name="elementCd" type="xs:string"/>
+      <xs:element minOccurs="0" name="heightDepth" type="tns:heightDepth"/>
+      <xs:element name="duration" type="tns:duration"/>
+      <xs:element name="getFlags" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getAveragesPeakResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:averagesPeakData"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getUnits">
+    <xs:sequence/>
+  </xs:complexType>
+<xs:complexType name="getUnitsResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:unit"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="unit">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+      <xs:element minOccurs="0" name="unitCd" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:complexType name="getElements">
+    <xs:sequence/>
+  </xs:complexType>
+<xs:complexType name="getElementsResponse">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="return" type="tns:element"/>
+    </xs:sequence>
+  </xs:complexType>
+<xs:simpleType name="duration">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="DAILY"/>
+      <xs:enumeration value="MONTHLY"/>
+      <xs:enumeration value="SEMIMONTHLY"/>
+      <xs:enumeration value="WATER_YEAR"/>
+      <xs:enumeration value="CALENDAR_YEAR"/>
+      <xs:enumeration value="HOURLY"/>
+      <xs:enumeration value="SEASONAL"/>
+      <xs:enumeration value="ANNUAL"/>
+    </xs:restriction>
+  </xs:simpleType>
+<xs:simpleType name="dataSource">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="OBSERVED"/>
+      <xs:enumeration value="DERIVED"/>
+      <xs:enumeration value="INTERPRETED"/>
+    </xs:restriction>
+  </xs:simpleType>
+<xs:simpleType name="centralTendencyType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AVERAGE"/>
+      <xs:enumeration value="MEDIAN"/>
+      <xs:enumeration value="NORMAL"/>
+    </xs:restriction>
+  </xs:simpleType>
+<xs:simpleType name="instantaneousDataFilter">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ALL"/>
+      <xs:enumeration value="FIRST_OF_DAY"/>
+      <xs:enumeration value="MIDNIGHT_ONLY"/>
+    </xs:restriction>
+  </xs:simpleType>
+<xs:simpleType name="unitSystem">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ENGLISH"/>
+      <xs:enumeration value="LAST_COLLECTED"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="runDiagnostics">
+    <wsdl:part element="tns:runDiagnostics" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastValueResponse">
+    <wsdl:part element="tns:getForecastValueResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastEquationsMultiple">
+    <wsdl:part element="tns:getForecastEquationsMultiple" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastPointsResponse">
+    <wsdl:part element="tns:getForecastPointsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getInstantaneousDataResponse">
+    <wsdl:part element="tns:getInstantaneousDataResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastEquationsMultipleResponse">
+    <wsdl:part element="tns:getForecastEquationsMultipleResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastResponse">
+    <wsdl:part element="tns:getForecastResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="areYouThere">
+    <wsdl:part element="tns:areYouThere" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStationMetadata">
+    <wsdl:part element="tns:getStationMetadata" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastPeriodCentralTendencyResponse">
+    <wsdl:part element="tns:getForecastPeriodCentralTendencyResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastConfigurationsResponse">
+    <wsdl:part element="tns:getForecastConfigurationsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAllForecastsForStation">
+    <wsdl:part element="tns:getAllForecastsForStation" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getPeakData">
+    <wsdl:part element="tns:getPeakData" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getHeightDepths">
+    <wsdl:part element="tns:getHeightDepths" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastPeriodAverages">
+    <wsdl:part element="tns:getForecastPeriodAverages" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getElementResponse">
+    <wsdl:part element="tns:getElementResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getElements">
+    <wsdl:part element="tns:getElements" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getReservoirMetadataResponse">
+    <wsdl:part element="tns:getReservoirMetadataResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getData">
+    <wsdl:part element="tns:getData" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecasts">
+    <wsdl:part element="tns:getForecasts" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStationElements">
+    <wsdl:part element="tns:getStationElements" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAveragesPeakResponse">
+    <wsdl:part element="tns:getAveragesPeakResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastEquationsResponse">
+    <wsdl:part element="tns:getForecastEquationsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getInstantaneousData">
+    <wsdl:part element="tns:getInstantaneousData" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getUnitNameResponse">
+    <wsdl:part element="tns:getUnitNameResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastPeriodsResponse">
+    <wsdl:part element="tns:getForecastPeriodsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastPeriodAveragesResponse">
+    <wsdl:part element="tns:getForecastPeriodAveragesResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="areYouThereResponse">
+    <wsdl:part element="tns:areYouThereResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getDataResponse">
+    <wsdl:part element="tns:getDataResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getHourlyData">
+    <wsdl:part element="tns:getHourlyData" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAveragesPeak">
+    <wsdl:part element="tns:getAveragesPeak" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAveragesData">
+    <wsdl:part element="tns:getAveragesData" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastEquations">
+    <wsdl:part element="tns:getForecastEquations" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getUnits">
+    <wsdl:part element="tns:getUnits" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getHeightDepthsResponse">
+    <wsdl:part element="tns:getHeightDepthsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastValue">
+    <wsdl:part element="tns:getForecastValue" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStationMetadataMultiple">
+    <wsdl:part element="tns:getStationMetadataMultiple" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getCentralTendencyDataResponse">
+    <wsdl:part element="tns:getCentralTendencyDataResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStationsResponse">
+    <wsdl:part element="tns:getStationsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStationElementsResponse">
+    <wsdl:part element="tns:getStationElementsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastsByPubDate">
+    <wsdl:part element="tns:getForecastsByPubDate" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAveragesDataResponse">
+    <wsdl:part element="tns:getAveragesDataResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastConfigurations">
+    <wsdl:part element="tns:getForecastConfigurations" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStationMetadataResponse">
+    <wsdl:part element="tns:getStationMetadataResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getElement">
+    <wsdl:part element="tns:getElement" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStationDataAssuredFlags">
+    <wsdl:part element="tns:getStationDataAssuredFlags" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastPeriodCentralTendency">
+    <wsdl:part element="tns:getForecastPeriodCentralTendency" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastsResponse">
+    <wsdl:part element="tns:getForecastsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getPeakDataResponse">
+    <wsdl:part element="tns:getPeakDataResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getUnitsResponse">
+    <wsdl:part element="tns:getUnitsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStationMetadataMultipleResponse">
+    <wsdl:part element="tns:getStationMetadataMultipleResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecast">
+    <wsdl:part element="tns:getForecast" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="runDiagnosticsResponse">
+    <wsdl:part element="tns:runDiagnosticsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getReservoirMetadataMultiple">
+    <wsdl:part element="tns:getReservoirMetadataMultiple" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getReservoirMetadata">
+    <wsdl:part element="tns:getReservoirMetadata" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getUnitName">
+    <wsdl:part element="tns:getUnitName" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastPeriods">
+    <wsdl:part element="tns:getForecastPeriods" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastPoint">
+    <wsdl:part element="tns:getForecastPoint" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAllForecastsForStationResponse">
+    <wsdl:part element="tns:getAllForecastsForStationResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getCentralTendencyPeakDataResponse">
+    <wsdl:part element="tns:getCentralTendencyPeakDataResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastPoints">
+    <wsdl:part element="tns:getForecastPoints" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStationDataAssuredFlagsResponse">
+    <wsdl:part element="tns:getStationDataAssuredFlagsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastsByPubDateResponse">
+    <wsdl:part element="tns:getForecastsByPubDateResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getHourlyDataResponse">
+    <wsdl:part element="tns:getHourlyDataResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getStations">
+    <wsdl:part element="tns:getStations" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getCentralTendencyPeakData">
+    <wsdl:part element="tns:getCentralTendencyPeakData" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getCentralTendencyData">
+    <wsdl:part element="tns:getCentralTendencyData" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getElementsResponse">
+    <wsdl:part element="tns:getElementsResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getForecastPointResponse">
+    <wsdl:part element="tns:getForecastPointResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getReservoirMetadataMultipleResponse">
+    <wsdl:part element="tns:getReservoirMetadataMultipleResponse" name="parameters">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="AwdbWebService">
+    <wsdl:operation name="getForecasts">
+      <wsdl:input message="tns:getForecasts" name="getForecasts">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastsResponse" name="getForecastsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getStations">
+      <wsdl:input message="tns:getStations" name="getStations">
+    </wsdl:input>
+      <wsdl:output message="tns:getStationsResponse" name="getStationsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastsByPubDate">
+      <wsdl:input message="tns:getForecastsByPubDate" name="getForecastsByPubDate">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastsByPubDateResponse" name="getForecastsByPubDateResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAveragesData">
+      <wsdl:input message="tns:getAveragesData" name="getAveragesData">
+    </wsdl:input>
+      <wsdl:output message="tns:getAveragesDataResponse" name="getAveragesDataResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="runDiagnostics">
+      <wsdl:input message="tns:runDiagnostics" name="runDiagnostics">
+    </wsdl:input>
+      <wsdl:output message="tns:runDiagnosticsResponse" name="runDiagnosticsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getHourlyData">
+      <wsdl:input message="tns:getHourlyData" name="getHourlyData">
+    </wsdl:input>
+      <wsdl:output message="tns:getHourlyDataResponse" name="getHourlyDataResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastEquations">
+      <wsdl:input message="tns:getForecastEquations" name="getForecastEquations">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastEquationsResponse" name="getForecastEquationsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getUnitName">
+      <wsdl:input message="tns:getUnitName" name="getUnitName">
+    </wsdl:input>
+      <wsdl:output message="tns:getUnitNameResponse" name="getUnitNameResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getStationMetadataMultiple">
+      <wsdl:input message="tns:getStationMetadataMultiple" name="getStationMetadataMultiple">
+    </wsdl:input>
+      <wsdl:output message="tns:getStationMetadataMultipleResponse" name="getStationMetadataMultipleResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastPoint">
+      <wsdl:input message="tns:getForecastPoint" name="getForecastPoint">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastPointResponse" name="getForecastPointResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getStationDataAssuredFlags">
+      <wsdl:input message="tns:getStationDataAssuredFlags" name="getStationDataAssuredFlags">
+    </wsdl:input>
+      <wsdl:output message="tns:getStationDataAssuredFlagsResponse" name="getStationDataAssuredFlagsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastEquationsMultiple">
+      <wsdl:input message="tns:getForecastEquationsMultiple" name="getForecastEquationsMultiple">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastEquationsMultipleResponse" name="getForecastEquationsMultipleResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastPeriodCentralTendency">
+      <wsdl:input message="tns:getForecastPeriodCentralTendency" name="getForecastPeriodCentralTendency">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastPeriodCentralTendencyResponse" name="getForecastPeriodCentralTendencyResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastValue">
+      <wsdl:input message="tns:getForecastValue" name="getForecastValue">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastValueResponse" name="getForecastValueResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getElement">
+      <wsdl:input message="tns:getElement" name="getElement">
+    </wsdl:input>
+      <wsdl:output message="tns:getElementResponse" name="getElementResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastConfigurations">
+      <wsdl:input message="tns:getForecastConfigurations" name="getForecastConfigurations">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastConfigurationsResponse" name="getForecastConfigurationsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getReservoirMetadataMultiple">
+      <wsdl:input message="tns:getReservoirMetadataMultiple" name="getReservoirMetadataMultiple">
+    </wsdl:input>
+      <wsdl:output message="tns:getReservoirMetadataMultipleResponse" name="getReservoirMetadataMultipleResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getCentralTendencyPeakData">
+      <wsdl:input message="tns:getCentralTendencyPeakData" name="getCentralTendencyPeakData">
+    </wsdl:input>
+      <wsdl:output message="tns:getCentralTendencyPeakDataResponse" name="getCentralTendencyPeakDataResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecast">
+      <wsdl:input message="tns:getForecast" name="getForecast">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastResponse" name="getForecastResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getReservoirMetadata">
+      <wsdl:input message="tns:getReservoirMetadata" name="getReservoirMetadata">
+    </wsdl:input>
+      <wsdl:output message="tns:getReservoirMetadataResponse" name="getReservoirMetadataResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastPeriodAverages">
+      <wsdl:input message="tns:getForecastPeriodAverages" name="getForecastPeriodAverages">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastPeriodAveragesResponse" name="getForecastPeriodAveragesResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAllForecastsForStation">
+      <wsdl:input message="tns:getAllForecastsForStation" name="getAllForecastsForStation">
+    </wsdl:input>
+      <wsdl:output message="tns:getAllForecastsForStationResponse" name="getAllForecastsForStationResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getStationElements">
+      <wsdl:input message="tns:getStationElements" name="getStationElements">
+    </wsdl:input>
+      <wsdl:output message="tns:getStationElementsResponse" name="getStationElementsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getInstantaneousData">
+      <wsdl:input message="tns:getInstantaneousData" name="getInstantaneousData">
+    </wsdl:input>
+      <wsdl:output message="tns:getInstantaneousDataResponse" name="getInstantaneousDataResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getData">
+      <wsdl:input message="tns:getData" name="getData">
+    </wsdl:input>
+      <wsdl:output message="tns:getDataResponse" name="getDataResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getCentralTendencyData">
+      <wsdl:input message="tns:getCentralTendencyData" name="getCentralTendencyData">
+    </wsdl:input>
+      <wsdl:output message="tns:getCentralTendencyDataResponse" name="getCentralTendencyDataResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastPeriods">
+      <wsdl:input message="tns:getForecastPeriods" name="getForecastPeriods">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastPeriodsResponse" name="getForecastPeriodsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getHeightDepths">
+      <wsdl:input message="tns:getHeightDepths" name="getHeightDepths">
+    </wsdl:input>
+      <wsdl:output message="tns:getHeightDepthsResponse" name="getHeightDepthsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getStationMetadata">
+      <wsdl:input message="tns:getStationMetadata" name="getStationMetadata">
+    </wsdl:input>
+      <wsdl:output message="tns:getStationMetadataResponse" name="getStationMetadataResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastPoints">
+      <wsdl:input message="tns:getForecastPoints" name="getForecastPoints">
+    </wsdl:input>
+      <wsdl:output message="tns:getForecastPointsResponse" name="getForecastPointsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="areYouThere">
+      <wsdl:input message="tns:areYouThere" name="areYouThere">
+    </wsdl:input>
+      <wsdl:output message="tns:areYouThereResponse" name="areYouThereResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPeakData">
+      <wsdl:input message="tns:getPeakData" name="getPeakData">
+    </wsdl:input>
+      <wsdl:output message="tns:getPeakDataResponse" name="getPeakDataResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAveragesPeak">
+      <wsdl:input message="tns:getAveragesPeak" name="getAveragesPeak">
+    </wsdl:input>
+      <wsdl:output message="tns:getAveragesPeakResponse" name="getAveragesPeakResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getUnits">
+      <wsdl:input message="tns:getUnits" name="getUnits">
+    </wsdl:input>
+      <wsdl:output message="tns:getUnitsResponse" name="getUnitsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getElements">
+      <wsdl:input message="tns:getElements" name="getElements">
+    </wsdl:input>
+      <wsdl:output message="tns:getElementsResponse" name="getElementsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="AwdbWebServiceSoapBinding" type="tns:AwdbWebService">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getForecasts">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecasts">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastsByPubDate">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecastsByPubDate">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastsByPubDateResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getStations">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getStations">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getStationsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAveragesData">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getAveragesData">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getAveragesDataResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getHourlyData">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getHourlyData">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getHourlyDataResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="runDiagnostics">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="runDiagnostics">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="runDiagnosticsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastEquations">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecastEquations">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastEquationsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getUnitName">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getUnitName">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getUnitNameResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getStationMetadataMultiple">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getStationMetadataMultiple">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getStationMetadataMultipleResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastPoint">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecastPoint">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastPointResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getStationDataAssuredFlags">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getStationDataAssuredFlags">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getStationDataAssuredFlagsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastEquationsMultiple">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecastEquationsMultiple">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastEquationsMultipleResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastPeriodCentralTendency">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecastPeriodCentralTendency">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastPeriodCentralTendencyResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getElement">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getElement">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getElementResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastValue">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecastValue">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastValueResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastConfigurations">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecastConfigurations">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastConfigurationsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getCentralTendencyPeakData">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getCentralTendencyPeakData">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getCentralTendencyPeakDataResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getReservoirMetadataMultiple">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getReservoirMetadataMultiple">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getReservoirMetadataMultipleResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecast">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecast">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getReservoirMetadata">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getReservoirMetadata">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getReservoirMetadataResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAllForecastsForStation">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getAllForecastsForStation">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getAllForecastsForStationResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastPeriodAverages">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecastPeriodAverages">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastPeriodAveragesResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getStationElements">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getStationElements">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getStationElementsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getInstantaneousData">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getInstantaneousData">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getInstantaneousDataResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getData">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getData">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getDataResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getCentralTendencyData">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getCentralTendencyData">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getCentralTendencyDataResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastPeriods">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecastPeriods">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastPeriodsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getHeightDepths">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getHeightDepths">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getHeightDepthsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getForecastPoints">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getForecastPoints">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getForecastPointsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getStationMetadata">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getStationMetadata">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getStationMetadataResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="areYouThere">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="areYouThere">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="areYouThereResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAveragesPeak">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getAveragesPeak">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getAveragesPeakResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getPeakData">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getPeakData">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getPeakDataResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getUnits">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getUnits">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getUnitsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getElements">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getElements">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getElementsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="AwdbWebService">
+    <wsdl:port binding="tns:AwdbWebServiceSoapBinding" name="AwdbWebServiceImplPort">
+      <soap:address location="http://www.wcc.nrcs.usda.gov/awdbWebService/services"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
