@@ -10,6 +10,7 @@ var typesTmpl = `
 	const (
 		{{with .Restriction}}
 			{{range .Enumeration}}
+				{{if .Doc}} {{.Doc | comment}} {{end}}
 				{{$type}}_{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{$value}}" {{end}}
 		{{end}}
 	)
@@ -21,13 +22,18 @@ var typesTmpl = `
 		{{$baseType}}
 	{{end}}
 
-	{{template "Elements" .Extension.Sequence.Elements}}
+	{{template "Elements" .Extension.Sequence}}
 	{{template "Attributes" .Extension.Attributes}}
 {{end}}
 
 {{define "Attributes"}}
 	{{range .}}
-		{{ .Name | makePublic}} {{toGoType .Type}}{{end}}
+		{{if .Doc}} {{.Doc | comment}} {{end}} {{if not .Type}}
+			{{ .Name | makePublic}} {{toGoType .SimpleType.Restriction.Base}} ` + "`" + `xml:"{{.Name}},attr,omitempty"` + "`" + `
+		{{else}}
+			{{ .Name | makePublic}} {{toGoType .Type}} ` + "`" + `xml:"{{.Name}},attr,omitempty"` + "`" + `
+		{{end}}
+	{{end}}
 {{end}}
 
 {{define "SimpleContent"}}
@@ -42,8 +48,8 @@ var typesTmpl = `
 			{{template "ComplexContent" .ComplexContent}}
 		{{else if ne .SimpleContent.Extension.Base ""}}
 			{{template "SimpleContent" .SimpleContent}}
-		{{ else }}
-			{{template "Elements" .Sequence.Elements}}
+		{{else}}
+			{{template "Elements" .Sequence}}
 			{{template "Elements" .Choice}}
 			{{template "Elements" .All}}
 			{{template "Attributes" .Attributes}}
@@ -60,8 +66,8 @@ var typesTmpl = `
 				{{template "ComplexContent" .ComplexContent}}
 			{{else if ne .SimpleContent.Extension.Base ""}}
 				{{template "SimpleContent" .SimpleContent}}
-			{{ else }}
-				{{template "Elements" .Sequence.Elements}}
+			{{else}}
+				{{template "Elements" .Sequence}}
 				{{template "Elements" .Choice}}
 				{{template "Elements" .All}}
 				{{template "Attributes" .Attributes}}
@@ -70,9 +76,30 @@ var typesTmpl = `
 	{{end}}
 {{end}}
 
+{{define "ComplexTypeInline"}}
+	{{with .ComplexType}}
+		{{if ne .ComplexContent.Extension.Base ""}}
+			{{template "ComplexContent" .ComplexContent}}
+		{{else if ne .SimpleContent.Extension.Base ""}}
+			{{template "SimpleContent" .SimpleContent}}
+		{{else}}
+			{{template "Elements" .Sequence}}
+			{{template "Elements" .Choice}}
+			{{template "Elements" .All}}
+			{{template "Attributes" .Attributes}}
+		{{end}}
+	{{end}}
+{{end}}
+
 {{define "Elements"}}
 	{{range .}}
-		{{replaceReservedWords .Name | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `{{end}}
+		{{if not .Type}}
+			{{template "ComplexTypeInline" .}}
+		{{else}}
+			{{if .Doc}} {{.Doc | comment}} {{end}}
+			{{replaceReservedWords .Name | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
+		{{end}}
+	{{end}}
 {{end}}
 
 {{range .Schemas}}
