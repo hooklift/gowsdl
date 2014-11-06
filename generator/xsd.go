@@ -34,6 +34,7 @@ type XsdImport struct {
 type XsdElement struct {
 	XMLName     xml.Name        `xml:"element"`
 	Name        string          `xml:"name,attr"`
+	Doc         string          `xml:"annotation>documentation"`
 	Nillable    bool            `xml:"nillable,attr"`
 	Type        string          `xml:"type,attr"`
 	Ref         string          `xml:"ref,attr"`
@@ -49,7 +50,7 @@ type XsdComplexType struct {
 	Abstract       bool              `xml:"abstract,attr"`
 	Name           string            `xml:"name,attr"`
 	Mixed          bool              `xml:"mixed,attr"`
-	Sequence       XsdSequence       `xml:"sequence"`
+	Sequence       []XsdElement      `xml:"sequence>element"`
 	Choice         []XsdElement      `xml:"choice>element"`
 	All            []XsdElement      `xml:"all>element"`
 	ComplexContent XsdComplexContent `xml:"complexContent"`
@@ -60,9 +61,9 @@ type XsdComplexType struct {
 type XsdGroup struct {
 	Name     string       `xml:"name,attr"`
 	Ref      string       `xml:"ref,attr"`
-	Sequence XsdSequence  `xml:"sequence"`
-	Choice   []XsdElement `xml:"choice"`
-	All      []XsdElement `xml:"all"`
+	Sequence []XsdElement `xml:"sequence>element"`
+	Choice   []XsdElement `xml:"choice>element"`
+	All      []XsdElement `xml:"all>element"`
 }
 
 type XsdComplexContent struct {
@@ -79,21 +80,19 @@ type XsdExtension struct {
 	XMLName    xml.Name        `xml:"extension"`
 	Base       string          `xml:"base,attr"`
 	Attributes []*XsdAttribute `xml:"attribute"`
-	Sequence   XsdSequence     `xml:"sequence"`
+	Sequence   []XsdElement    `xml:"sequence>element"`
 }
 
 type XsdAttribute struct {
-	Name string `xml:"name,attr"`
-	Type string `xml:"type,attr"`
+	Name       string         `xml:"name,attr"`
+	Doc        string         `xml:"annotation>documentation"`
+	Type       string         `xml:"type,attr"`
+	SimpleType *XsdSimpleType `xml:"simpleType"`
 }
 
 type XsdSimpleType struct {
 	Name        string         `xml:"name,attr"`
 	Restriction XsdRestriction `xml:"restriction"`
-}
-
-type XsdSequence struct {
-	Elements []XsdElement `xml:"element"`
 }
 
 type XsdRestriction struct {
@@ -109,5 +108,6 @@ type XsdRestriction struct {
 }
 
 type XsdRestrictionValue struct {
+	Doc   string `xml:"annotation>documentation"`
 	Value string `xml:"value,attr"`
 }

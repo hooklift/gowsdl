@@ -22,7 +22,7 @@ import (
 	"unicode"
 )
 
-const maxRecursion uint8 = 5
+const maxRecursion uint8 = 20
 
 type GoWsdl struct {
 	file, pkg             string
@@ -224,6 +224,7 @@ func (g *GoWsdl) genTypes() ([]byte, error) {
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           makePublic,
+		"comment":              comment,
 		"targetNamespace":      func() string { return g.wsdl.TargetNamespace },
 	}
 
@@ -278,6 +279,7 @@ func (g *GoWsdl) genHeader() ([]byte, error) {
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           makePublic,
 		"findType":             g.findType,
+		"comment":              comment,
 	}
 
 	data := new(bytes.Buffer)
@@ -318,12 +320,25 @@ var reservedWords = map[string]string{
 	"var":         "var_",
 }
 
+// Replaces Go reserved keywords to avoid compilation issues
 func replaceReservedWords(identifier string) string {
 	value := reservedWords[identifier]
 	if value != "" {
 		return value
 	}
-	return identifier
+	return normalize(identifier)
+}
+
+// Normalizes value to be used as a valid Go identifier, avoiding compilation issues
+func normalize(value string) string {
+	mapping := func(r rune) rune {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			return r
+		}
+		return -1
+	}
+
+	return strings.Map(mapping, value)
 }
 
 var xsd2GoTypes = map[string]string{
@@ -387,6 +402,7 @@ func (g *GoWsdl) findType(message string) string {
 			// Message does not have parts. This could be a Port
 			// with HTTP binding or SOAP 1.2 binding, which are not currently
 			// supported.
+			Log.Warn("WSDL does seem to have HTTP or SOAP 1.2 binding which is not currently supported.")
 			continue
 		}
 		part := msg.Parts[0]
@@ -458,4 +474,32 @@ func makePublic(field_ string) string {
 
 	field[0] = unicode.ToUpper(field[0])
 	return string(field)
+}
+
+func comment(text string) string {
+	lines := strings.Split(text, "\n")
+
+	var output string
+	if len(lines) == 1 && lines[0] == "" {
+		return ""
+	}
+
+	// Helps to determine if
+	// there is an actual comment
+	// without screwing newlines
+	// in real comments.
+	hasComment := false
+
+	for _, line := range lines {
+		line = strings.TrimLeftFunc(line, unicode.IsSpace)
+		if line != "" {
+			hasComment = true
+		}
+		output += "\n// " + line
+	}
+
+	if hasComment {
+		return output
+	}
+	return ""
 }
