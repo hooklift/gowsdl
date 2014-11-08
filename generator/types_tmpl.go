@@ -49,8 +49,11 @@ var typesTmpl = `
 		{{else if ne .SimpleContent.Extension.Base ""}}
 			{{template "SimpleContent" .SimpleContent}}
 		{{else}}
-			{{template "Elements" .Sequence}}
-			{{template "Elements" .Choice}}
+			{{template "Elements" .Sequence.Elements}}
+			{{template "Choices" .Sequence.Choices}}
+			{{template "Groups" .Sequence.Groups}}
+			{{template "Elements" .Sequence.Sequences}}
+			{{template "Elements" .Choice.Elements}}
 			{{template "Elements" .All}}
 			{{template "Attributes" .Attributes}}
 		{{end}}

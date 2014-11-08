@@ -14,9 +14,9 @@ type XsdSchema struct {
 	Version            string            `xml:"version,attr"`
 	TargetNamespace    string            `xml:"targetNamespace,attr"`
 	ElementFormDefault string            `xml:"elementFormDefault,attr"`
-	Includes           []*XsdInclude     `xml:"include"`
-	Imports            []*XsdImport      `xml:"import"`
-	Elements           []*XsdElement     `xml:"element"`
+	Includes           []XsdInclude      `xml:"include"`
+	Imports            []XsdImport       `xml:"import"`
+	Elements           []XsdElement      `xml:"element"`
 	ComplexTypes       []*XsdComplexType `xml:"complexType"` //global
 	SimpleType         []*XsdSimpleType  `xml:"simpleType"`
 }
@@ -42,7 +42,7 @@ type XsdElement struct {
 	MaxOccurs   string          `xml:"maxOccurs,attr"`
 	ComplexType *XsdComplexType `xml:"complexType"` //local
 	SimpleType  *XsdSimpleType  `xml:"simpleType"`
-	Groups      []*XsdGroup     `xml:"group"`
+	Groups      []XsdGroup      `xml:"group"`
 }
 
 type XsdComplexType struct {
@@ -50,20 +50,20 @@ type XsdComplexType struct {
 	Abstract       bool              `xml:"abstract,attr"`
 	Name           string            `xml:"name,attr"`
 	Mixed          bool              `xml:"mixed,attr"`
-	Sequence       []XsdElement      `xml:"sequence>element"`
-	Choice         []XsdElement      `xml:"choice>element"`
+	Sequences      []XsdSequence     `xml:"sequence"`
+	Choices        []XsdChoice       `xml:"choice"`
 	All            []XsdElement      `xml:"all>element"`
 	ComplexContent XsdComplexContent `xml:"complexContent"`
 	SimpleContent  XsdSimpleContent  `xml:"simpleContent"`
-	Attributes     []*XsdAttribute   `xml:"attribute"`
+	Attributes     []XsdAttribute    `xml:"attribute"`
 }
 
 type XsdGroup struct {
-	Name     string       `xml:"name,attr"`
-	Ref      string       `xml:"ref,attr"`
-	Sequence []XsdElement `xml:"sequence>element"`
-	Choice   []XsdElement `xml:"choice>element"`
-	All      []XsdElement `xml:"all>element"`
+	Name      string        `xml:"name,attr"`
+	Ref       string        `xml:"ref,attr"`
+	Sequences []XsdSequence `xml:"sequence"`
+	Choices   []XsdChoice   `xml:"choice"`
+	All       []XsdElement  `xml:"all>element"`
 }
 
 type XsdComplexContent struct {
@@ -77,10 +77,13 @@ type XsdSimpleContent struct {
 }
 
 type XsdExtension struct {
-	XMLName    xml.Name        `xml:"extension"`
-	Base       string          `xml:"base,attr"`
-	Attributes []*XsdAttribute `xml:"attribute"`
-	Sequence   []XsdElement    `xml:"sequence>element"`
+	XMLName    xml.Name       `xml:"extension"`
+	Doc        string         `xml:"annotation>documentation"`
+	Base       string         `xml:"base,attr"`
+	Attributes []XsdAttribute `xml:"attribute"`
+	Sequence   []XsdSequence  `xml:"sequence"`
+	Choices    []XsdChoice    `xml:"choice"`
+	Groups     []XsdGroup     `xml:"group"`
 }
 
 type XsdAttribute struct {
@@ -93,6 +96,22 @@ type XsdAttribute struct {
 type XsdSimpleType struct {
 	Name        string         `xml:"name,attr"`
 	Restriction XsdRestriction `xml:"restriction"`
+}
+
+type XsdChoice struct {
+	Doc       string        `xml:"annotation>documentation"`
+	Choices   []XsdChoice   `xml:"choice"`
+	Groups    []XsdGroup    `xml:"group"`
+	Sequences []XsdSequence `xml:"sequence"`
+	Elements  []XsdElement  `xml:"element"`
+}
+
+type XsdSequence struct {
+	Doc       string        `xml:"annotation>documentation"`
+	Choices   []XsdChoice   `xml:"choice"`
+	Groups    []XsdGroup    `xml:"group"`
+	Sequences []XsdSequence `xml:"sequence"`
+	Elements  []XsdElement  `xml:"element"`
 }
 
 type XsdRestriction struct {
