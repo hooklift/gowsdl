@@ -20,10 +20,9 @@ func init() {
 }
 
 type SoapEnvelope struct {
-	XMLName       xml.Name   `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	EncodingStyle string     `xml:"http://schemas.xmlsoap.org/soap/encoding/ encodingStyle,attr"`
-	Header        SoapHeader `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header,omitempty"`
-	Body          SoapBody   `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
+	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
+	//Header SoapHeader `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header,omitempty"`
+	Body SoapBody `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
 }
 
 type SoapHeader struct {
@@ -31,20 +30,24 @@ type SoapHeader struct {
 }
 
 type SoapBody struct {
-	Body  string     `xml:",innerxml"`
-	Fault *SoapFault `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+	Fault   *SoapFault `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+	Content string     `xml:",innerxml"`
 }
 
 type SoapFault struct {
-	faultcode   string `xml:"http://schemas.xmlsoap.org/soap/envelope/ faultcode"`
-	faultstring string `xml:"faultstring"`
-	faultactor  string `xml:"faultactor"`
-	detail      string `xml:"detail"`
+	Faultcode   string `xml:"faultcode,omitempty"`
+	Faultstring string `xml:"faultstring,omitempty"`
+	Faultactor  string `xml:"faultactor,omitempty"`
+	Detail      string `xml:"detail,omitempty"`
 }
 
 type SoapClient struct {
 	url string
 	tls bool
+}
+
+func (f *SoapFault) Error() string {
+	return f.Faultstring
 }
 
 func NewSoapClient(url string, tls bool) *SoapClient {
@@ -56,8 +59,7 @@ func NewSoapClient(url string, tls bool) *SoapClient {
 
 func (s *SoapClient) Call(soapAction string, request, response interface{}) error {
 	envelope := SoapEnvelope{
-		Header:        SoapHeader{},
-		EncodingStyle: "http://schemas.xmlsoap.org/soap/encoding/",
+	//Header:        SoapHeader{},
 	}
 
 	reqXml, err := xml.Marshal(request)
@@ -65,9 +67,7 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 		return err
 	}
 
-	envelope.Body = SoapBody{
-		Body: string(reqXml),
-	}
+	envelope.Body.Content = string(reqXml)
 
 	buffer := &bytes.Buffer{}
 
@@ -78,14 +78,16 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	if err == nil {
 		err = encoder.Flush()
 	}
-	Log.Debug("encoded", "envelope", log15.Lazy{func() string { return buffer.String() }})
+	Log.Debug("request", "envelope", log15.Lazy{func() string { return buffer.String() }})
 	if err != nil {
 		return err
 	}
 
 	req, err := http.NewRequest("POST", s.url, buffer)
 	req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
-	req.Header.Add("SOAPAction", soapAction)
+	if soapAction != "" {
+		req.Header.Add("SOAPAction", soapAction)
+	}
 	req.Header.Set("User-Agent", "gowsdl/0.1")
 
 	tr := &http.Transport{
@@ -102,25 +104,32 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	}
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
-	if len(body) == 0 {
+	rawbody, err := ioutil.ReadAll(res.Body)
+	if len(rawbody) == 0 {
 		Log.Warn("empty response")
 		return nil
 	}
 
 	respEnvelope := &SoapEnvelope{}
 
-	err = xml.Unmarshal(body, respEnvelope)
+	err = xml.Unmarshal(rawbody, respEnvelope)
 	if err != nil {
 		return err
 	}
 
-	if respEnvelope.Body.Body == "" {
-		Log.Warn("empty response body", "envelope", respEnvelope, "body", string(body))
+	body := respEnvelope.Body.Content
+	fault := respEnvelope.Body.Fault
+	if body == "" {
+		Log.Warn("empty response body", "envelope", respEnvelope, "body", body)
 		return nil
 	}
 
-	err = xml.Unmarshal([]byte(respEnvelope.Body.Body), response)
+	Log.Debug("response", "envelope", respEnvelope, "body", body)
+	if fault != nil {
+		return fault
+	}
+
+	err = xml.Unmarshal([]byte(body), response)
 	if err != nil {
 		return err
 	}
