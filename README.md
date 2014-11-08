@@ -19,6 +19,9 @@ Generates Go code from a WSDL file. This project is originally intended to gener
 * Setting SOAP headers
 * SOAP 1.2 and HTTP port bindings
 * WS-Security
+* WS-Addressing
+* MTOM binary attachments
+* UDDI
 
 ### Usage
 ```
