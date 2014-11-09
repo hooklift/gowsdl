@@ -1,4 +1,5 @@
 # WSDL to Go
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/cloudescape/gowsdl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![GoDoc](https://godoc.org/github.com/cloudescape/gowsdl?status.svg)](https://godoc.org/github.com/cloudescape/gowsdl)
 [![Build Status](https://travis-ci.org/cloudescape/gowsdl.svg?branch=master)](https://travis-ci.org/cloudescape/gowsdl)
 
