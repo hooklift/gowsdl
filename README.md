@@ -1,7 +1,7 @@
 # WSDL to Go
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/cloudescape/gowsdl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![GoDoc](https://godoc.org/github.com/cloudescape/gowsdl?status.svg)](https://godoc.org/github.com/cloudescape/gowsdl)
-[![Build Status](https://travis-ci.org/cloudescape/gowsdl.svg?branch=master)](https://travis-ci.org/cloudescape/gowsdl)
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/hooklift/gowsdl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![GoDoc](https://godoc.org/github.com/hooklift/gowsdl?status.svg)](https://godoc.org/github.com/hooklift/gowsdl)
+[![Build Status](https://travis-ci.org/hooklift/gowsdl.svg?branch=master)](https://travis-ci.org/hooklift/gowsdl)
 
 Generates Go code from a WSDL file. This project is originally intended to generate Go clients for WS-* services.
 
