@@ -77,6 +77,7 @@ var typesTmpl = `
 {{end}}
 
 {{define "ComplexTypeInline"}}
+	{{replaceReservedWords .Name | makePublic}} struct {
 	{{with .ComplexType}}
 		{{if ne .ComplexContent.Extension.Base ""}}
 			{{template "ComplexContent" .ComplexContent}}
@@ -89,6 +90,7 @@ var typesTmpl = `
 			{{template "Attributes" .Attributes}}
 		{{end}}
 	{{end}}
+	} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
 {{end}}
 
 {{define "Elements"}}
