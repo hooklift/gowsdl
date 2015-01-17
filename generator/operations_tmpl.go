@@ -5,7 +5,7 @@ package generator
 
 var opsTmpl = `
 {{range .}}
-	{{$portType := .Name}}
+	{{$portType := .Name | makePublic}}
 	type {{$portType}} struct {
 		client *gowsdl.SoapClient
 	}
@@ -23,22 +23,19 @@ var opsTmpl = `
 
 	{{range .Operations}}
 		{{$faults := len .Faults}}
-		{{$requestType := findType .Input.Message}}
+		{{$requestType := findType .Input.Message | replaceReservedWords | makePublic}}
 		{{$soapAction := findSoapAction .Name $portType}}
-		{{$output := findType .Output.Message}}
+		{{$responseType := findType .Output.Message | replaceReservedWords | makePublic}}
 
 		{{/*if ne $soapAction ""*/}}
 		{{if gt $faults 0}}
-		//
 		// Error can be either of the following types:
 		// {{range .Faults}}
-		//   - {{.Name}} {{.Doc}}{{end}}
-		//
-		{{end}}
+		//   - {{.Name}} {{.Doc}}{{end}}{{end}}
 		{{if ne .Doc ""}}// {{.Doc}}{{end}}
-		func (service *{{$portType}}) {{makePublic .Name}} (request *{{$requestType}}) (*{{$output}}, error) {
-			response := &{{$output}}{}
-			err := service.client.Call("{{$soapAction}}", request, response)
+		func (service *{{$portType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{$responseType}}, error) {
+			response := &{{$responseType}}{}
+			err := service.client.Call("{{$soapAction}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, response)
 			if err != nil {
 				return nil, err
 			}

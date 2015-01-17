@@ -62,19 +62,20 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	//Header:        SoapHeader{},
 	}
 
-	reqXml, err := xml.Marshal(request)
-	if err != nil {
-		return err
+	if request != nil {
+		reqXml, err := xml.Marshal(request)
+		if err != nil {
+			return err
+		}
+
+		envelope.Body.Content = string(reqXml)
 	}
-
-	envelope.Body.Content = string(reqXml)
-
 	buffer := &bytes.Buffer{}
 
 	encoder := xml.NewEncoder(buffer)
 	//encoder.Indent("  ", "    ")
 
-	err = encoder.Encode(envelope)
+	err := encoder.Encode(envelope)
 	if err == nil {
 		err = encoder.Flush()
 	}
