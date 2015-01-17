@@ -3,7 +3,7 @@
 [![GoDoc](https://godoc.org/github.com/hooklift/gowsdl?status.svg)](https://godoc.org/github.com/hooklift/gowsdl)
 [![Build Status](https://travis-ci.org/hooklift/gowsdl.svg?branch=master)](https://travis-ci.org/hooklift/gowsdl)
 
-Generates Go code from a WSDL file. This project is originally intended to generate Go clients for WS-* services.
+Generates Go code from a WSDL file.
 
 ### Features
 * Supports only Document/Literal wrapped services, which are [WS-I](http://ws-i.org/) compliant
@@ -24,6 +24,9 @@ Generates Go code from a WSDL file. This project is originally intended to gener
 * MTOM binary attachments
 * UDDI
 
+### Caveats
+* Please keep in mind that the generated code is just a reflection of what the WSDL is like. If your WSDL has duplicated type definitions, your Go code is going to have the same and will not compile.
+
 ### Usage
 ```
 gowsdl [OPTIONS]
@@ -38,11 +41,3 @@ Application Options:
 Help Options:
   -h, --help        Show this help message
 ```
-
-### TODO
-* Add support for filters to allow the user to change the generated code
-* If WSDL file is local, resolve external XML schemas locally too instead of failing due to not having a URL to download them from.
-* Resolve XSD element references
-* Support for generating namespaces
-* Make code generation agnostic so generating code to other programming languages is feasible through plugins
-
