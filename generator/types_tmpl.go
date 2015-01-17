@@ -5,13 +5,13 @@ package generator
 
 var typesTmpl = `
 {{define "SimpleType"}}
-	{{$type := replaceReservedWords .Name}}
+	{{$type := replaceReservedWords .Name | makePublic}}
 	type {{$type}} {{toGoType .Restriction.Base}}
 	const (
 		{{with .Restriction}}
 			{{range .Enumeration}}
 				{{if .Doc}} {{.Doc | comment}} {{end}}
-				{{$type}}_{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{$value}}" {{end}}
+				{{$type}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{$value}}" {{end}}
 		{{end}}
 	)
 {{end}}
@@ -41,9 +41,9 @@ var typesTmpl = `
 {{end}}
 
 {{define "ComplexTypeGlobal"}}
-	{{$name := replaceReservedWords .Name}}
+	{{$name := replaceReservedWords .Name | makePublic}}
 	type {{$name}} struct {
-		XMLName xml.Name ` + "`xml:\"{{targetNamespace}} {{$name}}\"`" + `
+		XMLName xml.Name ` + "`xml:\"{{targetNamespace}} {{.Name}}\"`" + `
 		{{if ne .ComplexContent.Extension.Base ""}}
 			{{template "ComplexContent" .ComplexContent}}
 		{{else if ne .SimpleContent.Extension.Base ""}}
@@ -58,9 +58,9 @@ var typesTmpl = `
 {{end}}
 
 {{define "ComplexTypeLocal"}}
-	{{$name := replaceReservedWords .Name}}
+	{{$name := .Name}}
 	{{with .ComplexType}}
-		type {{$name}} struct {
+		type {{$name | replaceReservedWords | makePublic}} struct {
 			XMLName xml.Name ` + "`xml:\"{{targetNamespace}} {{$name}}\"`" + `
 			{{if ne .ComplexContent.Extension.Base ""}}
 				{{template "ComplexContent" .ComplexContent}}
