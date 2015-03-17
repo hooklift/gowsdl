@@ -32,7 +32,7 @@ var opsTmpl = `
 		// Error can be either of the following types:
 		// {{range .Faults}}
 		//   - {{.Name}} {{.Doc}}{{end}}{{end}}
-		{{if ne .Doc ""}}// {{.Doc}}{{end}}
+		{{if ne .Doc ""}}/* {{.Doc}} */{{end}}
 		func (service *{{$portType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{$responseType}}, error) {
 			response := &{{$responseType}}{}
 			err := service.client.Call("{{$soapAction}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, response)
