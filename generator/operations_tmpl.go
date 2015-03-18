@@ -33,9 +33,9 @@ var opsTmpl = `
 		// {{range .Faults}}
 		//   - {{.Name}} {{.Doc}}{{end}}{{end}}
 		{{if ne .Doc ""}}/* {{.Doc}} */{{end}}
-		func (service *{{$portType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{$responseType}}, error) {
+		func (service *{{$portType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}, header *gowsdl.SoapHeader, configureRequest func(*http.Request)) (*{{$responseType}}, error) {
 			response := &{{$responseType}}{}
-			err := service.client.Call("{{$soapAction}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, response)
+			err := service.client.Call("{{$soapAction}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, response, header, configureRequest)
 			if err != nil {
 				return nil, err
 			}
