@@ -9,8 +9,10 @@ package {{.}}
 // Do not modify
 // Copyright (c) 2015, Hooklift. All rights reserved.
 import (
+    "net/http"
 	"encoding/xml"
 	"time"
+
 
 	gowsdl "github.com/hooklift/gowsdl/generator"
 	{{/*range .Imports*/}}

@@ -7,10 +7,10 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/xml"
+	"gopkg.in/inconshreveable/log15.v2"
 	"io/ioutil"
 	"net/http"
-
-	"gopkg.in/inconshreveable/log15.v2"
+	"net/http/httputil"
 )
 
 var Log = log15.New()
@@ -20,9 +20,9 @@ func init() {
 }
 
 type SoapEnvelope struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	//Header SoapHeader `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header,omitempty"`
-	Body SoapBody `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
+	XMLName xml.Name    `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
+	Header  *SoapHeader `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header,omitempty"`
+	Body    SoapBody    `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
 }
 
 type SoapHeader struct {
@@ -57,9 +57,9 @@ func NewSoapClient(url string, tls bool) *SoapClient {
 	}
 }
 
-func (s *SoapClient) Call(soapAction string, request, response interface{}) error {
+func (s *SoapClient) Call(soapAction string, request, response interface{}, header *SoapHeader, configureRequest func(*http.Request)) error {
 	envelope := SoapEnvelope{
-	//Header:        SoapHeader{},
+		Header: header,
 	}
 
 	if request != nil {
@@ -73,23 +73,30 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	buffer := &bytes.Buffer{}
 
 	encoder := xml.NewEncoder(buffer)
-	//encoder.Indent("  ", "    ")
+	encoder.Indent("  ", "    ")
 
 	err := encoder.Encode(envelope)
 	if err == nil {
 		err = encoder.Flush()
 	}
-	Log.Debug("request", "envelope", log15.Lazy{func() string { return buffer.String() }})
 	if err != nil {
 		return err
 	}
 
 	req, err := http.NewRequest("POST", s.url, buffer)
+
 	req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
 	if soapAction != "" {
 		req.Header.Add("SOAPAction", soapAction)
 	}
-	req.Header.Set("User-Agent", "gowsdl/0.1")
+
+	if configureRequest != nil {
+		configureRequest(req)
+	}
+
+	Log.Debug("request", "request", req,
+		"Header", log15.Lazy{func() string { r, _ := httputil.DumpRequestOut(req, true); return string(r) }},
+	)
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -101,6 +108,7 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	client := &http.Client{Transport: tr}
 	res, err := client.Do(req)
 	if err != nil {
+		Log.Debug("Client error", "err", err)
 		return err
 	}
 	defer res.Body.Close()
@@ -110,6 +118,7 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 		Log.Warn("empty response")
 		return nil
 	}
+	Log.Debug("Raw response", "url", s.url, "rawbody", log15.Lazy{func() string { return string(rawbody) }})
 
 	respEnvelope := &SoapEnvelope{}
 
