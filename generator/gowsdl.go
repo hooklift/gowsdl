@@ -169,7 +169,7 @@ func (g *GoWsdl) unmarshal() error {
 }
 
 func (g *GoWsdl) resolveXsdExternals(schema *XsdSchema, url *url.URL) error {
-	for _, incl := range schema.Includes {
+	for _, incl := range schema.Imports {
 		location, err := url.Parse(incl.SchemaLocation)
 		if err != nil {
 			return err
