@@ -353,16 +353,16 @@ var xsd2GoTypes = map[string]string{
 	"byte":          "int8",
 	"long":          "int64",
 	"boolean":       "bool",
-	"dateTime":      "time.Time",
+	"datetime":      "time.Time",
 	"date":          "time.Time",
 	"time":          "time.Time",
-	"base64Binary":  "[]byte",
-	"hexBinary":     "[]byte",
-	"unsignedInt":   "uint32",
-	"unsignedShort": "uint16",
-	"unsignedByte":  "byte",
-	"unsignedLong":  "uint64",
-	"anyType":       "interface{}",
+	"base64binary":  "[]byte",
+	"hexbinary":     "[]byte",
+	"unsignedint":   "uint32",
+	"unsignedshort": "uint16",
+	"unsignedbyte":  "byte",
+	"unsignedlong":  "uint64",
+	"anytype":       "interface{}",
 }
 
 func toGoType(xsdType string) string {
@@ -375,7 +375,7 @@ func toGoType(xsdType string) string {
 		type_ = r[1]
 	}
 
-	value := xsd2GoTypes[type_]
+	value := xsd2GoTypes[strings.ToLower(type_)]
 
 	if value != "" {
 		return value

@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"gopkg.in/inconshreveable/log15.v2"
+	"fmt"
 )
 
 var Log = log15.New()
@@ -41,19 +42,26 @@ type SoapFault struct {
 	Detail      string `xml:"detail,omitempty"`
 }
 
+type BasicAuth struct {
+	Login string
+	Password string
+}
+
 type SoapClient struct {
 	url string
 	tls bool
+	auth *BasicAuth
 }
 
 func (f *SoapFault) Error() string {
 	return f.Faultstring
 }
 
-func NewSoapClient(url string, tls bool) *SoapClient {
+func NewSoapClient(url string, tls bool, auth *BasicAuth) *SoapClient {
 	return &SoapClient{
 		url: url,
 		tls: tls,
+		auth: auth,
 	}
 }
 
@@ -85,6 +93,9 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	}
 
 	req, err := http.NewRequest("POST", s.url, buffer)
+	if s.auth != nil {
+		req.SetBasicAuth(s.auth.Login, s.auth.Password)
+	}
 	req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
 	if soapAction != "" {
 		req.Header.Add("SOAPAction", soapAction)
@@ -111,7 +122,7 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 		Log.Warn("empty response")
 		return nil
 	}
-
+	fmt.Println(string(rawbody))
 	respEnvelope := &SoapEnvelope{}
 
 	err = xml.Unmarshal(rawbody, respEnvelope)
