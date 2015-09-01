@@ -1,0 +1,671 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://tempuri.org/" name="Api" targetNamespace="http://tempuri.org/">
+  <types>
+    <xs:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+      <xs:complexType name="AppointmentInfo">
+        <xs:sequence>
+          <xs:element name="Date" type="xs:date"/>
+          <xs:element name="Time" type="xs:string"/>
+          <xs:element name="Remarks" type="xs:string"/>
+          <xs:element name="ReplacementVehicle" type="xs:int"/>
+          <xs:element name="Reference" type="xs:string"/>
+          <xs:element name="SendMailCustomer" type="xs:int"/>
+          <xs:element name="SendMailDealer" type="xs:int"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Job">
+        <xs:sequence>
+          <xs:element name="JobID" type="xs:int"/>
+          <xs:element name="Type" type="xs:int"/>
+          <xs:element name="Job" type="xs:string"/>
+          <xs:element name="Units" type="xs:int"/>
+          <xs:element name="Price" type="xs:decimal"/>
+          <xs:element name="DiscountPrice" type="xs:decimal"/>
+          <xs:element name="Code" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ContactData">
+        <xs:sequence>
+          <xs:element name="Contact" type="tns:ArrayOfContactInfo"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ContactInfo">
+        <xs:sequence>
+          <xs:element name="FieldName" type="xs:string"/>
+          <xs:element name="Value" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="WorkshopResponse">
+        <xs:sequence>
+          <xs:element name="Response" type="xs:string"/>
+          <xs:element name="ID" type="xs:int"/>
+          <xs:element name="Workshops" type="tns:ArrayOfWorkshop"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Workshop">
+        <xs:sequence>
+          <xs:element name="V" type="xs:int"/>
+          <xs:element name="Name" type="xs:string"/>
+          <xs:element name="Address" type="xs:string"/>
+          <xs:element name="HouseNumber" type="xs:string"/>
+          <xs:element name="ZipCode" type="xs:string"/>
+          <xs:element name="City" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Parameter">
+        <xs:sequence>
+          <xs:element name="ParameterName" type="xs:string"/>
+          <xs:element name="Value" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="WorkshopResponse_V2">
+        <xs:sequence>
+          <xs:element name="Response" type="xs:string"/>
+          <xs:element name="Workshops" type="tns:ArrayOfWorkshopInfo"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="WorkshopInfo">
+        <xs:sequence>
+          <xs:element name="ID" type="xs:int"/>
+          <xs:element name="Fields" type="tns:ArrayOfData"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Data">
+        <xs:sequence>
+          <xs:element name="FieldName" type="xs:string"/>
+          <xs:element name="Value" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="TextResponse">
+        <xs:sequence>
+          <xs:element name="Response" type="xs:string"/>
+          <xs:element name="Texts" type="tns:ArrayOfTextInfo"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="TextInfo">
+        <xs:sequence>
+          <xs:element name="TextName" type="xs:string"/>
+          <xs:element name="Text" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="FieldResponse">
+        <xs:sequence>
+          <xs:element name="Response" type="xs:string"/>
+          <xs:element name="Fields" type="tns:ArrayOfFieldInfo"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="FieldInfo">
+        <xs:sequence>
+          <xs:element name="FieldName" type="xs:string"/>
+          <xs:element name="Display" type="xs:int"/>
+          <xs:element name="FieldLength" type="xs:int"/>
+          <xs:element name="FieldVar" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ReplacementVehicleResponse">
+        <xs:sequence>
+          <xs:element name="Response" type="xs:string"/>
+          <xs:element name="ReplacementVehicles" type="tns:ArrayOfReplacementVehicle"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ReplacementVehicle">
+        <xs:sequence>
+          <xs:element name="ReplacementVehicleID" type="xs:int"/>
+          <xs:element name="ReplacementVehicle" type="xs:string"/>
+          <xs:element name="Price" type="xs:decimal"/>
+          <xs:element name="DiscountPrice" type="xs:decimal"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="JobResponse">
+        <xs:sequence>
+          <xs:element name="Response" type="xs:string"/>
+          <xs:element name="Jobs" type="tns:ArrayOfJob"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="AvailabilityResponse">
+        <xs:sequence>
+          <xs:element name="Response" type="xs:string"/>
+          <xs:element name="OpeningHours" type="xs:int"/>
+          <xs:element name="ClosingHours" type="xs:int"/>
+          <xs:element name="HourIncrement" type="xs:int"/>
+          <xs:element name="NumberOfMonths" type="xs:int"/>
+          <xs:element name="Available" type="tns:ArrayOfAvailability"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Availability">
+        <xs:sequence>
+          <xs:element name="Date" type="xs:date"/>
+          <xs:element name="Available" type="xs:int"/>
+          <xs:element name="Discount" type="xs:decimal"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="PreferredTimesResponse">
+        <xs:sequence>
+          <xs:element name="Response" type="xs:string"/>
+          <xs:element name="PreferredTime" type="tns:ArrayOfTimes"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="Times">
+        <xs:sequence>
+          <xs:element name="Time" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ExtraJobs">
+        <xs:sequence>
+          <xs:element name="JobID" type="xs:int"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="DateAvailabilityResponse">
+        <xs:sequence>
+          <xs:element name="Response" type="xs:string"/>
+          <xs:element name="Available" type="tns:ArrayOfAvailability"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="TimeAvailabilityResponse">
+        <xs:sequence>
+          <xs:element name="Response" type="xs:string"/>
+          <xs:element name="Available" type="tns:ArrayOfAvailableTimes"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="AvailableTimes">
+        <xs:sequence>
+          <xs:element name="Time" type="xs:int"/>
+          <xs:element name="Available" type="xs:int"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfContactInfo">
+        <xs:sequence>
+          <xs:element name="ContactInfo" type="tns:ContactInfo" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfWorkshop">
+        <xs:sequence>
+          <xs:element name="Workshop" type="tns:Workshop" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfWorkshopInfo">
+        <xs:sequence>
+          <xs:element name="WorkshopInfo" type="tns:WorkshopInfo" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfData">
+        <xs:sequence>
+          <xs:element name="Data" type="tns:Data" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfTextInfo">
+        <xs:sequence>
+          <xs:element name="TextInfo" type="tns:TextInfo" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfFieldInfo">
+        <xs:sequence>
+          <xs:element name="FieldInfo" type="tns:FieldInfo" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfReplacementVehicle">
+        <xs:sequence>
+          <xs:element name="ReplacementVehicle" type="tns:ReplacementVehicle" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfJob">
+        <xs:sequence>
+          <xs:element name="Job" type="tns:Job" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfAvailability">
+        <xs:sequence>
+          <xs:element name="Availability" type="tns:Availability" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfTimes">
+        <xs:sequence>
+          <xs:element name="Times" type="tns:Times" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfAvailableTimes">
+        <xs:sequence>
+          <xs:element name="AvailableTimes" type="tns:AvailableTimes" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfParameter">
+        <xs:sequence>
+          <xs:element name="Parameter" type="tns:Parameter" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="ArrayOfExtraJobs">
+        <xs:sequence>
+          <xs:element name="ExtraJobs" type="tns:ExtraJobs" minOccurs="0" maxOccurs="unbounded" nillable="true"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:element name="ConfirmAppointment">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sLogin" type="xs:string"/>
+            <xs:element name="sPassword" type="xs:string"/>
+            <xs:element name="sPartnerID" type="xs:string"/>
+            <xs:element name="iID" type="xs:int"/>
+            <xs:element name="iV" type="xs:int"/>
+            <xs:element name="tAppointmentInfo" type="tns:AppointmentInfo"/>
+            <xs:element name="tJobs" type="tns:ArrayOfJob"/>
+            <xs:element name="tContactData" type="tns:ContactData"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ConfirmAppointmentResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ConfirmAppointmentResult" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetWorkshops">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sLogin" type="xs:string"/>
+            <xs:element name="sPassword" type="xs:string"/>
+            <xs:element name="sPartnerID" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetWorkshopsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="GetWorkshopsResult" type="tns:WorkshopResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetWorkshops_V2">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sLogin" type="xs:string"/>
+            <xs:element name="sPassword" type="xs:string"/>
+            <xs:element name="sPartnerID" type="xs:string"/>
+            <xs:element name="tParameters" type="tns:ArrayOfParameter"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetWorkshops_V2Response">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="GetWorkshops_V2Result" type="tns:WorkshopResponse_V2"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetTexts">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sLogin" type="xs:string"/>
+            <xs:element name="sPassword" type="xs:string"/>
+            <xs:element name="sPartnerID" type="xs:string"/>
+            <xs:element name="iID" type="xs:int"/>
+            <xs:element name="iV" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetTextsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="GetTextsResult" type="tns:TextResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetFields">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sLogin" type="xs:string"/>
+            <xs:element name="sPassword" type="xs:string"/>
+            <xs:element name="sPartnerID" type="xs:string"/>
+            <xs:element name="iID" type="xs:int"/>
+            <xs:element name="iV" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetFieldsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="GetFieldsResult" type="tns:FieldResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetReplacementVehicles">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sLogin" type="xs:string"/>
+            <xs:element name="sPassword" type="xs:string"/>
+            <xs:element name="sPartnerID" type="xs:string"/>
+            <xs:element name="iID" type="xs:int"/>
+            <xs:element name="iV" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetReplacementVehiclesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="GetReplacementVehiclesResult" type="tns:ReplacementVehicleResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetJobs">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sLogin" type="xs:string"/>
+            <xs:element name="sPassword" type="xs:string"/>
+            <xs:element name="sPartnerID" type="xs:string"/>
+            <xs:element name="iID" type="xs:int"/>
+            <xs:element name="iV" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetJobsResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="GetJobsResult" type="tns:JobResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetAvailability">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sLogin" type="xs:string"/>
+            <xs:element name="sPassword" type="xs:string"/>
+            <xs:element name="sPartnerID" type="xs:string"/>
+            <xs:element name="iID" type="xs:int"/>
+            <xs:element name="iV" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetAvailabilityResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="GetAvailabilityResult" type="tns:AvailabilityResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetPreferredTimes">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sLogin" type="xs:string"/>
+            <xs:element name="sPassword" type="xs:string"/>
+            <xs:element name="sPartnerID" type="xs:string"/>
+            <xs:element name="iID" type="xs:int"/>
+            <xs:element name="iV" type="xs:int"/>
+            <xs:element name="sDate" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetPreferredTimesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="GetPreferredTimesResult" type="tns:PreferredTimesResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetAvailableDates">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sLogin" type="xs:string"/>
+            <xs:element name="sPassword" type="xs:string"/>
+            <xs:element name="sPartnerID" type="xs:string"/>
+            <xs:element name="iID" type="xs:int"/>
+            <xs:element name="iV" type="xs:int"/>
+            <xs:element name="iMonth" type="xs:int"/>
+            <xs:element name="iYear" type="xs:int"/>
+            <xs:element name="iMainJob" type="xs:int"/>
+            <xs:element name="tJobs" type="tns:ArrayOfExtraJobs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetAvailableDatesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="GetAvailableDatesResult" type="tns:DateAvailabilityResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetAvailableTimes">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="sLogin" type="xs:string"/>
+            <xs:element name="sPassword" type="xs:string"/>
+            <xs:element name="sPartnerID" type="xs:string"/>
+            <xs:element name="iID" type="xs:int"/>
+            <xs:element name="iV" type="xs:int"/>
+            <xs:element name="iDay" type="xs:int"/>
+            <xs:element name="iMonth" type="xs:int"/>
+            <xs:element name="iYear" type="xs:int"/>
+            <xs:element name="iMainJob" type="xs:int"/>
+            <xs:element name="tJobs" type="tns:ArrayOfExtraJobs"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GetAvailableTimesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="GetAvailableTimesResult" type="tns:TimeAvailabilityResponse"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+  </types>
+  <message name="ConfirmAppointmentSoapRequest">
+    <part name="parameters" element="tns:ConfirmAppointment"/>
+  </message>
+  <message name="ConfirmAppointmentSoapResponse">
+    <part name="parameters" element="tns:ConfirmAppointmentResponse"/>
+  </message>
+  <message name="GetWorkshopsSoapRequest">
+    <part name="parameters" element="tns:GetWorkshops"/>
+  </message>
+  <message name="GetWorkshopsSoapResponse">
+    <part name="parameters" element="tns:GetWorkshopsResponse"/>
+  </message>
+  <message name="GetWorkshops_V2SoapRequest">
+    <part name="parameters" element="tns:GetWorkshops_V2"/>
+  </message>
+  <message name="GetWorkshops_V2SoapResponse">
+    <part name="parameters" element="tns:GetWorkshops_V2Response"/>
+  </message>
+  <message name="GetTextsSoapRequest">
+    <part name="parameters" element="tns:GetTexts"/>
+  </message>
+  <message name="GetTextsSoapResponse">
+    <part name="parameters" element="tns:GetTextsResponse"/>
+  </message>
+  <message name="GetFieldsSoapRequest">
+    <part name="parameters" element="tns:GetFields"/>
+  </message>
+  <message name="GetFieldsSoapResponse">
+    <part name="parameters" element="tns:GetFieldsResponse"/>
+  </message>
+  <message name="GetReplacementVehiclesSoapRequest">
+    <part name="parameters" element="tns:GetReplacementVehicles"/>
+  </message>
+  <message name="GetReplacementVehiclesSoapResponse">
+    <part name="parameters" element="tns:GetReplacementVehiclesResponse"/>
+  </message>
+  <message name="GetJobsSoapRequest">
+    <part name="parameters" element="tns:GetJobs"/>
+  </message>
+  <message name="GetJobsSoapResponse">
+    <part name="parameters" element="tns:GetJobsResponse"/>
+  </message>
+  <message name="GetAvailabilitySoapRequest">
+    <part name="parameters" element="tns:GetAvailability"/>
+  </message>
+  <message name="GetAvailabilitySoapResponse">
+    <part name="parameters" element="tns:GetAvailabilityResponse"/>
+  </message>
+  <message name="GetPreferredTimesSoapRequest">
+    <part name="parameters" element="tns:GetPreferredTimes"/>
+  </message>
+  <message name="GetPreferredTimesSoapResponse">
+    <part name="parameters" element="tns:GetPreferredTimesResponse"/>
+  </message>
+  <message name="GetAvailableDatesSoapRequest">
+    <part name="parameters" element="tns:GetAvailableDates"/>
+  </message>
+  <message name="GetAvailableDatesSoapResponse">
+    <part name="parameters" element="tns:GetAvailableDatesResponse"/>
+  </message>
+  <message name="GetAvailableTimesSoapRequest">
+    <part name="parameters" element="tns:GetAvailableTimes"/>
+  </message>
+  <message name="GetAvailableTimesSoapResponse">
+    <part name="parameters" element="tns:GetAvailableTimesResponse"/>
+  </message>
+  <portType name="ApiSoapType">
+    <operation name="ConfirmAppointment">
+      <input message="tns:ConfirmAppointmentSoapRequest"/>
+      <output message="tns:ConfirmAppointmentSoapResponse"/>
+    </operation>
+    <operation name="GetWorkshops">
+      <input message="tns:GetWorkshopsSoapRequest"/>
+      <output message="tns:GetWorkshopsSoapResponse"/>
+    </operation>
+    <operation name="GetWorkshops_V2">
+      <input message="tns:GetWorkshops_V2SoapRequest"/>
+      <output message="tns:GetWorkshops_V2SoapResponse"/>
+    </operation>
+    <operation name="GetTexts">
+      <input message="tns:GetTextsSoapRequest"/>
+      <output message="tns:GetTextsSoapResponse"/>
+    </operation>
+    <operation name="GetFields">
+      <input message="tns:GetFieldsSoapRequest"/>
+      <output message="tns:GetFieldsSoapResponse"/>
+    </operation>
+    <operation name="GetReplacementVehicles">
+      <input message="tns:GetReplacementVehiclesSoapRequest"/>
+      <output message="tns:GetReplacementVehiclesSoapResponse"/>
+    </operation>
+    <operation name="GetJobs">
+      <input message="tns:GetJobsSoapRequest"/>
+      <output message="tns:GetJobsSoapResponse"/>
+    </operation>
+    <operation name="GetAvailability">
+      <input message="tns:GetAvailabilitySoapRequest"/>
+      <output message="tns:GetAvailabilitySoapResponse"/>
+    </operation>
+    <operation name="GetPreferredTimes">
+      <input message="tns:GetPreferredTimesSoapRequest"/>
+      <output message="tns:GetPreferredTimesSoapResponse"/>
+    </operation>
+    <operation name="GetAvailableDates">
+      <input message="tns:GetAvailableDatesSoapRequest"/>
+      <output message="tns:GetAvailableDatesSoapResponse"/>
+    </operation>
+    <operation name="GetAvailableTimes">
+      <input message="tns:GetAvailableTimesSoapRequest"/>
+      <output message="tns:GetAvailableTimesSoapResponse"/>
+    </operation>
+  </portType>
+  <binding name="ApiSoapBinding" type="tns:ApiSoapType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="ConfirmAppointment">
+      <soap:operation soapAction="" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="GetWorkshops">
+      <soap:operation soapAction="" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="GetWorkshops_V2">
+      <soap:operation soapAction="" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="GetTexts">
+      <soap:operation soapAction="" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="GetFields">
+      <soap:operation soapAction="" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="GetReplacementVehicles">
+      <soap:operation soapAction="" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="GetJobs">
+      <soap:operation soapAction="" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="GetAvailability">
+      <soap:operation soapAction="" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="GetPreferredTimes">
+      <soap:operation soapAction="" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="GetAvailableDates">
+      <soap:operation soapAction="" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="GetAvailableTimes">
+      <soap:operation soapAction="" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+  <service name="Api">
+    <documentation>Api Plan-IT Online</documentation>
+    <port name="ApiSoap" binding="tns:ApiSoapBinding">
+      <soap:address location="http://planitonline.dyndns.org/planitonline/api.wso"/>
+    </port>
+  </service>
+</definitions>
