@@ -94,13 +94,7 @@ var typesTmpl = `
 {{end}}
 
 {{define "Elements"}}
-	{{range .}}
-		{{if not .Type}}
-			{{template "ComplexTypeInline" .}}
-		{{else}}
-			{{if .Doc}} {{.Doc | comment}} {{end}}
-			{{replaceReservedWords .Name | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
-		{{end}}
+	{{range .}} {{if not .Type}} {{template "ComplexTypeInline" .}} {{else}} {{if .Doc}} {{.Doc | comment}} {{end}} {{replaceReservedWords .Name | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + ` {{end}}
 	{{end}}
 {{end}}
 
