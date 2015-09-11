@@ -69,6 +69,7 @@ var typesTmpl = `
 			{{else}}
 				{{template "Elements" .Sequence}}
 				{{template "Elements" .Choice}}
+				{{template "Elements" .SequenceChoice}}
 				{{template "Elements" .All}}
 				{{template "Attributes" .Attributes}}
 			{{end}}

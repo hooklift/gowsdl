@@ -52,6 +52,7 @@ type XsdComplexType struct {
 	Mixed          bool              `xml:"mixed,attr"`
 	Sequence       []XsdElement      `xml:"sequence>element"`
 	Choice         []XsdElement      `xml:"choice>element"`
+	SequenceChoice []XsdElement      `xml:"sequence>choice>element"`
 	All            []XsdElement      `xml:"all>element"`
 	ComplexContent XsdComplexContent `xml:"complexContent"`
 	SimpleContent  XsdSimpleContent  `xml:"simpleContent"`
