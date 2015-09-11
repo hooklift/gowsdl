@@ -6,23 +6,20 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"go/format"
 	"log"
 	"os"
 	"runtime"
 
-	gen "github.com/hooklift/gowsdl/generator"
-	flags "github.com/jessevdk/go-flags"
+	gen "github.com/sanbornm/gowsdl/generator"
 )
 
 const version = "v0.0.1"
 
-var opts struct {
-	Version    bool   `short:"v" long:"version" description:"Shows gowsdl version"`
-	Package    string `short:"p" long:"package" description:"Package under which code will be generated" default:"myservice"`
-	OutputFile string `short:"o" long:"output" description:"File where the generated code will be saved" default:"myservice.go"`
-	IgnoreTls  bool   `short:"i" long:"ignore-tls" description:"Ignores invalid TLS certificates. It is not recomended for production. Use at your own risk" default:"false"`
-}
+var vers = flag.Bool("v", false, "Shows gowsdl version")
+var pkg = flag.String("p", "myservice", "Package under which code will be generated")
+var outFile = flag.String("o", "myservice.go", "File where the generated code will be saved")
 
 func init() {
 	if os.Getenv("GOMAXPROCS") == "" {
@@ -35,25 +32,22 @@ func init() {
 }
 
 func main() {
-	args, err := flags.Parse(&opts)
-	if err != nil {
-		os.Exit(1)
-	}
+	flag.Parse()
 
-	if opts.Version {
+	if *vers {
 		log.Println(version)
 		os.Exit(0)
 	}
 
-	if len(args) == 0 {
+	if len(os.Args) < 2 {
 		log.Fatalln("WSDL file is required to start the party")
 	}
 
-	if opts.OutputFile == args[0] {
+	if *outFile == os.Args[1] {
 		log.Fatalln("Output file cannot be the same WSDL file")
 	}
 
-	gowsdl, err := gen.NewGoWsdl(args[0], opts.Package, opts.IgnoreTls)
+	gowsdl, err := gen.NewGoWsdl(os.Args[1], *pkg, false)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -63,10 +57,10 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	pkg := "./" + opts.Package
+	pkg := "./" + *pkg
 	err = os.Mkdir(pkg, 0744)
 
-	fd, err := os.Create(pkg + "/" + opts.OutputFile)
+	fd, err := os.Create(pkg + "/" + *outFile)
 	if err != nil {
 		log.Fatalln(err)
 	}
