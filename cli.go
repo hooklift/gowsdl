@@ -10,7 +10,6 @@ import (
 	"go/format"
 	"log"
 	"os"
-	"runtime"
 
 	gen "github.com/sanbornm/gowsdl/generator"
 )
@@ -22,10 +21,6 @@ var pkg = flag.String("p", "myservice", "Package under which code will be genera
 var outFile = flag.String("o", "myservice.go", "File where the generated code will be saved")
 
 func init() {
-	if os.Getenv("GOMAXPROCS") == "" {
-		runtime.GOMAXPROCS(runtime.NumCPU())
-	}
-
 	log.SetFlags(0)
 	log.SetOutput(os.Stdout)
 	log.SetPrefix("🍀  ")
