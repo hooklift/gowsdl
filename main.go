@@ -12,7 +12,7 @@ import (
 	"os"
 	"fmt"
 
-	gen "github.com/sanbornm/gowsdl/generator"
+	gen "github.com/hooklift/gowsdl/generator"
 )
 
 const version = "v0.0.1"
