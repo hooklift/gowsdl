@@ -66,14 +66,6 @@ func main() {
 	pkg := "./" + opts.Package
 	err = os.Mkdir(pkg, 0744)
 
-	if perr, ok := err.(*os.PathError); ok && os.IsExist(perr.Err) {
-		log.Printf("Package directory %s already exist, skipping creation\n", pkg)
-	} else {
-		if err != nil {
-			log.Fatalln(err)
-		}
-	}
-
 	fd, err := os.Create(pkg + "/" + opts.OutputFile)
 	if err != nil {
 		log.Fatalln(err)
