@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.mnb.hu/webservices/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://www.mnb.hu/webservices/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">MNB curreny exchange rate webservice.</wsdl:documentation>
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://www.mnb.hu/webservices/">
+      <s:element name="GetInfo">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetInfoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetInfoResult" type="s:string">
+                <s:annotation>
+                    <s:documentation>this is a comment</s:documentation>
+                </s:annotation>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetInfoSoapIn">
+    <wsdl:part name="parameters" element="tns:GetInfo" />
+  </wsdl:message>
+  <wsdl:message name="GetInfoSoapOut">
+    <wsdl:part name="parameters" element="tns:GetInfoResponse" />
+  </wsdl:message>
+  <wsdl:service name="MNBArfolyamService">
+    <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">MNB curreny exchange rate webservice.</wsdl:documentation>
+    <wsdl:port name="MNBArfolyamServiceSoap" binding="tns:MNBArfolyamServiceSoap">
+      <soap:address location="http://www.mnb.hu/arfolyamok.asmx" />
+    </wsdl:port>
+    <wsdl:port name="MNBArfolyamServiceSoap12" binding="tns:MNBArfolyamServiceSoap12">
+      <soap12:address location="http://www.mnb.hu/arfolyamok.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
