@@ -20,6 +20,7 @@ import (
 	"text/template"
 	"time"
 	"unicode"
+	"log"
 )
 
 const maxRecursion uint8 = 20
@@ -37,7 +38,7 @@ var cacheDir = filepath.Join(os.TempDir(), "gowsdl-cache")
 func init() {
 	err := os.MkdirAll(cacheDir, 0700)
 	if err != nil {
-		Log.Crit("Create cache directory", "error", err)
+		log.Println("Create cache directory", "error", err)
 		os.Exit(1)
 	}
 }
@@ -74,7 +75,7 @@ func downloadFile(url string, ignoreTls bool) ([]byte, error) {
 func NewGoWsdl(file, pkg string, ignoreTls bool) (*GoWsdl, error) {
 	file = strings.TrimSpace(file)
 	if file == "" {
-		Log.Crit("WSDL file is required to generate Go proxy")
+		log.Println("WSDL file is required to generate Go proxy")
 		os.Exit(2)
 	}
 
@@ -107,7 +108,7 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 
 		gocode["types"], err = g.genTypes()
 		if err != nil {
-			Log.Error("genTypes", "error", err)
+			log.Println("genTypes", "error", err)
 		}
 	}()
 
@@ -118,7 +119,7 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 
 		gocode["operations"], err = g.genOperations()
 		if err != nil {
-			Log.Error("genOperations", "error", err)
+			log.Println(err)
 		}
 	}()
 
@@ -126,7 +127,12 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 
 	gocode["header"], err = g.genHeader()
 	if err != nil {
-		Log.Error("genHeader", "error", err)
+		log.Println(err)
+	}
+
+	gocode["soap"], err = g.genSoapClient()
+	if err != nil {
+		log.Println(err)
 	}
 
 	return gocode, nil
@@ -137,14 +143,14 @@ func (g *GoWsdl) unmarshal() error {
 
 	parsedUrl, err := url.Parse(g.file)
 	if parsedUrl.Scheme == "" {
-		Log.Info("Reading", "file", g.file)
+		log.Println("Reading", "file", g.file)
 
 		data, err = ioutil.ReadFile(g.file)
 		if err != nil {
 			return err
 		}
 	} else {
-		Log.Info("Downloading", "file", g.file)
+		log.Println("Downloading", "file", g.file)
 
 		data, err = downloadFile(g.file, g.ignoreTls)
 		if err != nil {
@@ -188,7 +194,7 @@ func (g *GoWsdl) resolveXsdExternals(schema *XsdSchema, url *url.URL) error {
 			schemaLocation = url.Scheme + "://" + url.Host + schemaLocation
 		}
 
-		Log.Info("Downloading external schema", "location", schemaLocation)
+		log.Println("Downloading external schema", "location", schemaLocation)
 
 		data, err := downloadFile(schemaLocation, g.ignoreTls)
 		newschema := &XsdSchema{}
@@ -284,6 +290,17 @@ func (g *GoWsdl) genHeader() ([]byte, error) {
 
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("header").Funcs(funcMap).Parse(headerTmpl))
+	err := tmpl.Execute(data, g.pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return data.Bytes(), nil
+}
+
+func (g *GoWsdl) genSoapClient() ([]byte, error) {
+	data := new(bytes.Buffer)
+	tmpl := template.Must(template.New("soapclient").Parse(soapTmpl))
 	err := tmpl.Execute(data, g.pkg)
 	if err != nil {
 		return nil, err
@@ -402,7 +419,7 @@ func (g *GoWsdl) findType(message string) string {
 			// Message does not have parts. This could be a Port
 			// with HTTP binding or SOAP 1.2 binding, which are not currently
 			// supported.
-			Log.Warn("WSDL does seem to have HTTP or SOAP 1.2 binding which is not currently supported.")
+			log.Println("WSDL does seem to have HTTP or SOAP 1.2 binding which is not currently supported.")
 			continue
 		}
 		part := msg.Parts[0]

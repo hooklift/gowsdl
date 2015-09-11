@@ -1,29 +1,15 @@
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
 package generator
 
-import (
-	"bytes"
-	"crypto/tls"
-	"encoding/xml"
-	"io/ioutil"
-	"net/http"
+var soapTmpl = `
+var timeout = time.Duration(30 * time.Second)
 
-	"gopkg.in/inconshreveable/log15.v2"
-	"fmt"
-)
-
-var Log = log15.New()
-
-func init() {
-	Log.SetHandler(log15.DiscardHandler())
+func dialTimeout(network, addr string) (net.Conn, error) {
+	return net.DialTimeout(network, addr, timeout)
 }
 
 type SoapEnvelope struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	//Header SoapHeader `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header,omitempty"`
-	Body SoapBody `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
+	XMLName xml.Name `+"`"+`xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`+"`"+`
+	Body SoapBody `+"`"+`xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`+"`"+`
 }
 
 type SoapHeader struct {
@@ -31,15 +17,15 @@ type SoapHeader struct {
 }
 
 type SoapBody struct {
-	Fault   *SoapFault `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
-	Content string     `xml:",innerxml"`
+	Fault   *SoapFault `+"`"+`xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`+"`"+`
+	Content string     `+"`"+`xml:",innerxml"`+"`"+`
 }
 
 type SoapFault struct {
-	Faultcode   string `xml:"faultcode,omitempty"`
-	Faultstring string `xml:"faultstring,omitempty"`
-	Faultactor  string `xml:"faultactor,omitempty"`
-	Detail      string `xml:"detail,omitempty"`
+	Faultcode   string `+"`"+`xml:"faultcode,omitempty"`+"`"+`
+	Faultstring string `+"`"+`xml:"faultstring,omitempty"`+"`"+`
+	Faultactor  string `+"`"+`xml:"faultactor,omitempty"`+"`"+`
+	Detail      string `+"`"+`xml:"detail,omitempty"`+"`"+`
 }
 
 type BasicAuth struct {
@@ -87,7 +73,7 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	if err == nil {
 		err = encoder.Flush()
 	}
-	Log.Debug("request", "envelope", log15.Lazy{func() string { return buffer.String() }})
+	log.Println(buffer.String())
 	if err != nil {
 		return err
 	}
@@ -119,10 +105,10 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 
 	rawbody, err := ioutil.ReadAll(res.Body)
 	if len(rawbody) == 0 {
-		Log.Warn("empty response")
+		log.Println("empty response")
 		return nil
 	}
-	fmt.Println(string(rawbody))
+	log.Println(string(rawbody))
 	respEnvelope := &SoapEnvelope{}
 
 	err = xml.Unmarshal(rawbody, respEnvelope)
@@ -133,11 +119,11 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 	body := respEnvelope.Body.Content
 	fault := respEnvelope.Body.Fault
 	if body == "" {
-		Log.Warn("empty response body", "envelope", respEnvelope, "body", body)
+		log.Println("empty response body", "envelope", respEnvelope, "body", body)
 		return nil
 	}
 
-	Log.Debug("response", "envelope", respEnvelope, "body", body)
+	log.Println("response", "envelope", respEnvelope, "body", body)
 	if fault != nil {
 		return fault
 	}
@@ -149,3 +135,7 @@ func (s *SoapClient) Call(soapAction string, request, response interface{}) erro
 
 	return nil
 }
+
+func main() {
+}
+`

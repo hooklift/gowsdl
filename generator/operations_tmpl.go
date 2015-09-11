@@ -7,14 +7,14 @@ var opsTmpl = `
 {{range .}}
 	{{$portType := .Name | makePublic}}
 	type {{$portType}} struct {
-		client *gowsdl.SoapClient
+		client *SoapClient
 	}
 
-	func New{{$portType}}(url string, tls bool, auth *gowsdl.BasicAuth) *{{$portType}} {
+	func New{{$portType}}(url string, tls bool, auth *BasicAuth) *{{$portType}} {
 		if url == "" {
 			url = {{findServiceAddress .Name | printf "%q"}}
 		}
-		client := gowsdl.NewSoapClient(url, tls, auth)
+		client := NewSoapClient(url, tls, auth)
 
 		return &{{$portType}}{
 			client: client,

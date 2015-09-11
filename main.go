@@ -47,12 +47,14 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *outFile == os.Args[1] {
+	wsdlPath := os.Args[len(os.Args)-1]
+
+	if *outFile == wsdlPath {
 		log.Fatalln("Output file cannot be the same WSDL file")
 	}
 
 	// load wsdl
-	gowsdl, err := gen.NewGoWsdl(os.Args[1], *pkg, false)
+	gowsdl, err := gen.NewGoWsdl(wsdlPath, *pkg, false)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -76,6 +78,7 @@ func main() {
 	data.Write(gocode["header"])
 	data.Write(gocode["types"])
 	data.Write(gocode["operations"])
+	data.Write(gocode["soap"])
 
 	// go fmt the generated code
 	source, err := format.Source(data.Bytes())
