@@ -143,7 +143,7 @@ func (g *GoWsdl) unmarshal() error {
 
 	parsedUrl, err := url.Parse(g.file)
 	if parsedUrl.Scheme == "" {
-		log.Println("Reading", "file", g.file)
+		//log.Println("Reading", "file", g.file)
 
 		data, err = ioutil.ReadFile(g.file)
 		if err != nil {
