@@ -6,6 +6,11 @@
 
 Generates Go code from a WSDL file.
 
+### Install
+
+* [Download binary release](https://github.com/hooklift/gowsdl/releases)
+* Or: `go get github.com/hooklift/gowsdl/...`
+
 ### Goals
 * Generate idiomatic Go code as much as possible
 * Support only Document/Literal wrapped services, which are [WS-I](http://ws-i.org/) compliant

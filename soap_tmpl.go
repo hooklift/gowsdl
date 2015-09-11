@@ -1,4 +1,4 @@
-package generator
+package gowsdl
 
 var soapTmpl = `
 var timeout = time.Duration(30 * time.Second)
