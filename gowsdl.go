@@ -247,16 +247,6 @@ func (g *GoWsdl) genTypes() ([]byte, error) {
 	return data.Bytes(), nil
 }
 
-// func (g *GoWsdl) resolveElementsRefs() error {
-// 	for _, schema := range g.wsdl.Types.Schemas {
-// 		for _, globalEl := range schema.Elements {
-// 			for _, localEl := range globalEl.ComplexType.Sequence.Elements {
-
-// 			}
-// 		}
-// 	}
-// }
-
 func (g *GoWsdl) genOperations() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":             toGoType,
