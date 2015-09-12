@@ -17,8 +17,7 @@ compile:
 	@gox $(LDFLAGS) \
 	-os="darwin" \
 	-os="linux" \
-	-os="solaris" \
-	-os="freebsd" \
+	-os="windows" \
 	-output "build/$(NAME)_$(VERSION)_{{.OS}}_{{.Arch}}/$(NAME)" \
 	./...
 

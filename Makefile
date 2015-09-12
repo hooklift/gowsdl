@@ -1,6 +1,6 @@
 GHACCOUNT := hooklift
 NAME := gowsdl
-VERSION := v0.1.0
+VERSION := v0.1.1
 
 include common.mk
 
