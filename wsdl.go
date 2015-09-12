@@ -1,100 +1,116 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 package gowsdl
 
-type Wsdl struct {
+// WSDL represents the global structure of a WSDL file.
+type WSDL struct {
 	Name            string          `xml:"name,attr"`
 	TargetNamespace string          `xml:"targetNamespace,attr"`
-	Imports         []*WsdlImport   `xml:"import"`
+	Imports         []*WSDLImport   `xml:"import"`
 	Doc             string          `xml:"documentation"`
-	Types           WsdlType        `xml:"http://schemas.xmlsoap.org/wsdl/ types"`
-	Messages        []*WsdlMessage  `xml:"http://schemas.xmlsoap.org/wsdl/ message"`
-	PortTypes       []*WsdlPortType `xml:"http://schemas.xmlsoap.org/wsdl/ portType"`
-	Binding         []*WsdlBinding  `xml:"http://schemas.xmlsoap.org/wsdl/ binding"`
-	Service         []*WsdlService  `xml:"http://schemas.xmlsoap.org/wsdl/ service"`
+	Types           WSDLType        `xml:"http://schemas.xmlsoap.org/wsdl/ types"`
+	Messages        []*WSDLMessage  `xml:"http://schemas.xmlsoap.org/wsdl/ message"`
+	PortTypes       []*WSDLPortType `xml:"http://schemas.xmlsoap.org/wsdl/ portType"`
+	Binding         []*WSDLBinding  `xml:"http://schemas.xmlsoap.org/wsdl/ binding"`
+	Service         []*WSDLService  `xml:"http://schemas.xmlsoap.org/wsdl/ service"`
 }
 
-type WsdlImport struct {
+// WSDLImport is the struct used for deserializing WSDL imports.
+type WSDLImport struct {
 	Namespace string `xml:"namespace,attr"`
 	Location  string `xml:"location,attr"`
 }
 
-type WsdlType struct {
+// WSDLType represents the entry point for deserializing XSD schemas used by the WSDL file.
+type WSDLType struct {
 	Doc     string       `xml:"documentation"`
-	Schemas []*XsdSchema `xml:"schema"`
+	Schemas []*XSDSchema `xml:"schema"`
 }
 
-type WsdlPart struct {
+// WSDLPart defines the struct for a function parameter within a WSDL.
+type WSDLPart struct {
 	Name    string `xml:"name,attr"`
 	Element string `xml:"element,attr"`
 	Type    string `xml:"type,attr"`
 }
 
-type WsdlMessage struct {
+// WSDLMessage represents a function, which in turn has one or more parameters.
+type WSDLMessage struct {
 	Name  string      `xml:"name,attr"`
 	Doc   string      `xml:"documentation"`
-	Parts []*WsdlPart `xml:"http://schemas.xmlsoap.org/wsdl/ part"`
+	Parts []*WSDLPart `xml:"http://schemas.xmlsoap.org/wsdl/ part"`
 }
 
-type WsdlFault struct {
+// WSDLFault represents a WSDL fault message.
+type WSDLFault struct {
 	Name      string        `xml:"name,attr"`
 	Message   string        `xml:"message,attr"`
 	Doc       string        `xml:"documentation"`
-	SoapFault WsdlSoapFault `xml:"http://schemas.xmlsoap.org/wsdl/soap/ fault"`
+	SOAPFault WSDLSOAPFault `xml:"http://schemas.xmlsoap.org/wsdl/soap/ fault"`
 }
 
-type WsdlInput struct {
+// WSDLInput represents a WSDL input message.
+type WSDLInput struct {
 	Name       string            `xml:"name,attr"`
 	Message    string            `xml:"message,attr"`
 	Doc        string            `xml:"documentation"`
-	SoapBody   WsdlSoapBody      `xml:"http://schemas.xmlsoap.org/wsdl/soap/ body"`
-	SoapHeader []*WsdlSoapHeader `xml:"http://schemas.xmlsoap.org/wsdl/soap/ header"`
+	SOAPBody   WSDLSOAPBody      `xml:"http://schemas.xmlsoap.org/wsdl/soap/ body"`
+	SOAPHeader []*WSDLSOAPHeader `xml:"http://schemas.xmlsoap.org/wsdl/soap/ header"`
 }
 
-type WsdlOutput struct {
+// WSDLOutput represents a WSDL output message.
+type WSDLOutput struct {
 	Name       string            `xml:"name,attr"`
 	Message    string            `xml:"message,attr"`
 	Doc        string            `xml:"documentation"`
-	SoapBody   WsdlSoapBody      `xml:"http://schemas.xmlsoap.org/wsdl/soap/ body"`
-	SoapHeader []*WsdlSoapHeader `xml:"http://schemas.xmlsoap.org/wsdl/soap/ header"`
+	SOAPBody   WSDLSOAPBody      `xml:"http://schemas.xmlsoap.org/wsdl/soap/ body"`
+	SOAPHeader []*WSDLSOAPHeader `xml:"http://schemas.xmlsoap.org/wsdl/soap/ header"`
 }
 
-type WsdlOperation struct {
+// WSDLOperation represents the contract of an entire operation or function.
+type WSDLOperation struct {
 	Name          string            `xml:"name,attr"`
 	Doc           string            `xml:"documentation"`
-	Input         WsdlInput         `xml:"input"`
-	Output        WsdlOutput        `xml:"output"`
-	Faults        []*WsdlFault      `xml:"fault"`
-	SoapOperation WsdlSoapOperation `xml:"http://schemas.xmlsoap.org/wsdl/soap/ operation"`
+	Input         WSDLInput         `xml:"input"`
+	Output        WSDLOutput        `xml:"output"`
+	Faults        []*WSDLFault      `xml:"fault"`
+	SOAPOperation WSDLSOAPOperation `xml:"http://schemas.xmlsoap.org/wsdl/soap/ operation"`
 }
 
-type WsdlPortType struct {
+// WSDLPortType defines the service, operations that can be performed and the messages involved.
+// A port type can be compared to a function library, module or class.
+type WSDLPortType struct {
 	Name       string           `xml:"name,attr"`
 	Doc        string           `xml:"documentation"`
-	Operations []*WsdlOperation `xml:"http://schemas.xmlsoap.org/wsdl/ operation"`
+	Operations []*WSDLOperation `xml:"http://schemas.xmlsoap.org/wsdl/ operation"`
 }
 
-type WsdlSoapBinding struct {
+// WSDLSOAPBinding represents a SOAP binding to the web service.
+type WSDLSOAPBinding struct {
 	Style     string `xml:"style,attr"`
 	Transport string `xml:"transport,attr"`
 }
 
-type WsdlSoapOperation struct {
-	SoapAction string `xml:"soapAction,attr"`
+// WSDLSOAPOperation represents a service operation in SOAP terms.
+type WSDLSOAPOperation struct {
+	SOAPAction string `xml:"soapAction,attr"`
 	Style      string `xml:"style,attr"`
 }
 
-type WsdlSoapHeader struct {
+// WSDLSOAPHeader defines the header for a SOAP service.
+type WSDLSOAPHeader struct {
 	Message       string                 `xml:"message,attr"`
 	Part          string                 `xml:"part,attr"`
 	Use           string                 `xml:"use,attr"`
 	EncodingStyle string                 `xml:"encodingStyle,attr"`
 	Namespace     string                 `xml:"namespace,attr"`
-	HeadersFault  []*WsdlSoapHeaderFault `xml:"headerfault"`
+	HeadersFault  []*WSDLSOAPHeaderFault `xml:"headerfault"`
 }
 
-type WsdlSoapHeaderFault struct {
+// WSDLSOAPHeaderFault defines a SOAP fault header.
+type WSDLSOAPHeaderFault struct {
 	Message       string `xml:"message,attr"`
 	Part          string `xml:"part,attr"`
 	Use           string `xml:"use,attr"`
@@ -102,41 +118,47 @@ type WsdlSoapHeaderFault struct {
 	Namespace     string `xml:"namespace,attr"`
 }
 
-type WsdlSoapBody struct {
+// WSDLSOAPBody defines SOAP body characteristics.
+type WSDLSOAPBody struct {
 	Parts         string `xml:"parts,attr"`
 	Use           string `xml:"use,attr"`
 	EncodingStyle string `xml:"encodingStyle,attr"`
 	Namespace     string `xml:"namespace,attr"`
 }
 
-type WsdlSoapFault struct {
+// WSDLSOAPFault defines a SOAP fault message characteristics.
+type WSDLSOAPFault struct {
 	Parts         string `xml:"parts,attr"`
 	Use           string `xml:"use,attr"`
 	EncodingStyle string `xml:"encodingStyle,attr"`
 	Namespace     string `xml:"namespace,attr"`
 }
 
-type WsdlSoapAddress struct {
+// WSDLSOAPAddress defines the location for the SOAP service.
+type WSDLSOAPAddress struct {
 	Location string `xml:"location,attr"`
 }
 
-type WsdlBinding struct {
+// WSDLBinding defines only a SOAP binding and its operations
+type WSDLBinding struct {
 	Name        string           `xml:"name,attr"`
 	Type        string           `xml:"type,attr"`
 	Doc         string           `xml:"documentation"`
-	SoapBinding WsdlSoapBinding  `xml:"http://schemas.xmlsoap.org/wsdl/soap/ binding"`
-	Operations  []*WsdlOperation `xml:"http://schemas.xmlsoap.org/wsdl/ operation"`
+	SOAPBinding WSDLSOAPBinding  `xml:"http://schemas.xmlsoap.org/wsdl/soap/ binding"`
+	Operations  []*WSDLOperation `xml:"http://schemas.xmlsoap.org/wsdl/ operation"`
 }
 
-type WsdlPort struct {
+// WSDLPort defines the properties for a SOAP port only.
+type WSDLPort struct {
 	Name        string          `xml:"name,attr"`
 	Binding     string          `xml:"binding,attr"`
 	Doc         string          `xml:"documentation"`
-	SoapAddress WsdlSoapAddress `xml:"http://schemas.xmlsoap.org/wsdl/soap/ address"`
+	SOAPAddress WSDLSOAPAddress `xml:"http://schemas.xmlsoap.org/wsdl/soap/ address"`
 }
 
-type WsdlService struct {
+// WSDLService defines the list of SOAP services associated with the WSDL.
+type WSDLService struct {
 	Name  string      `xml:"name,attr"`
 	Doc   string      `xml:"documentation"`
-	Ports []*WsdlPort `xml:"http://schemas.xmlsoap.org/wsdl/ port"`
+	Ports []*WSDLPort `xml:"http://schemas.xmlsoap.org/wsdl/ port"`
 }

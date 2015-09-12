@@ -1,20 +1,21 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 package gowsdl
 
 var opsTmpl = `
 {{range .}}
 	{{$portType := .Name | makePublic}}
 	type {{$portType}} struct {
-		client *SoapClient
+		client *SOAPClient
 	}
 
 	func New{{$portType}}(url string, tls bool, auth *BasicAuth) *{{$portType}} {
 		if url == "" {
 			url = {{findServiceAddress .Name | printf "%q"}}
 		}
-		client := NewSoapClient(url, tls, auth)
+		client := NewSOAPClient(url, tls, auth)
 
 		return &{{$portType}}{
 			client: client,
@@ -24,7 +25,7 @@ var opsTmpl = `
 	{{range .Operations}}
 		{{$faults := len .Faults}}
 		{{$requestType := findType .Input.Message | replaceReservedWords | makePublic}}
-		{{$soapAction := findSoapAction .Name $portType}}
+		{{$soapAction := findSOAPAction .Name $portType}}
 		{{$responseType := findType .Output.Message | replaceReservedWords | makePublic}}
 
 		{{/*if ne $soapAction ""*/}}
@@ -34,7 +35,7 @@ var opsTmpl = `
 		//   - {{.Name}} {{.Doc}}{{end}}{{end}}
 		{{if ne .Doc ""}}/* {{.Doc}} */{{end}}
 		func (service *{{$portType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{$responseType}}, error) {
-			response := &{{$responseType}}{}
+			response := new({{$responseType}})
 			err := service.client.Call("{{$soapAction}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, response)
 			if err != nil {
 				return nil, err

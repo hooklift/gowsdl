@@ -1,37 +1,42 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 package gowsdl
 
 import (
 	"encoding/xml"
 )
 
-type XsdSchema struct {
+// XSDSchema represents an entire Schema structure.
+type XSDSchema struct {
 	XMLName            xml.Name          `xml:"schema"`
 	Tns                string            `xml:"xmlns tns,attr"`
 	Xs                 string            `xml:"xmlns xs,attr"`
 	Version            string            `xml:"version,attr"`
 	TargetNamespace    string            `xml:"targetNamespace,attr"`
 	ElementFormDefault string            `xml:"elementFormDefault,attr"`
-	Includes           []*XsdInclude     `xml:"include"`
-	Imports            []*XsdImport      `xml:"import"`
-	Elements           []*XsdElement     `xml:"element"`
-	ComplexTypes       []*XsdComplexType `xml:"complexType"` //global
-	SimpleType         []*XsdSimpleType  `xml:"simpleType"`
+	Includes           []*XSDInclude     `xml:"include"`
+	Imports            []*XSDImport      `xml:"import"`
+	Elements           []*XSDElement     `xml:"element"`
+	ComplexTypes       []*XSDComplexType `xml:"complexType"` //global
+	SimpleType         []*XSDSimpleType  `xml:"simpleType"`
 }
 
-type XsdInclude struct {
+// XSDInclude represents schema includes.
+type XSDInclude struct {
 	SchemaLocation string `xml:"schemaLocation,attr"`
 }
 
-type XsdImport struct {
+// XSDImport represents XSD imports within the main schema.
+type XSDImport struct {
 	XMLName        xml.Name `xml:"import"`
 	SchemaLocation string   `xml:"schemaLocation,attr"`
 	Namespace      string   `xml:"namespace,attr"`
 }
 
-type XsdElement struct {
+// XSDElement represents a Schema element.
+type XSDElement struct {
 	XMLName     xml.Name        `xml:"element"`
 	Name        string          `xml:"name,attr"`
 	Doc         string          `xml:"annotation>documentation"`
@@ -40,75 +45,89 @@ type XsdElement struct {
 	Ref         string          `xml:"ref,attr"`
 	MinOccurs   string          `xml:"minOccurs,attr"`
 	MaxOccurs   string          `xml:"maxOccurs,attr"`
-	ComplexType *XsdComplexType `xml:"complexType"` //local
-	SimpleType  *XsdSimpleType  `xml:"simpleType"`
-	Groups      []*XsdGroup     `xml:"group"`
+	ComplexType *XSDComplexType `xml:"complexType"` //local
+	SimpleType  *XSDSimpleType  `xml:"simpleType"`
+	Groups      []*XSDGroup     `xml:"group"`
 }
 
-type XsdComplexType struct {
+// XSDComplexType represents a Schema complex type.
+type XSDComplexType struct {
 	XMLName        xml.Name          `xml:"complexType"`
 	Abstract       bool              `xml:"abstract,attr"`
 	Name           string            `xml:"name,attr"`
 	Mixed          bool              `xml:"mixed,attr"`
-	Sequence       []XsdElement      `xml:"sequence>element"`
-	Choice         []XsdElement      `xml:"choice>element"`
-	SequenceChoice []XsdElement      `xml:"sequence>choice>element"`
-	All            []XsdElement      `xml:"all>element"`
-	ComplexContent XsdComplexContent `xml:"complexContent"`
-	SimpleContent  XsdSimpleContent  `xml:"simpleContent"`
-	Attributes     []*XsdAttribute   `xml:"attribute"`
+	Sequence       []XSDElement      `xml:"sequence>element"`
+	Choice         []XSDElement      `xml:"choice>element"`
+	SequenceChoice []XSDElement      `xml:"sequence>choice>element"`
+	All            []XSDElement      `xml:"all>element"`
+	ComplexContent XSDComplexContent `xml:"complexContent"`
+	SimpleContent  XSDSimpleContent  `xml:"simpleContent"`
+	Attributes     []*XSDAttribute   `xml:"attribute"`
 }
 
-type XsdGroup struct {
+// XSDGroup element is used to define a group of elements to be used in complex type definitions.
+type XSDGroup struct {
 	Name     string       `xml:"name,attr"`
 	Ref      string       `xml:"ref,attr"`
-	Sequence []XsdElement `xml:"sequence>element"`
-	Choice   []XsdElement `xml:"choice>element"`
-	All      []XsdElement `xml:"all>element"`
+	Sequence []XSDElement `xml:"sequence>element"`
+	Choice   []XSDElement `xml:"choice>element"`
+	All      []XSDElement `xml:"all>element"`
 }
 
-type XsdComplexContent struct {
+// XSDComplexContent element defines extensions or restrictions on a complex
+// type that contains mixed content or elements only.
+type XSDComplexContent struct {
 	XMLName   xml.Name     `xml:"complexContent"`
-	Extension XsdExtension `xml:"extension"`
+	Extension XSDExtension `xml:"extension"`
 }
 
-type XsdSimpleContent struct {
+// XSDSimpleContent element contains extensions or restrictions on a text-only
+// complex type or on a simple type as content and contains no elements.
+type XSDSimpleContent struct {
 	XMLName   xml.Name     `xml:"simpleContent"`
-	Extension XsdExtension `xml:"extension"`
+	Extension XSDExtension `xml:"extension"`
 }
 
-type XsdExtension struct {
+// XSDExtension element extends an existing simpleType or complexType element.
+type XSDExtension struct {
 	XMLName    xml.Name        `xml:"extension"`
 	Base       string          `xml:"base,attr"`
-	Attributes []*XsdAttribute `xml:"attribute"`
-	Sequence   []XsdElement    `xml:"sequence>element"`
+	Attributes []*XSDAttribute `xml:"attribute"`
+	Sequence   []XSDElement    `xml:"sequence>element"`
 }
 
-type XsdAttribute struct {
+// XSDAttribute represent an element attribute. Simple elements cannot have
+// attributes. If an element has attributes, it is considered to be of a
+// complex type. But the attribute itself is always declared as a simple type.
+type XSDAttribute struct {
 	Name       string         `xml:"name,attr"`
 	Doc        string         `xml:"annotation>documentation"`
 	Type       string         `xml:"type,attr"`
-	SimpleType *XsdSimpleType `xml:"simpleType"`
+	SimpleType *XSDSimpleType `xml:"simpleType"`
 }
 
-type XsdSimpleType struct {
+// XSDSimpleType element defines a simple type and specifies the constraints
+// and information about the values of attributes or text-only elements.
+type XSDSimpleType struct {
 	Name        string         `xml:"name,attr"`
-	Restriction XsdRestriction `xml:"restriction"`
+	Restriction XSDRestriction `xml:"restriction"`
 }
 
-type XsdRestriction struct {
+// XSDRestriction defines restrictions on a simpleType, simpleContent, or complexContent definition.
+type XSDRestriction struct {
 	Base         string                `xml:"base,attr"`
-	Enumeration  []XsdRestrictionValue `xml:"enumeration"`
-	Pattern      XsdRestrictionValue   `xml:"pattern"`
-	MinInclusive XsdRestrictionValue   `xml:"minInclusive"`
-	MaxInclusive XsdRestrictionValue   `xml:"maxInclusive"`
-	WhiteSpace   XsdRestrictionValue   `xml:"whitespace"`
-	Length       XsdRestrictionValue   `xml:"length"`
-	MinLength    XsdRestrictionValue   `xml:"minLength"`
-	MaxLength    XsdRestrictionValue   `xml:"maxLength"`
+	Enumeration  []XSDRestrictionValue `xml:"enumeration"`
+	Pattern      XSDRestrictionValue   `xml:"pattern"`
+	MinInclusive XSDRestrictionValue   `xml:"minInclusive"`
+	MaxInclusive XSDRestrictionValue   `xml:"maxInclusive"`
+	WhiteSpace   XSDRestrictionValue   `xml:"whitespace"`
+	Length       XSDRestrictionValue   `xml:"length"`
+	MinLength    XSDRestrictionValue   `xml:"minLength"`
+	MaxLength    XSDRestrictionValue   `xml:"maxLength"`
 }
 
-type XsdRestrictionValue struct {
+// XSDRestrictionValue represents a restriction value.
+type XSDRestrictionValue struct {
 	Doc   string `xml:"annotation>documentation"`
 	Value string `xml:"value,attr"`
 }

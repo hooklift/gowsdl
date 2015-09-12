@@ -1,6 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 package gowsdl
 
 import (
@@ -10,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -20,16 +22,16 @@ import (
 	"text/template"
 	"time"
 	"unicode"
-	"log"
 )
 
 const maxRecursion uint8 = 20
 
-type GoWsdl struct {
+// GoWSDL defines the struct for WSDL generator.
+type GoWSDL struct {
 	file, pkg             string
-	ignoreTls             bool
-	wsdl                  *Wsdl
-	resolvedXsdExternals  map[string]bool
+	ignoreTLS             bool
+	wsdl                  *WSDL
+	resolvedXSDExternals  map[string]bool
 	currentRecursionLevel uint8
 }
 
@@ -49,10 +51,10 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, timeout)
 }
 
-func downloadFile(url string, ignoreTls bool) ([]byte, error) {
+func downloadFile(url string, ignoreTLS bool) ([]byte, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: ignoreTls,
+			InsecureSkipVerify: ignoreTLS,
 		},
 		Dial: dialTimeout,
 	}
@@ -72,11 +74,11 @@ func downloadFile(url string, ignoreTls bool) ([]byte, error) {
 	return data, nil
 }
 
-func NewGoWsdl(file, pkg string, ignoreTls bool) (*GoWsdl, error) {
+// NewGoWSDL initializes WSDL generator.
+func NewGoWSDL(file, pkg string, ignoreTLS bool) (*GoWSDL, error) {
 	file = strings.TrimSpace(file)
 	if file == "" {
-		log.Println("WSDL file is required to generate Go proxy")
-		os.Exit(2)
+		return nil, errors.New("WSDL file is required to generate Go proxy")
 	}
 
 	pkg = strings.TrimSpace(pkg)
@@ -84,14 +86,16 @@ func NewGoWsdl(file, pkg string, ignoreTls bool) (*GoWsdl, error) {
 		pkg = "myservice"
 	}
 
-	return &GoWsdl{
+	return &GoWSDL{
 		file:      file,
 		pkg:       pkg,
-		ignoreTls: ignoreTls,
+		ignoreTLS: ignoreTLS,
 	}, nil
 }
 
-func (g *GoWsdl) Start() (map[string][]byte, error) {
+// Start initiaties the code generation process by starting two goroutines: one
+// to generate types and another one to generate operations.
+func (g *GoWSDL) Start() (map[string][]byte, error) {
 	gocode := make(map[string][]byte)
 
 	err := g.unmarshal()
@@ -130,7 +134,7 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 		log.Println(err)
 	}
 
-	gocode["soap"], err = g.genSoapClient()
+	gocode["soap"], err = g.genSOAPClient()
 	if err != nil {
 		log.Println(err)
 	}
@@ -138,11 +142,11 @@ func (g *GoWsdl) Start() (map[string][]byte, error) {
 	return gocode, nil
 }
 
-func (g *GoWsdl) unmarshal() error {
+func (g *GoWSDL) unmarshal() error {
 	var data []byte
 
-	parsedUrl, err := url.Parse(g.file)
-	if parsedUrl.Scheme == "" {
+	parsedURL, err := url.Parse(g.file)
+	if parsedURL.Scheme == "" {
 		//log.Println("Reading", "file", g.file)
 
 		data, err = ioutil.ReadFile(g.file)
@@ -152,20 +156,20 @@ func (g *GoWsdl) unmarshal() error {
 	} else {
 		log.Println("Downloading", "file", g.file)
 
-		data, err = downloadFile(g.file, g.ignoreTls)
+		data, err = downloadFile(g.file, g.ignoreTLS)
 		if err != nil {
 			return err
 		}
 	}
 
-	g.wsdl = &Wsdl{}
+	g.wsdl = new(WSDL)
 	err = xml.Unmarshal(data, g.wsdl)
 	if err != nil {
 		return err
 	}
 
 	for _, schema := range g.wsdl.Types.Schemas {
-		err = g.resolveXsdExternals(schema, parsedUrl)
+		err = g.resolveXSDExternals(schema, parsedURL)
 		if err != nil {
 			return err
 		}
@@ -174,7 +178,7 @@ func (g *GoWsdl) unmarshal() error {
 	return nil
 }
 
-func (g *GoWsdl) resolveXsdExternals(schema *XsdSchema, url *url.URL) error {
+func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, url *url.URL) error {
 	for _, incl := range schema.Includes {
 		location, err := url.Parse(incl.SchemaLocation)
 		if err != nil {
@@ -182,22 +186,22 @@ func (g *GoWsdl) resolveXsdExternals(schema *XsdSchema, url *url.URL) error {
 		}
 
 		_, schemaName := filepath.Split(location.Path)
-		if g.resolvedXsdExternals[schemaName] {
+		if g.resolvedXSDExternals[schemaName] {
 			continue
 		}
 
 		schemaLocation := location.String()
 		if !location.IsAbs() {
 			if !url.IsAbs() {
-				return errors.New(fmt.Sprintf("Unable to resolve external schema %s through WSDL URL %s", schemaLocation, url))
+				return fmt.Errorf("Unable to resolve external schema %s through WSDL URL %s", schemaLocation, url)
 			}
 			schemaLocation = url.Scheme + "://" + url.Host + schemaLocation
 		}
 
 		log.Println("Downloading external schema", "location", schemaLocation)
 
-		data, err := downloadFile(schemaLocation, g.ignoreTls)
-		newschema := &XsdSchema{}
+		data, err := downloadFile(schemaLocation, g.ignoreTLS)
+		newschema := new(XSDSchema)
 
 		err = xml.Unmarshal(data, newschema)
 		if err != nil {
@@ -210,21 +214,21 @@ func (g *GoWsdl) resolveXsdExternals(schema *XsdSchema, url *url.URL) error {
 			g.currentRecursionLevel++
 
 			//log.Printf("Entering recursion %d\n", g.currentRecursionLevel)
-			g.resolveXsdExternals(newschema, url)
+			g.resolveXSDExternals(newschema, url)
 		}
 
 		g.wsdl.Types.Schemas = append(g.wsdl.Types.Schemas, newschema)
 
-		if g.resolvedXsdExternals == nil {
-			g.resolvedXsdExternals = make(map[string]bool, maxRecursion)
+		if g.resolvedXSDExternals == nil {
+			g.resolvedXSDExternals = make(map[string]bool, maxRecursion)
 		}
-		g.resolvedXsdExternals[schemaName] = true
+		g.resolvedXSDExternals[schemaName] = true
 	}
 
 	return nil
 }
 
-func (g *GoWsdl) genTypes() ([]byte, error) {
+func (g *GoWSDL) genTypes() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":             toGoType,
 		"stripns":              stripns,
@@ -247,14 +251,14 @@ func (g *GoWsdl) genTypes() ([]byte, error) {
 	return data.Bytes(), nil
 }
 
-func (g *GoWsdl) genOperations() ([]byte, error) {
+func (g *GoWSDL) genOperations() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":             toGoType,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           makePublic,
 		"findType":             g.findType,
-		"findSoapAction":       g.findSoapAction,
+		"findSOAPAction":       g.findSOAPAction,
 		"findServiceAddress":   g.findServiceAddress,
 	}
 
@@ -268,7 +272,7 @@ func (g *GoWsdl) genOperations() ([]byte, error) {
 	return data.Bytes(), nil
 }
 
-func (g *GoWsdl) genHeader() ([]byte, error) {
+func (g *GoWSDL) genHeader() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":             toGoType,
 		"stripns":              stripns,
@@ -288,7 +292,7 @@ func (g *GoWsdl) genHeader() ([]byte, error) {
 	return data.Bytes(), nil
 }
 
-func (g *GoWsdl) genSoapClient() ([]byte, error) {
+func (g *GoWSDL) genSOAPClient() ([]byte, error) {
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("soapclient").Parse(soapTmpl))
 	err := tmpl.Execute(data, g.pkg)
@@ -376,19 +380,19 @@ func toGoType(xsdType string) string {
 	// Handles name space, ie. xsd:string, xs:string
 	r := strings.Split(xsdType, ":")
 
-	type_ := r[0]
+	t := r[0]
 
 	if len(r) == 2 {
-		type_ = r[1]
+		t = r[1]
 	}
 
-	value := xsd2GoTypes[strings.ToLower(type_)]
+	value := xsd2GoTypes[strings.ToLower(t)]
 
 	if value != "" {
 		return value
 	}
 
-	return "*" + replaceReservedWords(makePublic(type_))
+	return "*" + replaceReservedWords(makePublic(t))
 }
 
 // Given a message, finds its type.
@@ -396,7 +400,7 @@ func toGoType(xsdType string) string {
 // I'm not very proud of this function but
 // it works for now and performance doesn't
 // seem critical at this point
-func (g *GoWsdl) findType(message string) string {
+func (g *GoWSDL) findType(message string) string {
 	message = stripns(message)
 
 	for _, msg := range g.wsdl.Messages {
@@ -435,7 +439,7 @@ func (g *GoWsdl) findType(message string) string {
 
 // TODO(c4milo): Add support for namespaces instead of striping them out
 // TODO(c4milo): improve runtime complexity if performance turns out to be an issue.
-func (g *GoWsdl) findSoapAction(operation, portType string) string {
+func (g *GoWSDL) findSOAPAction(operation, portType string) string {
 	for _, binding := range g.wsdl.Binding {
 		if stripns(binding.Type) != portType {
 			continue
@@ -443,18 +447,18 @@ func (g *GoWsdl) findSoapAction(operation, portType string) string {
 
 		for _, soapOp := range binding.Operations {
 			if soapOp.Name == operation {
-				return soapOp.SoapOperation.SoapAction
+				return soapOp.SOAPOperation.SOAPAction
 			}
 		}
 	}
 	return ""
 }
 
-func (g *GoWsdl) findServiceAddress(name string) string {
+func (g *GoWSDL) findServiceAddress(name string) string {
 	for _, service := range g.wsdl.Service {
 		for _, port := range service.Ports {
 			if port.Name == name {
-				return port.SoapAddress.Location
+				return port.SOAPAddress.Location
 			}
 		}
 	}
@@ -464,19 +468,19 @@ func (g *GoWsdl) findServiceAddress(name string) string {
 // TODO(c4milo): Add namespace support instead of stripping it
 func stripns(xsdType string) string {
 	r := strings.Split(xsdType, ":")
-	type_ := r[0]
+	t := r[0]
 
 	if len(r) == 2 {
-		type_ = r[1]
+		t = r[1]
 	}
 
-	return type_
+	return t
 }
 
-func makePublic(field_ string) string {
-	field := []rune(field_)
+func makePublic(identifier string) string {
+	field := []rune(identifier)
 	if len(field) == 0 {
-		return field_
+		return identifier
 	}
 
 	field[0] = unicode.ToUpper(field[0])
@@ -491,9 +495,7 @@ func comment(text string) string {
 		return ""
 	}
 
-	// Helps to determine if
-	// there is an actual comment
-	// without screwing newlines
+	// Helps to determine if there is an actual comment without screwing newlines
 	// in real comments.
 	hasComment := false
 
