@@ -49,20 +49,23 @@ package main
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"go/format"
 	"log"
 	"os"
-	"fmt"
 
 	gen "github.com/hooklift/gowsdl"
 )
 
-const version = "v0.0.1"
+// Version is initialized in compilation time by go build.
+var Version string
+
+// Name is initialized in compilation time by go build.
+var Name string
 
 var vers = flag.Bool("v", false, "Shows gowsdl version")
 var pkg = flag.String("p", "myservice", "Package under which code will be generated")
 var outFile = flag.String("o", "myservice.go", "File where the generated code will be saved")
-
 
 func init() {
 	log.SetFlags(0)
@@ -72,15 +75,15 @@ func init() {
 
 func main() {
 	flag.Usage = func() {
-	    fmt.Fprintf(os.Stderr, "Usage: %s [options] myservice.wsdl\n", os.Args[0])
-	    flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] myservice.wsdl\n", os.Args[0])
+		flag.PrintDefaults()
 	}
 
 	flag.Parse()
 
 	// Show app version
 	if *vers {
-		log.Println(version)
+		log.Println(Version)
 		os.Exit(0)
 	}
 
@@ -96,7 +99,7 @@ func main() {
 	}
 
 	// load wsdl
-	gowsdl, err := gen.NewGoWsdl(wsdlPath, *pkg, false)
+	gowsdl, err := gen.NewGoWSDL(wsdlPath, *pkg, false)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -110,11 +113,11 @@ func main() {
 	pkg := "./" + *pkg
 	err = os.Mkdir(pkg, 0744)
 
-	fd, err := os.Create(pkg + "/" + *outFile)
+	file, err := os.Create(pkg + "/" + *outFile)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer fd.Close()
+	defer file.Close()
 
 	data := new(bytes.Buffer)
 	data.Write(gocode["header"])
@@ -125,11 +128,11 @@ func main() {
 	// go fmt the generated code
 	source, err := format.Source(data.Bytes())
 	if err != nil {
-		fd.Write(data.Bytes())
+		file.Write(data.Bytes())
 		log.Fatalln(err)
 	}
 
-	fd.Write(source)
+	file.Write(source)
 
 	log.Println("Done 💩")
 }
