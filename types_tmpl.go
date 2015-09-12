@@ -41,44 +41,6 @@ var typesTmpl = `
 	Value {{toGoType .Extension.Base}}{{template "Attributes" .Extension.Attributes}}
 {{end}}
 
-{{define "ComplexTypeGlobal"}}
-	{{$name := replaceReservedWords .Name | makePublic}}
-	type {{$name}} struct {
-		XMLName xml.Name ` + "`xml:\"{{targetNamespace}} {{.Name}}\"`" + `
-		{{if ne .ComplexContent.Extension.Base ""}}
-			{{template "ComplexContent" .ComplexContent}}
-		{{else if ne .SimpleContent.Extension.Base ""}}
-			{{template "SimpleContent" .SimpleContent}}
-		{{else}}
-			{{template "Elements" .Sequence}}
-			{{template "Elements" .Choice}}
-			{{template "Elements" .SequenceChoice}}
-			{{template "Elements" .All}}
-			{{template "Attributes" .Attributes}}
-		{{end}}
-	}
-{{end}}
-
-{{define "ComplexTypeLocal"}}
-	{{$name := .Name}}
-	{{with .ComplexType}}
-		type {{$name | replaceReservedWords | makePublic}} struct {
-			XMLName xml.Name ` + "`xml:\"{{targetNamespace}} {{$name}}\"`" + `
-			{{if ne .ComplexContent.Extension.Base ""}}
-				{{template "ComplexContent" .ComplexContent}}
-			{{else if ne .SimpleContent.Extension.Base ""}}
-				{{template "SimpleContent" .SimpleContent}}
-			{{else}}
-				{{template "Elements" .Sequence}}
-				{{template "Elements" .Choice}}
-				{{template "Elements" .SequenceChoice}}
-				{{template "Elements" .All}}
-				{{template "Attributes" .Attributes}}
-			{{end}}
-		}
-	{{end}}
-{{end}}
-
 {{define "ComplexTypeInline"}}
 	{{replaceReservedWords .Name | makePublic}} struct {
 	{{with .ComplexType}}
@@ -103,16 +65,52 @@ var typesTmpl = `
 {{end}}
 
 {{range .Schemas}}
+	{{ $targetNamespace := .TargetNamespace }}
+
 	{{range .SimpleType}}
 		{{template "SimpleType" .}}
 	{{end}}
+
 	{{range .Elements}}
 		{{if not .Type}}
-			{{template "ComplexTypeLocal" .}}
+			{{/* ComplexTypeLocal */}}
+			{{$name := .Name}}
+			{{with .ComplexType}}
+				type {{$name | replaceReservedWords | makePublic}} struct {
+					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$name}}\"`" + `
+					{{if ne .ComplexContent.Extension.Base ""}}
+						{{template "ComplexContent" .ComplexContent}}
+					{{else if ne .SimpleContent.Extension.Base ""}}
+						{{template "SimpleContent" .SimpleContent}}
+					{{else}}
+						{{template "Elements" .Sequence}}
+						{{template "Elements" .Choice}}
+						{{template "Elements" .SequenceChoice}}
+						{{template "Elements" .All}}
+						{{template "Attributes" .Attributes}}
+					{{end}}
+				}
+			{{end}}
 		{{end}}
 	{{end}}
+
 	{{range .ComplexTypes}}
-		{{template "ComplexTypeGlobal" .}}
+		{{/* ComplexTypeGlobal */}}
+		{{$name := replaceReservedWords .Name | makePublic}}
+		type {{$name}} struct {
+			XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{.Name}}\"`" + `
+			{{if ne .ComplexContent.Extension.Base ""}}
+				{{template "ComplexContent" .ComplexContent}}
+			{{else if ne .SimpleContent.Extension.Base ""}}
+				{{template "SimpleContent" .SimpleContent}}
+			{{else}}
+				{{template "Elements" .Sequence}}
+				{{template "Elements" .Choice}}
+				{{template "Elements" .SequenceChoice}}
+				{{template "Elements" .All}}
+				{{template "Attributes" .Attributes}}
+			{{end}}
+		}
 	{{end}}
 {{end}}
 `
