@@ -413,7 +413,7 @@ func (g *GoWSDL) findType(message string) string {
 			// Message does not have parts. This could be a Port
 			// with HTTP binding or SOAP 1.2 binding, which are not currently
 			// supported.
-			log.Printf("[WARN] %s message doesn't have any parts. It is probably part of HTTP or SOAP 1.2 bindings which are unsupported, ignoring message...", msg.Name)
+			log.Printf("[WARN] %s message doesn't have any parts, ignoring message...", msg.Name)
 			continue
 		}
 
