@@ -32,7 +32,7 @@ Go is unlike any other language in that it forces a specific development workflo
 * Please be generous describing your changes.
 * Although it is highly suggested to include tests, they are not a hard requirement in order to get your contributions accepted.
 * Keep pull requests small so core developers can review them quickly.
-* Unlike other projects, we are not going to nitpick your contributions. If your pull request is correct, we are going to merge and address the small details by ourselves. There is no point on delaying contributions due to little and unimportant details.
+* Make sure you run `go fmt` to format your code before submitting your pull request.
 
 ### Workflow for third-party code contributions
 * In Github, fork `https://github.com/hooklift/gowsdl` to your own account
