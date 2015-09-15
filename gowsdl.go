@@ -225,6 +225,32 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, url *url.URL) error {
 		g.resolvedXSDExternals[schemaName] = true
 	}
 
+	for _, incl := range schema.Imports {
+		location, err := url.Parse(incl.SchemaLocation)
+		if err != nil {
+			return err
+		}
+
+		_, schemaName := filepath.Split(location.Path)
+		if g.resolvedXSDExternals[schemaName] {
+			continue
+		}
+
+		data, err := ioutil.ReadFile(schemaName)
+		newschema := new(XSDSchema)
+		err = xml.Unmarshal(data, newschema)
+		if err != nil {
+			return err
+		}
+
+		g.wsdl.Types.Schemas = append(g.wsdl.Types.Schemas, newschema)
+
+		if g.resolvedXSDExternals == nil {
+			g.resolvedXSDExternals = make(map[string]bool, maxRecursion)
+		}
+		g.resolvedXSDExternals[schemaName] = true
+	}
+
 	return nil
 }
 
