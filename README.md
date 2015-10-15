@@ -31,5 +31,6 @@ Usage: gowsdl [options] myservice.wsdl
         File where the generated code will be saved (default "myservice.go")
   -p string
         Package under which code will be generated (default "myservice")
+  -i    Skips TLS Verification
   -v    Shows gowsdl version
   ```
