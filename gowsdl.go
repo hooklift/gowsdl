@@ -178,18 +178,19 @@ func (g *GoWSDL) unmarshal() error {
 	return nil
 }
 
-func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, url *url.URL) error {
-	for _, incl := range schema.Includes {
-		location, err := url.Parse(incl.SchemaLocation)
+func (g *GoWSDL) getSchema(schemaLocation string, url *url.URL) error {
+	_, schemaFile := filepath.Split(schemaLocation)
+
+	data, err := ioutil.ReadFile(schemaFile)
+	if err != nil {
+
+		location, err := url.Parse(schemaLocation)
 		if err != nil {
 			return err
 		}
 
-		if g.resolvedXSDExternals[incl.SchemaLocation] {
-			continue
-		}
+		schemaLocation = location.String()
 
-		schemaLocation := location.String()
 		if !location.IsAbs() {
 			if !url.IsAbs() {
 				return fmt.Errorf("Unable to resolve external schema %s through WSDL URL %s", schemaLocation, url)
@@ -199,55 +200,66 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, url *url.URL) error {
 
 		log.Println("Downloading external schema", "location", schemaLocation)
 
-		data, err := downloadFile(schemaLocation, g.ignoreTLS)
-		newschema := new(XSDSchema)
-
-		err = xml.Unmarshal(data, newschema)
+		data, err = downloadFile(schemaLocation, g.ignoreTLS)
 		if err != nil {
 			return err
 		}
+	}
+	newschema := new(XSDSchema)
 
-		if len(newschema.Includes) > 0 &&
-			maxRecursion > g.currentRecursionLevel {
+	err = xml.Unmarshal(data, newschema)
+	if err != nil {
+		return err
+	}
+
+	if len(newschema.Includes) > 0 || len(newschema.Imports) > 0 {
+		if maxRecursion > g.currentRecursionLevel {
 
 			g.currentRecursionLevel++
 
 			//log.Printf("Entering recursion %d\n", g.currentRecursionLevel)
 			g.resolveXSDExternals(newschema, url)
 		}
+	}
 
-		g.wsdl.Types.Schemas = append(g.wsdl.Types.Schemas, newschema)
+	g.wsdl.Types.Schemas = append(g.wsdl.Types.Schemas, newschema)
 
+	return nil
+}
+
+func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, url *url.URL) error {
+	if len(schema.Includes) > 0 || len(schema.Imports) > 0 {
 		if g.resolvedXSDExternals == nil {
 			g.resolvedXSDExternals = make(map[string]bool, maxRecursion)
 		}
-		g.resolvedXSDExternals[incl.SchemaLocation] = true
 	}
 
-	for _, incl := range schema.Imports {
-		location, err := url.Parse(incl.SchemaLocation)
-		if err != nil {
-			return err
-		}
-
-		_, schemaName := filepath.Split(location.Path)
-		if g.resolvedXSDExternals[schemaName] {
+	var err error
+	for _, incl := range schema.Includes {
+		if g.resolvedXSDExternals[incl.SchemaLocation] {
 			continue
 		}
 
-		data, err := ioutil.ReadFile(schemaName)
-		newschema := new(XSDSchema)
-		err = xml.Unmarshal(data, newschema)
+		err = g.getSchema(incl.SchemaLocation, url)
 		if err != nil {
 			return err
 		}
 
-		g.wsdl.Types.Schemas = append(g.wsdl.Types.Schemas, newschema)
+		g.resolvedXSDExternals[incl.SchemaLocation] = true
+	}
 
-		if g.resolvedXSDExternals == nil {
-			g.resolvedXSDExternals = make(map[string]bool, maxRecursion)
+	for _, imp := range schema.Imports {
+		if g.resolvedXSDExternals[imp.SchemaLocation] {
+			continue
 		}
-		g.resolvedXSDExternals[schemaName] = true
+
+		err = g.getSchema(imp.SchemaLocation, url)
+		if err != nil {
+			return err
+		}
+
+		g.resolvedXSDExternals[imp.SchemaLocation] = true
+
 	}
 
 	return nil
