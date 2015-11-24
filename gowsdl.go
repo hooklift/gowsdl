@@ -185,8 +185,7 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, url *url.URL) error {
 			return err
 		}
 
-		_, schemaName := filepath.Split(location.Path)
-		if g.resolvedXSDExternals[schemaName] {
+		if g.resolvedXSDExternals[incl.SchemaLocation] {
 			continue
 		}
 
@@ -222,7 +221,7 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, url *url.URL) error {
 		if g.resolvedXSDExternals == nil {
 			g.resolvedXSDExternals = make(map[string]bool, maxRecursion)
 		}
-		g.resolvedXSDExternals[schemaName] = true
+		g.resolvedXSDExternals[incl.SchemaLocation] = true
 	}
 
 	return nil
