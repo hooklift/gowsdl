@@ -13,19 +13,26 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 
 type SOAPEnvelope struct {
 	XMLName xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"` + "`" + `
-	Body SOAPBody ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"` + "`" + `
+
+	Body SOAPBody
 }
 
 type SOAPHeader struct {
+	XMLName xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"` + "`" + `
+
 	Header interface{}
 }
 
 type SOAPBody struct {
-	Fault   *SOAPFault ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"` + "`" + `
-	Content string     ` + "`" + `xml:",innerxml"` + "`" + `
+	XMLName xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"` + "`" + `
+
+	Fault   *SOAPFault ` + "`" + `xml:",omitempty"` + "`" + `
+	Content interface{} ` + "`" + `xml:",omitempty"` + "`" + `
 }
 
 type SOAPFault struct {
+	XMLName xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault"` + "`" + `
+
 	Code   string ` + "`" + `xml:"faultcode,omitempty"` + "`" + `
 	String string ` + "`" + `xml:"faultstring,omitempty"` + "`" + `
 	Actor  string ` + "`" + `xml:"faultactor,omitempty"` + "`" + `
@@ -41,6 +48,56 @@ type SOAPClient struct {
 	url string
 	tls bool
 	auth *BasicAuth
+}
+
+func (b *SOAPBody) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	if b.Content == nil {
+		return xml.UnmarshalError("Content must be a pointer to a struct")
+	}
+
+	var (
+		token    xml.Token
+		err      error
+		consumed bool
+	)
+
+Loop:
+	for {
+		if token, err = d.Token(); err != nil {
+			return err
+		}
+
+		if token == nil {
+			break
+		}
+
+		switch se := token.(type) {
+		case xml.StartElement:
+			if consumed {
+				return xml.UnmarshalError("Found multiple elements inside SOAP body; not wrapped-document/literal WS-I compliant")
+			} else if se.Name.Space == "http://schemas.xmlsoap.org/soap/envelope/" && se.Name.Local == "Fault" {
+				b.Fault = &SOAPFault{}
+				b.Content = nil
+
+				err = d.DecodeElement(b.Fault, &se)
+				if err != nil {
+					return err
+				}
+
+				consumed = true
+			} else {
+				if err = d.DecodeElement(b.Content, &se); err != nil {
+					return err
+				}
+
+				consumed = true
+			}
+		case xml.EndElement:
+			break Loop
+		}
+	}
+
+	return nil
 }
 
 func (f *SOAPFault) Error() string {
@@ -60,14 +117,7 @@ func (s *SOAPClient) Call(soapAction string, request, response interface{}) erro
 	//Header:        SoapHeader{},
 	}
 
-	if request != nil {
-		reqXml, err := xml.Marshal(request)
-		if err != nil {
-			return err
-		}
-
-		envelope.Body.Content = string(reqXml)
-	}
+	envelope.Body.Content = request
 	buffer := new(bytes.Buffer)
 
 	encoder := xml.NewEncoder(buffer)
@@ -118,26 +168,15 @@ func (s *SOAPClient) Call(soapAction string, request, response interface{}) erro
 
 	log.Println(string(rawbody))
 	respEnvelope := new(SOAPEnvelope)
+	respEnvelope.Body = SOAPBody{Content: response}
 	err = xml.Unmarshal(rawbody, respEnvelope)
 	if err != nil {
 		return err
 	}
 
-	body := respEnvelope.Body.Content
 	fault := respEnvelope.Body.Fault
-	if body == "" {
-		log.Println("empty response body", "envelope", respEnvelope, "body", body)
-		return nil
-	}
-
-	log.Println("response", "envelope", respEnvelope, "body", body)
 	if fault != nil {
 		return fault
-	}
-
-	err = xml.Unmarshal([]byte(body), response)
-	if err != nil {
-		return err
 	}
 
 	return nil
