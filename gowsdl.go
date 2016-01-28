@@ -235,6 +235,7 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           makePublic,
 		"comment":              comment,
+		"removeNS":             removeNS,
 	}
 
 	//TODO resolve element refs in place.
@@ -373,6 +374,17 @@ var xsd2GoTypes = map[string]string{
 	"unsignedbyte":  "byte",
 	"unsignedlong":  "uint64",
 	"anytype":       "interface{}",
+}
+
+func removeNS(xsdType string) string {
+	// Handles name space, ie. xsd:string, xs:string
+	r := strings.Split(xsdType, ":")
+
+	if len(r) == 2 {
+		return r[1]
+	} else {
+		return r[0]
+	}
 }
 
 func toGoType(xsdType string) string {
