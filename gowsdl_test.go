@@ -14,8 +14,9 @@ import (
 
 func TestElementGenerationDoesntCommentOutStructProperty(t *testing.T) {
 	g := GoWSDL{
-		file: "fixtures/test.wsdl",
-		pkg:  "myservice",
+		file:         "fixtures/test.wsdl",
+		pkg:          "myservice",
+		makePublicFn: makePublic,
 	}
 
 	resp, err := g.Start()
@@ -37,8 +38,9 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 
 	for _, file := range files {
 		g := GoWSDL{
-			file: file,
-			pkg:  "myservice",
+			file:         file,
+			pkg:          "myservice",
+			makePublicFn: makePublic,
 		}
 
 		resp, err := g.Start()
