@@ -30,6 +30,7 @@ const maxRecursion uint8 = 20
 type GoWSDL struct {
 	file, pkg             string
 	ignoreTLS             bool
+	makePublicFn          func(string) string
 	wsdl                  *WSDL
 	resolvedXSDExternals  map[string]bool
 	currentRecursionLevel uint8
@@ -75,7 +76,7 @@ func downloadFile(url string, ignoreTLS bool) ([]byte, error) {
 }
 
 // NewGoWSDL initializes WSDL generator.
-func NewGoWSDL(file, pkg string, ignoreTLS bool) (*GoWSDL, error) {
+func NewGoWSDL(file, pkg string, ignoreTLS bool, exportAllTypes bool) (*GoWSDL, error) {
 	file = strings.TrimSpace(file)
 	if file == "" {
 		return nil, errors.New("WSDL file is required to generate Go proxy")
@@ -85,11 +86,16 @@ func NewGoWSDL(file, pkg string, ignoreTLS bool) (*GoWSDL, error) {
 	if pkg == "" {
 		pkg = "myservice"
 	}
+	makePublicFn := func(id string) string { return id }
+	if exportAllTypes {
+		makePublicFn = makePublic
+	}
 
 	return &GoWSDL{
-		file:      file,
-		pkg:       pkg,
-		ignoreTLS: ignoreTLS,
+		file:         file,
+		pkg:          pkg,
+		ignoreTLS:    ignoreTLS,
+		makePublicFn: makePublicFn,
 	}, nil
 }
 
@@ -233,7 +239,7 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"toGoType":             toGoType,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
-		"makePublic":           makePublic,
+		"makePublic":           g.makePublicFn,
 		"comment":              comment,
 		"removeNS":             removeNS,
 	}
@@ -256,7 +262,7 @@ func (g *GoWSDL) genOperations() ([]byte, error) {
 		"toGoType":             toGoType,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
-		"makePublic":           makePublic,
+		"makePublic":           g.makePublicFn,
 		"findType":             g.findType,
 		"findSOAPAction":       g.findSOAPAction,
 		"findServiceAddress":   g.findServiceAddress,
@@ -277,7 +283,7 @@ func (g *GoWSDL) genHeader() ([]byte, error) {
 		"toGoType":             toGoType,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
-		"makePublic":           makePublic,
+		"makePublic":           g.makePublicFn,
 		"findType":             g.findType,
 		"comment":              comment,
 	}
