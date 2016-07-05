@@ -61,3 +61,19 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 		}
 	}
 }
+
+func TestSOAPHeaderGeneratesWithoutErrors(t *testing.T) {
+	g := GoWSDL{
+		file:         "fixtures/ferry.wsdl",
+		pkg:          "myservice",
+		makePublicFn: makePublic,
+	}
+
+	resp, err := g.Start()
+	if err != nil {
+		t.Error(err)
+	}
+	if !strings.Contains(string(resp["operations"]), "SetHeader") {
+		t.Error("SetHeader method should be generated in the service operation")
+	}
+}

@@ -22,6 +22,10 @@ var opsTmpl = `
 		}
 	}
 
+	func (service *{{$portType}}) SetHeader(header interface{}) {
+		service.client.SetHeader(header)
+	}
+
 	{{range .Operations}}
 		{{$faults := len .Faults}}
 		{{$requestType := findType .Input.Message | replaceReservedWords | makePublic}}
