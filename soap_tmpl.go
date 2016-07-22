@@ -13,7 +13,7 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 
 type SOAPEnvelope struct {
 	XMLName xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"` + "`" + `
-
+	Header *SOAPHeader
 	Body SOAPBody
 }
 
@@ -48,6 +48,7 @@ type SOAPClient struct {
 	url string
 	tls bool
 	auth *BasicAuth
+	header interface{}
 }
 
 func (b *SOAPBody) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
@@ -112,9 +113,15 @@ func NewSOAPClient(url string, tls bool, auth *BasicAuth) *SOAPClient {
 	}
 }
 
+func (s *SOAPClient) SetHeader(header interface{}) {
+	s.header = header
+}
+
 func (s *SOAPClient) Call(soapAction string, request, response interface{}) error {
-	envelope := SOAPEnvelope{
-	//Header:        SoapHeader{},
+	envelope := SOAPEnvelope{}
+
+	if s.header != nil {
+		envelope.Header = &SOAPHeader{Header: s.header}
 	}
 
 	envelope.Body.Content = request
