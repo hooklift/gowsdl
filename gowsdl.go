@@ -240,6 +240,7 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           g.makePublicFn,
+		"makeFieldPublic":      makePublic,
 		"comment":              comment,
 		"removeNS":             removeNS,
 	}
