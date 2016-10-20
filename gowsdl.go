@@ -185,23 +185,22 @@ func (g *GoWSDL) unmarshal() error {
 }
 
 func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, url *url.URL) error {
-	for _, incl := range schema.Includes {
-		location, err := url.Parse(incl.SchemaLocation)
+	download := func(u1 *url.URL, loc string) error{
+		location, err := u1.Parse(loc)
 		if err != nil {
 			return err
 		}
-
 		_, schemaName := filepath.Split(location.Path)
 		if g.resolvedXSDExternals[schemaName] {
-			continue
+			return nil
 		}
 
 		schemaLocation := location.String()
 		if !location.IsAbs() {
-			if !url.IsAbs() {
-				return fmt.Errorf("Unable to resolve external schema %s through WSDL URL %s", schemaLocation, url)
+			if !u1.IsAbs() {
+				return fmt.Errorf("Unable to resolve external schema %s through WSDL URL %s", schemaLocation, u1)
 			}
-			schemaLocation = url.Scheme + "://" + url.Host + schemaLocation
+			schemaLocation = u1.Scheme + "://" + u1.Host + schemaLocation
 		}
 
 		log.Println("Downloading external schema", "location", schemaLocation)
@@ -220,7 +219,7 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, url *url.URL) error {
 			g.currentRecursionLevel++
 
 			//log.Printf("Entering recursion %d\n", g.currentRecursionLevel)
-			g.resolveXSDExternals(newschema, url)
+			g.resolveXSDExternals(newschema, u1)
 		}
 
 		g.wsdl.Types.Schemas = append(g.wsdl.Types.Schemas, newschema)
@@ -229,6 +228,21 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, url *url.URL) error {
 			g.resolvedXSDExternals = make(map[string]bool, maxRecursion)
 		}
 		g.resolvedXSDExternals[schemaName] = true
+
+		return nil
+	}
+
+
+	for _, impts := range schema.Imports {
+		if e := download(u, impts.SchemaLocation); e!= nil {
+			return e
+		}
+	}
+
+	for _, incl := range schema.Includes {
+		if e := download(u, incl.SchemaLocation); e!= nil {
+			return e
+		}
 	}
 
 	return nil
