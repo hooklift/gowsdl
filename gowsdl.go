@@ -184,7 +184,7 @@ func (g *GoWSDL) unmarshal() error {
 	return nil
 }
 
-func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, url *url.URL) error {
+func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, u *url.URL) error {
 	download := func(u1 *url.URL, loc string) error{
 		location, err := u1.Parse(loc)
 		if err != nil {
