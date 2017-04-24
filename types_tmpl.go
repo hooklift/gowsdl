@@ -12,7 +12,7 @@ var typesTmpl = `
 		{{with .Restriction}}
 			{{range .Enumeration}}
 				{{if .Doc}} {{.Doc | comment}} {{end}}
-				{{$type}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{.Value}}" {{end}}
+				{{$type}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{goString .Value}}" {{end}}
 		{{end}}
 	)
 {{end}}

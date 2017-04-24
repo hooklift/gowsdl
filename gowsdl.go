@@ -257,6 +257,7 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"makeFieldPublic":      makePublic,
 		"comment":              comment,
 		"removeNS":             removeNS,
+		"goString":             goString,
 	}
 
 	//TODO resolve element refs in place.
@@ -371,6 +372,10 @@ func normalize(value string) string {
 	}
 
 	return strings.Map(mapping, value)
+}
+
+func goString(s string) string {
+	return strings.Replace(s, "\"", "\\\"", -1)
 }
 
 var xsd2GoTypes = map[string]string{
