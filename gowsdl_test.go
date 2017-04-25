@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"go/format"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -76,4 +77,31 @@ func TestSOAPHeaderGeneratesWithoutErrors(t *testing.T) {
 	if !strings.Contains(string(resp["operations"]), "SetHeader") {
 		t.Error("SetHeader method should be generated in the service operation")
 	}
+}
+
+func TestEnumerationsGeneratedCorrectly(t *testing.T) {
+	enumStringTest := func(t *testing.T, fixtureWsdl string, varName string, typeName string, enumString string) {
+		g := GoWSDL{
+			file:         "fixtures/" + fixtureWsdl,
+			pkg:          "myservice",
+			makePublicFn: makePublic,
+		}
+
+		resp, err := g.Start()
+		if err != nil {
+			t.Error(err)
+		}
+
+		re := regexp.MustCompile(varName + " " + typeName + " = \"([^\"]+)\"")
+		matches := re.FindStringSubmatch(string(resp["types"]))
+
+		if len(matches) != 2 {
+			t.Errorf("No match or too many matches found for %s", varName)
+		} else if matches[1] != enumString {
+			t.Errorf("%s got '%s' but expected '%s'", varName, matches[1], enumString)
+		}
+	}
+	enumStringTest(t, "chromedata.wsdl", "DriveTrainFrontWheelDrive", "DriveTrain", "Front Wheel Drive")
+	enumStringTest(t, "vboxweb.wsdl", "SettingsVersionV1_14", "SettingsVersion", "v1_14")
+
 }
