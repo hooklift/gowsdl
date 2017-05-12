@@ -400,6 +400,7 @@ var xsd2GoTypes = map[string]string{
 	"unsignedbyte":  "byte",
 	"unsignedlong":  "uint64",
 	"anytype":       "interface{}",
+	"anysimpletype": "interface{}",
 }
 
 func removeNS(xsdType string) string {
