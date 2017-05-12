@@ -20,7 +20,7 @@ type XSDSchema struct {
 	Imports            []*XSDImport      `xml:"import"`
 	Elements           []*XSDElement     `xml:"element"`
 	ComplexTypes       []*XSDComplexType `xml:"complexType"` //global
-	SimpleType         []*XSDSimpleType  `xml:"simpleType"`
+	SimpleTypes        []*XSDSimpleType  `xml:"simpleType"`
 }
 
 // XSDInclude represents schema includes.

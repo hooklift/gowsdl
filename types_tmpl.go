@@ -62,7 +62,7 @@ var typesTmpl = `
 {{define "Elements"}}
 	{{range .}}
 		{{if ne .Ref ""}}
-			{{removeNS .Ref | replaceReservedWords  | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Ref | toGoType}} ` + "`" + `xml:"{{.Ref | removeNS}},omitempty"` + "`" + `
+			{{removeNS .Ref | replaceReservedWords | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Ref | toGoType}} ` + "`" + `xml:"{{.Ref | removeNS}},omitempty"` + "`" + `
 		{{else}}
 		{{if not .Type}}
 			{{template "ComplexTypeInline" .}}
@@ -78,7 +78,7 @@ var typesTmpl = `
 {{range .Schemas}}
 	{{ $targetNamespace := .TargetNamespace }}
 
-	{{range .SimpleType}}
+	{{range .SimpleTypes}}
 		{{template "SimpleType" .}}
 	{{end}}
 
