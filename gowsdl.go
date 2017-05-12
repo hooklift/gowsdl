@@ -258,6 +258,7 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"comment":              comment,
 		"removeNS":             removeNS,
 		"goString":             goString,
+		"findNameByType":       g.findNameByType,
 	}
 
 	//TODO resolve element refs in place.
@@ -474,6 +475,21 @@ func (g *GoWSDL) findType(message string) string {
 		}
 	}
 	return ""
+}
+
+// Given a type, check if there's SimpleType with that type, and return its name.
+func (g *GoWSDL) findNameByType(name string) string {
+	name = stripns(name)
+
+	for _, schema := range g.wsdl.Types.Schemas {
+		for _, elem := range schema.Elements {
+			if stripns(elem.Type) == name {
+				return elem.Name
+			}
+		}
+	}
+
+	return name
 }
 
 // TODO(c4milo): Add support for namespaces instead of striping them out
