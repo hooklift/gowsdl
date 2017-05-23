@@ -8,15 +8,15 @@ var headerTmpl = `
 package {{.}}
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/xml"
-	"time"
- 	"bytes"
- 	"crypto/tls"
- 	"encoding/xml"
- 	"io/ioutil"
-	"net/http"
+	"io/ioutil"
 	"log"
+	"math/rand"
 	"net"
+	"net/http"
+	"time"
 
 	{{/*range .Imports*/}}
 		{{/*.*/}}
