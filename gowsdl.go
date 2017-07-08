@@ -185,7 +185,7 @@ func (g *GoWSDL) unmarshal() error {
 }
 
 func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, u *url.URL) error {
-	download := func(u1 *url.URL, loc string) error{
+	download := func(u1 *url.URL, loc string) error {
 		location, err := u1.Parse(loc)
 		if err != nil {
 			return err
@@ -232,15 +232,14 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, u *url.URL) error {
 		return nil
 	}
 
-
 	for _, impts := range schema.Imports {
-		if e := download(u, impts.SchemaLocation); e!= nil {
+		if e := download(u, impts.SchemaLocation); e != nil {
 			return e
 		}
 	}
 
 	for _, incl := range schema.Includes {
-		if e := download(u, incl.SchemaLocation); e!= nil {
+		if e := download(u, incl.SchemaLocation); e != nil {
 			return e
 		}
 	}
@@ -495,7 +494,7 @@ func (g *GoWSDL) findSOAPAction(operation, portType string) string {
 func (g *GoWSDL) findServiceAddress(name string) string {
 	for _, service := range g.wsdl.Service {
 		for _, port := range service.Ports {
-			if port.Name == name {
+			if stripns(port.Binding) == name || port.Binding == name {
 				return port.SOAPAddress.Location
 			}
 		}
