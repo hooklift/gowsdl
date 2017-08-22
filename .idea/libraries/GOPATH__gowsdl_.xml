@@ -1,0 +1,39 @@
+<component name="libraryTable">
+  <library name="GOPATH &lt;gowsdl&gt;">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/model" />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/controller" />
+      <root url="file://$PROJECT_DIR$/../../../gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/pconst" />
+      <root url="file://$PROJECT_DIR$/../../../labix.org" />
+      <root url="file://$PROJECT_DIR$/../.." />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/service" />
+      <root url="file://$PROJECT_DIR$/../../../golang.org" />
+      <root url="file://$PROJECT_DIR$/../../../google.golang.org" />
+      <root url="file://$PROJECT_DIR$/../../../awesomeProject" />
+      <root url="file://$PROJECT_DIR$/../../../hello" />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/dao" />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/route" />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/mypkg" />
+    </CLASSES>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/model" />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/controller" />
+      <root url="file://$PROJECT_DIR$/../../../gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/pconst" />
+      <root url="file://$PROJECT_DIR$/../../../labix.org" />
+      <root url="file://$PROJECT_DIR$/../.." />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/service" />
+      <root url="file://$PROJECT_DIR$/../../../golang.org" />
+      <root url="file://$PROJECT_DIR$/../../../google.golang.org" />
+      <root url="file://$PROJECT_DIR$/../../../awesomeProject" />
+      <root url="file://$PROJECT_DIR$/../../../hello" />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/dao" />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/route" />
+      <root url="file://$PROJECT_DIR$/../../../../../gofiles/tgoexample/src/mypkg" />
+    </SOURCES>
+    <excluded>
+      <root url="file://$PROJECT_DIR$" />
+    </excluded>
+  </library>
+</component>
