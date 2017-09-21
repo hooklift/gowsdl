@@ -136,5 +136,5 @@ func main() {
 
 	file.Write(source)
 
-	log.Println("Done 💩")
+	log.Println("Done 👍")
 }
