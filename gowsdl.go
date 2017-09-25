@@ -463,7 +463,7 @@ func (g *GoWSDL) findType(message string) string {
 			continue
 		}
 
-		part := msg.Parts[0]
+		part := msg.Parts[len(msg.Parts)-1]
 		if part.Type != "" {
 			return stripns(part.Type)
 		}
