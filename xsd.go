@@ -110,6 +110,7 @@ type XSDAttribute struct {
 // and information about the values of attributes or text-only elements.
 type XSDSimpleType struct {
 	Name        string         `xml:"name,attr"`
+	Doc         string         `xml:"annotation>documentation"`
 	Restriction XSDRestriction `xml:"restriction"`
 }
 
