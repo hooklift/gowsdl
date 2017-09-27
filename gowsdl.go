@@ -249,7 +249,7 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, u *url.URL) error {
 	}
 
 	for _, incl := range schema.Includes {
-		if e := download(u, schema.TargetNamespace+"/"+incl.SchemaLocation); e != nil {
+		if e := download(u, incl.SchemaLocation); e != nil {
 			return e
 		}
 	}
