@@ -6,7 +6,11 @@ package gowsdl
 
 import (
 	"bytes"
+	"errors"
 	"go/format"
+	"go/parser"
+	"go/printer"
+	"go/token"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -28,6 +32,32 @@ func TestElementGenerationDoesntCommentOutStructProperty(t *testing.T) {
 	if strings.Contains(string(resp["types"]), "// this is a comment  GetInfoResult string `xml:\"GetInfoResult,omitempty\"`") {
 		t.Error("Type comment should not comment out struct type property")
 		t.Error(string(resp["types"]))
+	}
+}
+
+func TestComplexTypeWithInlineSimpleType(t *testing.T) {
+	g := GoWSDL{
+		file:         "fixtures/test.wsdl",
+		pkg:          "myservice",
+		makePublicFn: makePublic,
+	}
+
+	resp, err := g.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	actual, err := getTypeDeclaration(resp, "GetInfo")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := `type GetInfo struct {
+	XMLName	xml.Name	` + "`" + `xml:"http://www.mnb.hu/webservices/ GetInfo"` + "`" + `
+
+	Id	string	` + "`" + `xml:"Id,omitempty"` + "`" + `
+}`
+	if actual != expected {
+		t.Error("got " + actual + " want " + expected)
 	}
 }
 
@@ -104,4 +134,28 @@ func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 	enumStringTest(t, "chromedata.wsdl", "DriveTrainFrontWheelDrive", "DriveTrain", "Front Wheel Drive")
 	enumStringTest(t, "vboxweb.wsdl", "SettingsVersionV1_14", "SettingsVersion", "v1_14")
 
+}
+
+func getTypeDeclaration(resp map[string][]byte, name string) (string, error) {
+	source, err := format.Source([]byte(string(resp["header"]) + string(resp["types"])))
+	if err != nil {
+		return "", err
+	}
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, "myservice.go", string(source), parser.DeclarationErrors)
+	if err != nil {
+		return "", err
+	}
+	o := f.Scope.Lookup(name)
+	if o == nil {
+		return "", errors.New("type " + name + " is missing")
+	}
+	var buf bytes.Buffer
+	buf.WriteString(o.Kind.String())
+	buf.WriteString(" ")
+	err = printer.Fprint(&buf, fset, o.Decl)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }

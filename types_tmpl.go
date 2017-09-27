@@ -7,7 +7,9 @@ package gowsdl
 var typesTmpl = `
 {{define "SimpleType"}}
 	{{$type := replaceReservedWords .Name | makePublic}}
+	{{if .Doc}} {{.Doc | comment}} {{end}}
 	type {{$type}} {{toGoType .Restriction.Base}}
+	{{if .Restriction.Enumeration}}
 	const (
 		{{with .Restriction}}
 			{{range .Enumeration}}
@@ -15,6 +17,7 @@ var typesTmpl = `
 				{{$type}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{goString .Value}}" {{end}}
 		{{end}}
 	)
+	{{end}}
 {{end}}
 
 {{define "ComplexContent"}}
@@ -65,11 +68,14 @@ var typesTmpl = `
 			{{removeNS .Ref | replaceReservedWords  | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Ref | toGoType}} ` + "`" + `xml:"{{.Ref | removeNS}},omitempty"` + "`" + `
 		{{else}}
 		{{if not .Type}}
-			{{template "ComplexTypeInline" .}}
-		{{else}}
-			{{if .Doc}}
-				{{.Doc | comment}} {{"\n"}}
+			{{if .SimpleType}}
+				{{if .Doc}} {{.Doc | comment}} {{end}}
+				{{ .Name | makeFieldPublic}} {{toGoType .SimpleType.Restriction.Base}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
+			{{else}}
+				{{template "ComplexTypeInline" .}}
 			{{end}}
+		{{else}}
+			{{if .Doc}}{{.Doc | comment}} {{end}}
 			{{replaceReservedWords .Name | makeFieldPublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + ` {{end}}
 		{{end}}
 	{{end}}
