@@ -18,10 +18,9 @@ import (
 )
 
 func TestElementGenerationDoesntCommentOutStructProperty(t *testing.T) {
-	g := GoWSDL{
-		file:         "fixtures/test.wsdl",
-		pkg:          "myservice",
-		makePublicFn: makePublic,
+	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	if err != nil {
+		t.Error(err)
 	}
 
 	resp, err := g.Start()
@@ -36,10 +35,9 @@ func TestElementGenerationDoesntCommentOutStructProperty(t *testing.T) {
 }
 
 func TestComplexTypeWithInlineSimpleType(t *testing.T) {
-	g := GoWSDL{
-		file:         "fixtures/test.wsdl",
-		pkg:          "myservice",
-		makePublicFn: makePublic,
+	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	if err != nil {
+		t.Error(err)
 	}
 
 	resp, err := g.Start()
@@ -68,10 +66,9 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 	}
 
 	for _, file := range files {
-		g := GoWSDL{
-			file:         file,
-			pkg:          "myservice",
-			makePublicFn: makePublic,
+		g, err := NewGoWSDL(file, "myservice", false, true)
+		if err != nil {
+			t.Error(err)
 		}
 
 		resp, err := g.Start()
@@ -94,10 +91,9 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 }
 
 func TestSOAPHeaderGeneratesWithoutErrors(t *testing.T) {
-	g := GoWSDL{
-		file:         "fixtures/ferry.wsdl",
-		pkg:          "myservice",
-		makePublicFn: makePublic,
+	g, err := NewGoWSDL("fixtures/ferry.wsdl", "myservice", false, true)
+	if err != nil {
+		t.Error(err)
 	}
 
 	resp, err := g.Start()
@@ -111,10 +107,9 @@ func TestSOAPHeaderGeneratesWithoutErrors(t *testing.T) {
 
 func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 	enumStringTest := func(t *testing.T, fixtureWsdl string, varName string, typeName string, enumString string) {
-		g := GoWSDL{
-			file:         "fixtures/" + fixtureWsdl,
-			pkg:          "myservice",
-			makePublicFn: makePublic,
+		g, err := NewGoWSDL("fixtures/"+fixtureWsdl, "myservice", false, true)
+		if err != nil {
+			t.Error(err)
 		}
 
 		resp, err := g.Start()

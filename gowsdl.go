@@ -14,7 +14,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,7 +27,8 @@ const maxRecursion uint8 = 20
 
 // GoWSDL defines the struct for WSDL generator.
 type GoWSDL struct {
-	file, pkg             string
+	loc                   *Location
+	pkg                   string
 	ignoreTLS             bool
 	makePublicFn          func(string) string
 	wsdl                  *WSDL
@@ -95,8 +95,13 @@ func NewGoWSDL(file, pkg string, ignoreTLS bool, exportAllTypes bool) (*GoWSDL, 
 		makePublicFn = makePublic
 	}
 
+	r, err := ParseLocation(file)
+	if err != nil {
+		return nil, err
+	}
+
 	return &GoWSDL{
-		file:         file,
+		loc:          r,
 		pkg:          pkg,
 		ignoreTLS:    ignoreTLS,
 		makePublicFn: makePublicFn,
@@ -152,24 +157,21 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 	return gocode, nil
 }
 
-func (g *GoWSDL) unmarshal() error {
-	var data []byte
-
-	parsedURL, err := url.Parse(g.file)
-	if parsedURL.Scheme == "" {
-		//log.Println("Reading", "file", g.file)
-
-		data, err = ioutil.ReadFile(g.file)
-		if err != nil {
-			return err
-		}
+func (g *GoWSDL) fetchFile(loc *Location) (data []byte, err error) {
+	if loc.f != "" {
+		log.Println("Reading", "file", loc.f)
+		data, err = ioutil.ReadFile(loc.f)
 	} else {
-		log.Println("Downloading", "file", g.file)
+		log.Println("Downloading", "file", loc.u.String())
+		data, err = downloadFile(loc.u.String(), g.ignoreTLS)
+	}
+	return
+}
 
-		data, err = downloadFile(g.file, g.ignoreTLS)
-		if err != nil {
-			return err
-		}
+func (g *GoWSDL) unmarshal() error {
+	data, err := g.fetchFile(g.loc)
+	if err != nil {
+		return err
 	}
 
 	g.wsdl = new(WSDL)
@@ -179,7 +181,7 @@ func (g *GoWSDL) unmarshal() error {
 	}
 
 	for _, schema := range g.wsdl.Types.Schemas {
-		err = g.resolveXSDExternals(schema, parsedURL)
+		err = g.resolveXSDExternals(schema, g.loc)
 		if err != nil {
 			return err
 		}
@@ -188,30 +190,19 @@ func (g *GoWSDL) unmarshal() error {
 	return nil
 }
 
-func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, u *url.URL) error {
-	download := func(u1 *url.URL, loc string) error {
-		location, err := u1.Parse(loc)
+func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
+	download := func(base *Location, ref string) error {
+		location, err := base.Parse(ref)
 		if err != nil {
 			return err
 		}
-		_, schemaName := filepath.Split(location.Path)
-		if g.resolvedXSDExternals[schemaName] {
+		schemaKey := location.String()
+		if g.resolvedXSDExternals[location.String()] {
 			return nil
 		}
 
-		if !location.IsAbs() {
-			if !u1.IsAbs() {
-				return fmt.Errorf("Unable to resolve external schema %s through WSDL URL %s", location.String(), u1)
-			}
-			if location, err = url.Parse(u1.Scheme + "://" + u1.Host + location.String()); err != nil {
-				return err
-			}
-		}
-
-		log.Println("Downloading external schema", "location", location.String())
-
-		data, err := downloadFile(location.String(), g.ignoreTLS)
-		if err != nil {
+		var data []byte
+		if data, err = g.fetchFile(location); err != nil {
 			return err
 		}
 
@@ -237,19 +228,19 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, u *url.URL) error {
 		if g.resolvedXSDExternals == nil {
 			g.resolvedXSDExternals = make(map[string]bool, maxRecursion)
 		}
-		g.resolvedXSDExternals[schemaName] = true
+		g.resolvedXSDExternals[schemaKey] = true
 
 		return nil
 	}
 
 	for _, impts := range schema.Imports {
-		if e := download(u, impts.SchemaLocation); e != nil {
+		if e := download(loc, impts.SchemaLocation); e != nil {
 			return e
 		}
 	}
 
 	for _, incl := range schema.Includes {
-		if e := download(u, incl.SchemaLocation); e != nil {
+		if e := download(loc, incl.SchemaLocation); e != nil {
 			return e
 		}
 	}
@@ -417,9 +408,9 @@ func removeNS(xsdType string) string {
 
 	if len(r) == 2 {
 		return r[1]
-	} else {
-		return r[0]
 	}
+
+	return r[0]
 }
 
 func toGoType(xsdType string) string {
