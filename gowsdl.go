@@ -234,6 +234,12 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 	}
 
 	for _, impts := range schema.Imports {
+		// Download the file only if we have a hint in the form of schemaLocation.
+		if impts.SchemaLocation == "" {
+			log.Printf("[WARN] Don't know where to find XSD for %s", impts.Namespace)
+			continue
+		}
+
 		if e := download(loc, impts.SchemaLocation); e != nil {
 			return e
 		}
