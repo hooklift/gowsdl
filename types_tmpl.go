@@ -32,11 +32,8 @@ var typesTmpl = `
 
 {{define "Attributes"}}
 	{{range .}}
-		{{if .Doc}} {{.Doc | comment}} {{end}} {{if not .Type}}
-			{{ .Name | makeFieldPublic}} {{toGoType .SimpleType.Restriction.Base}} ` + "`" + `xml:"{{.Name}},attr,omitempty"` + "`" + `
-		{{else}}
-			{{ .Name | makeFieldPublic}} {{toGoType .Type}} ` + "`" + `xml:"{{.Name}},attr,omitempty"` + "`" + `
-		{{end}}
+		{{if .Doc}} {{.Doc | comment}} {{end}}
+		{{ .Name | makeFieldPublic}} {{toGoType .Type}} ` + "`" + `xml:"{{.Name}},attr,omitempty"` + "`" + `
 	{{end}}
 {{end}}
 
@@ -45,7 +42,7 @@ var typesTmpl = `
 {{end}}
 
 {{define "ComplexTypeInline"}}
-	{{replaceReservedWords .Name | makePublic}} struct {
+	{{replaceReservedWords .Name | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}struct {
 	{{with .ComplexType}}
 		{{if ne .ComplexContent.Extension.Base ""}}
 			{{template "ComplexContent" .ComplexContent}}

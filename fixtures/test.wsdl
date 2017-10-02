@@ -35,6 +35,36 @@
           </s:sequence>
         </s:complexType>
       </s:element>
+      <s:complexType name="ResponseStatus">
+        <s:sequence>
+          <s:element name="status" minOccurs="0" maxOccurs="unbounded">
+            <s:complexType>
+              <s:simpleContent>
+                <s:extension base="s:string">
+                  <s:attribute name="code" use="required">
+                    <s:simpleType>
+                      <s:restriction base="s:string">
+                        <s:enumeration value="UnrecognizedTrimName" />
+                        <s:enumeration value="UnusedTrimName" />
+                      </s:restriction>
+                    </s:simpleType>
+                  </s:attribute>
+                </s:extension>
+              </s:simpleContent>
+            </s:complexType>
+          </s:element>
+        </s:sequence>
+        <s:attribute ref="tns:responseCode"/>
+      </s:complexType>
+      <s:attribute name="responseCode">
+        <s:simpleType>
+          <s:restriction base="s:string">
+            <s:enumeration value="Successful" />
+            <s:enumeration value="Unsuccessful" />
+            <s:enumeration value="ConditionallySuccessful" />
+          </s:restriction>
+        </s:simpleType>
+      </s:attribute>
     </s:schema>
   </wsdl:types>
   <wsdl:message name="GetInfoSoapIn">

@@ -7,6 +7,7 @@ package gowsdl
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"go/format"
 	"go/parser"
 	"go/printer"
@@ -59,6 +60,38 @@ func TestComplexTypeWithInlineSimpleType(t *testing.T) {
 	}
 }
 
+func TestAttributeRef(t *testing.T) {
+	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := g.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	actual, err := getTypeDeclaration(resp, "ResponseStatus")
+	if err != nil {
+		fmt.Println(string(resp["types"]))
+		t.Fatal(err)
+	}
+
+	expected := `type ResponseStatus struct {
+	XMLName	xml.Name	` + "`" + `xml:"http://www.mnb.hu/webservices/ ResponseStatus"` + "`" + `
+
+	Status	[]struct {
+		Value	string
+
+		Code	string	` + "`" + `xml:"code,attr,omitempty"` + "`" + `
+	}	` + "`" + `xml:"status,omitempty"` + "`" + `
+
+	ResponseCode	string	` + "`" + `xml:"responseCode,attr,omitempty"` + "`" + `
+}`
+	if actual != expected {
+		t.Error("got " + actual + " want " + expected)
+	}
+}
+
 func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 	files, err := filepath.Glob("fixtures/*.wsdl")
 	if err != nil {
@@ -85,6 +118,7 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 
 		_, err = format.Source(data.Bytes())
 		if err != nil {
+			fmt.Println(string(data.Bytes()))
 			t.Error(err)
 		}
 	}
