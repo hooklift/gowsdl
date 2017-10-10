@@ -118,6 +118,11 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 		return nil, err
 	}
 
+	// Process WSDL nodes
+	for _, schema := range g.wsdl.Types.Schemas {
+		newTraverser(schema, g.wsdl.Types.Schemas).traverse()
+	}
+
 	var wg sync.WaitGroup
 
 	wg.Add(1)
@@ -265,9 +270,6 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"removeNS":             removeNS,
 		"goString":             goString,
 	}
-
-	//TODO resolve element refs in place.
-	//g.resolveElementsRefs()
 
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("types").Funcs(funcMap).Parse(typesTmpl))
