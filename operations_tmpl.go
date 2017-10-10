@@ -26,6 +26,10 @@ var opsTmpl = `
 		service.client.AddHeader(header)
 	}
 
+	func (service *{{$portType}}) ClearHeaders() {
+		service.client.ClearHeaders()
+	}
+
 	// Backwards-compatible function: use AddHeader instead
 	func (service *{{$portType}}) SetHeader(header interface{}) {
 		service.client.AddHeader(header)

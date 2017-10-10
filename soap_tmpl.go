@@ -198,6 +198,10 @@ func (s *SOAPClient) AddHeader(header interface{}) {
 	s.headers = append(s.headers, header)
 }
 
+func (s *SOAPClient) ClearHeaders() {
+	s.headers = nil
+}
+
 func (s *SOAPClient) Call(soapAction string, request, response interface{}) error {
 	envelope := SOAPEnvelope{}
 
