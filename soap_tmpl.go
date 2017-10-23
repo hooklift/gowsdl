@@ -19,7 +19,7 @@ type SOAPEnvelope struct {
 
 type SOAPHeader struct {
 	XMLName xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"` + "`" + `
-	
+
 	Items []interface{} ` + "`" + `xml:",omitempty"` + "`" + `
 }
 
@@ -49,7 +49,7 @@ const (
 type WSSSecurityHeader struct {
 	XMLName   xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ wsse:Security"` + "`" + `
 	XmlNSWsse string   ` + "`" + `xml:"xmlns:wsse,attr"` + "`" + `
-	
+
 	MustUnderstand string ` + "`" + `xml:"mustUnderstand,attr,omitempty"` + "`" + `
 
 	Token *WSSUsernameToken ` + "`" + `xml:",omitempty"` + "`" + `
@@ -88,7 +88,7 @@ type BasicAuth struct {
 
 type SOAPClient struct {
 	url     string
-	tls     bool
+	tlsCfg  *tls.Config
 	auth    *BasicAuth
 	headers []interface{}
 }
@@ -186,10 +186,17 @@ func (f *SOAPFault) Error() string {
 	return f.String
 }
 
-func NewSOAPClient(url string, tls bool, auth *BasicAuth) *SOAPClient {
+func NewSOAPClient(url string, insecureSkipVerify bool, auth *BasicAuth) *SOAPClient {
+	tlsCfg := &tls.Config{
+	       InsecureSkipVerify: insecureSkipVerify,
+	}
+	return NewSOAPClientWithTLSConfig(url, tlsCfg, auth)
+}
+
+func NewSOAPClientWithTLSConfig(url string, tlsCfg *tls.Config, auth *BasicAuth) *SOAPClient {
 	return &SOAPClient{
 		url: url,
-		tls: tls,
+		tlsCfg: tlsCfg,
 		auth: auth,
 	}
 }
@@ -233,14 +240,12 @@ func (s *SOAPClient) Call(soapAction string, request, response interface{}) erro
 
 	req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
 	req.Header.Add("SOAPAction", soapAction)
-	
+
 	req.Header.Set("User-Agent", "gowsdl/0.1")
 	req.Close = true
 
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: s.tls,
-		},
+		TLSClientConfig: s.tlsCfg,
 		Dial: dialTimeout,
 	}
 
