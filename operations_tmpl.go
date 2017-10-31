@@ -22,6 +22,17 @@ var opsTmpl = `
 		}
 	}
 
+	func New{{$portType}}WithTLSConfig(url string, tlsCfg *tls.Config, auth *BasicAuth) *{{$portType}} {
+		if url == "" {
+			url = {{findServiceAddress .Name | printf "%q"}}
+		}
+		client := NewSOAPClientWithTLSConfig(url, tlsCfg, auth)
+
+		return &{{$portType}}{
+			client: client,
+		}
+	}
+
 	func (service *{{$portType}}) AddHeader(header interface{}) {
 		service.client.AddHeader(header)
 	}
