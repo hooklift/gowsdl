@@ -54,14 +54,12 @@ var opsTmpl = `
 		// {{range .Faults}}
 		//   - {{.Name}} {{.Doc}}{{end}}{{end}}
 		{{if ne .Doc ""}}/* {{.Doc}} */{{end}}
-		func (service *{{$portType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{$responseType}}, error) {
-			response := new({{$responseType}})
-			err := service.client.Call("{{$soapAction}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, response)
-			if err != nil {
-				return nil, err
+		func (service *{{$portType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) ({{if ne $responseType ""}}response *{{$responseType}}, {{end}}err error) {
+			response {{if ne $responseType ""}}= new({{$responseType}}){{else}}:= new(interface{}){{end}}
+			if err = service.client.Call("{{$soapAction}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, response); err != nil {
+				{{if ne $responseType ""}}response = nil{{end}}
 			}
-
-			return response, nil
+			return
 		}
 		{{/*end*/}}
 	{{end}}
