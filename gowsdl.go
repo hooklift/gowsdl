@@ -524,6 +524,9 @@ func stripns(xsdType string) string {
 }
 
 func makePublic(identifier string) string {
+	if isBasicType(identifier) {
+		return identifier
+	}
 	field := []rune(identifier)
 	if len(field) == 0 {
 		return identifier
@@ -531,6 +534,33 @@ func makePublic(identifier string) string {
 
 	field[0] = unicode.ToUpper(field[0])
 	return string(field)
+}
+
+var basicTypes = map[string]string{
+	"string":      "string",
+	"float32":     "float32",
+	"float64":     "float64",
+	"int":         "int",
+	"int8":        "int8",
+	"int16":       "int16",
+	"int32":       "int32",
+	"int64":       "int64",
+	"bool":        "bool",
+	"time.Time":   "time.Time",
+	"[]byte":      "[]byte",
+	"byte":        "byte",
+	"uint16":      "uint16",
+	"uint32":      "uint32",
+	"uinit64":     "uint64",
+	"interface{}": "interface{}",
+}
+
+func isBasicType(identifier string) bool {
+
+	if _, exsits := basicTypes[identifier]; exsits {
+		return true
+	}
+	return false
 }
 
 func comment(text string) string {

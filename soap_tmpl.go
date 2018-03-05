@@ -93,6 +93,10 @@ type SOAPClient struct {
 	headers []interface{}
 }
 
+type Empty struct{
+
+}
+
 // **********
 // Accepted solution from http://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-golang
 // Author: Icza - http://stackoverflow.com/users/1705598/icza

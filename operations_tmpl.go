@@ -54,8 +54,8 @@ var opsTmpl = `
 		// {{range .Faults}}
 		//   - {{.Name}} {{.Doc}}{{end}}{{end}}
 		{{if ne .Doc ""}}/* {{.Doc}} */{{end}}
-		func (service *{{$portType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{$responseType}}, error) {
-			response := new({{$responseType}})
+		func (service *{{$portType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{if ne $responseType ""}}{{$responseType}}{{else}}Empty{{end}}, error) {
+			response := new({{if eq $responseType ""}}Empty{{else}}{{$responseType}}{{end}})
 			err := service.client.Call("{{$soapAction}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, response)
 			if err != nil {
 				return nil, err
