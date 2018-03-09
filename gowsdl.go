@@ -487,7 +487,7 @@ func (g *GoWSDL) findType(message string) string {
 // TODO(c4milo): improve runtime complexity if performance turns out to be an issue.
 func (g *GoWSDL) findSOAPAction(operation, portType string) string {
 	for _, binding := range g.wsdl.Binding {
-		if stripns(binding.Type) != portType {
+		if strings.ToUpper(stripns(binding.Type)) != strings.ToUpper(portType) {
 			continue
 		}
 
