@@ -10,8 +10,6 @@ var opsTmpl = `
 	{{$exportType := .Name | makePublic}}
 
 	type {{$exportType}} interface {
-		AddHeader(header interface{})
-		SetHeader(header interface{})
 		{{range .Operations}}
 			{{$faults := len .Faults}}
 			{{$soapAction := findSOAPAction .Name $privateType}}
@@ -30,38 +28,13 @@ var opsTmpl = `
 	}
 
 	type {{$privateType}} struct {
-		client *SOAPClient
+		client *soap.Client
 	}
 
-	func New{{$exportType}}(url string, tls bool, auth *BasicAuth) {{$exportType}} {
-		if url == "" {
-			url = {{findServiceAddress .Name | printf "%q"}}
-		}
-		client := NewSOAPClient(url, tls, auth)
-
+	func New{{$exportType}}(client *soap.Client) {{$exportType}} {
 		return &{{$privateType}}{
 			client: client,
 		}
-	}
-
-	func New{{$exportType}}WithTLSConfig(url string, tlsCfg *tls.Config, auth *BasicAuth) {{$exportType}} {
-		if url == "" {
-			url = {{findServiceAddress .Name | printf "%q"}}
-		}
-		client := NewSOAPClientWithTLSConfig(url, tlsCfg, auth)
-
-		return &{{$privateType}}{
-			client: client,
-		}
-	}
-
-	func (service *{{$privateType}}) AddHeader(header interface{}) {
-		service.client.AddHeader(header)
-	}
-
-	// Backwards-compatible function: use AddHeader instead
-	func (service *{{$privateType}}) SetHeader(header interface{}) {
-		service.client.AddHeader(header)
 	}
 
 	{{range .Operations}}

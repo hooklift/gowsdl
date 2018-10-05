@@ -176,10 +176,15 @@ func (f *SOAPFault) Error() string {
 	return f.String
 }
 
+type basicAuth struct {
+	Login    string
+	Password string
+}
+
 type options struct {
 	insecureSkipVerify bool
 	tlsCfg             *tls.Config
-	auth               *BasicAuth
+	auth               *basicAuth
 	timeout            time.Duration
 }
 
@@ -192,9 +197,9 @@ var defaultOptions = options{
 type Option func(*options)
 
 // WithBasicAuth is an Option to set BasicAuth
-func WithBasicAuth(auth *BasicAuth) Option {
+func WithBasicAuth(login, password string) Option {
 	return func(o *options) {
-		o.auth = auth
+		o.auth = &basicAuth{Login: login, Password: password}
 	}
 }
 
@@ -210,11 +215,6 @@ func DialTimeout(t time.Duration) Option {
 	return func(o *options) {
 		o.timeout = t
 	}
-}
-
-type BasicAuth struct {
-	Login    string
-	Password string
 }
 
 // Client is soap client
@@ -274,6 +274,7 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 
 	req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
 	req.Header.Add("SOAPAction", soapAction)
+	// TODO: allow to set global headers
 	req.Header.Set("User-Agent", "gowsdl/0.1")
 	req.Close = true
 
