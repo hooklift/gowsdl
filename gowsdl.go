@@ -154,11 +154,6 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 		log.Println(err)
 	}
 
-	gocode["soap"], err = g.genSOAPClient()
-	if err != nil {
-		log.Println(err)
-	}
-
 	return gocode, nil
 }
 
@@ -315,17 +310,6 @@ func (g *GoWSDL) genHeader() ([]byte, error) {
 
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("header").Funcs(funcMap).Parse(headerTmpl))
-	err := tmpl.Execute(data, g.pkg)
-	if err != nil {
-		return nil, err
-	}
-
-	return data.Bytes(), nil
-}
-
-func (g *GoWSDL) genSOAPClient() ([]byte, error) {
-	data := new(bytes.Buffer)
-	tmpl := template.Must(template.New("soapclient").Parse(soapTmpl))
 	err := tmpl.Execute(data, g.pkg)
 	if err != nil {
 		return nil, err

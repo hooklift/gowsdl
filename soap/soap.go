@@ -1,42 +1,42 @@
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+package soap
 
-package gowsdl
-
-var soapTmpl = `
-var timeout = time.Duration(30 * time.Second)
-
-func dialTimeout(network, addr string) (net.Conn, error) {
-	return net.DialTimeout(network, addr, timeout)
-}
+import (
+	"bytes"
+	"crypto/tls"
+	"encoding/xml"
+	"io/ioutil"
+	"math/rand"
+	"net"
+	"net/http"
+	"time"
+)
 
 type SOAPEnvelope struct {
-	XMLName xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"` + "`" + `
-	Header *SOAPHeader
-	Body SOAPBody
+	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
+	Header  *SOAPHeader
+	Body    SOAPBody
 }
 
 type SOAPHeader struct {
-	XMLName xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"` + "`" + `
+	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"`
 
-	Items []interface{} ` + "`" + `xml:",omitempty"` + "`" + `
+	Items []interface{} `xml:",omitempty"`
 }
 
 type SOAPBody struct {
-	XMLName xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"` + "`" + `
+	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
 
-	Fault   *SOAPFault ` + "`" + `xml:",omitempty"` + "`" + `
-	Content interface{} ` + "`" + `xml:",omitempty"` + "`" + `
+	Fault   *SOAPFault  `xml:",omitempty"`
+	Content interface{} `xml:",omitempty"`
 }
 
 type SOAPFault struct {
-	XMLName xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault"` + "`" + `
+	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault"`
 
-	Code   string ` + "`" + `xml:"faultcode,omitempty"` + "`" + `
-	String string ` + "`" + `xml:"faultstring,omitempty"` + "`" + `
-	Actor  string ` + "`" + `xml:"faultactor,omitempty"` + "`" + `
-	Detail string ` + "`" + `xml:"detail,omitempty"` + "`" + `
+	Code   string `xml:"faultcode,omitempty"`
+	String string `xml:"faultstring,omitempty"`
+	Actor  string `xml:"faultactor,omitempty"`
+	Detail string `xml:"detail,omitempty"`
 }
 
 const (
@@ -47,50 +47,38 @@ const (
 )
 
 type WSSSecurityHeader struct {
-	XMLName   xml.Name ` + "`" + `xml:"http://schemas.xmlsoap.org/soap/envelope/ wsse:Security"` + "`" + `
-	XmlNSWsse string   ` + "`" + `xml:"xmlns:wsse,attr"` + "`" + `
+	XMLName   xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ wsse:Security"`
+	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
 
-	MustUnderstand string ` + "`" + `xml:"mustUnderstand,attr,omitempty"` + "`" + `
+	MustUnderstand string `xml:"mustUnderstand,attr,omitempty"`
 
-	Token *WSSUsernameToken ` + "`" + `xml:",omitempty"` + "`" + `
+	Token *WSSUsernameToken `xml:",omitempty"`
 }
 
 type WSSUsernameToken struct {
-	XMLName   xml.Name ` + "`" + `xml:"wsse:UsernameToken"` + "`" + `
-	XmlNSWsu  string   ` + "`" + `xml:"xmlns:wsu,attr"` + "`" + `
-	XmlNSWsse string   ` + "`" + `xml:"xmlns:wsse,attr"` + "`" + `
+	XMLName   xml.Name `xml:"wsse:UsernameToken"`
+	XmlNSWsu  string   `xml:"xmlns:wsu,attr"`
+	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
 
-	Id string ` + "`" + `xml:"wsu:Id,attr,omitempty"` + "`" + `
+	Id string `xml:"wsu:Id,attr,omitempty"`
 
-	Username *WSSUsername ` + "`" + `xml:",omitempty"` + "`" + `
-	Password *WSSPassword ` + "`" + `xml:",omitempty"` + "`" + `
+	Username *WSSUsername `xml:",omitempty"`
+	Password *WSSPassword `xml:",omitempty"`
 }
 
 type WSSUsername struct {
-	XMLName   xml.Name ` + "`" + `xml:"wsse:Username"` + "`" + `
-	XmlNSWsse string   ` + "`" + `xml:"xmlns:wsse,attr"` + "`" + `
+	XMLName   xml.Name `xml:"wsse:Username"`
+	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
 
-	Data string ` + "`" + `xml:",chardata"` + "`" + `
+	Data string `xml:",chardata"`
 }
 
 type WSSPassword struct {
-	XMLName   xml.Name ` + "`" + `xml:"wsse:Password"` + "`" + `
-	XmlNSWsse string   ` + "`" + `xml:"xmlns:wsse,attr"` + "`" + `
-	XmlNSType string   ` + "`" + `xml:"Type,attr"` + "`" + `
+	XMLName   xml.Name `xml:"wsse:Password"`
+	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
+	XmlNSType string   `xml:"Type,attr"`
 
-	Data string ` + "`" + `xml:",chardata"` + "`" + `
-}
-
-type BasicAuth struct {
-	Login    string
-	Password string
-}
-
-type SOAPClient struct {
-	url     string
-	tlsCfg  *tls.Config
-	auth    *BasicAuth
-	headers []interface{}
+	Data string `xml:",chardata"`
 }
 
 // **********
@@ -124,6 +112,7 @@ func randStringBytesMaskImprSrc(n int) string {
 
 // **********
 
+// NewWSSSecurityHeader creates WSSSecurityHeader instance
 func NewWSSSecurityHeader(user, pass, mustUnderstand string) *WSSSecurityHeader {
 	hdr := &WSSSecurityHeader{XmlNSWsse: WssNsWSSE, MustUnderstand: mustUnderstand}
 	hdr.Token = &WSSUsernameToken{XmlNSWsu: WssNsWSU, XmlNSWsse: WssNsWSSE, Id: "UsernameToken-" + randStringBytesMaskImprSrc(9)}
@@ -132,6 +121,7 @@ func NewWSSSecurityHeader(user, pass, mustUnderstand string) *WSSSecurityHeader 
 	return hdr
 }
 
+// UnmarshalXML unmarshals given xml
 func (b *SOAPBody) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	if b.Content == nil {
 		return xml.UnmarshalError("Content must be a pointer to a struct")
@@ -186,26 +176,73 @@ func (f *SOAPFault) Error() string {
 	return f.String
 }
 
-func NewSOAPClient(url string, insecureSkipVerify bool, auth *BasicAuth) *SOAPClient {
-	tlsCfg := &tls.Config{
-	       InsecureSkipVerify: insecureSkipVerify,
-	}
-	return NewSOAPClientWithTLSConfig(url, tlsCfg, auth)
+type options struct {
+	insecureSkipVerify bool
+	tlsCfg             *tls.Config
+	auth               *BasicAuth
+	timeout            time.Duration
 }
 
-func NewSOAPClientWithTLSConfig(url string, tlsCfg *tls.Config, auth *BasicAuth) *SOAPClient {
-	return &SOAPClient{
-		url: url,
-		tlsCfg: tlsCfg,
-		auth: auth,
+var defaultOptions = options{
+	insecureSkipVerify: false,
+	timeout:            time.Duration(30 * time.Second),
+}
+
+// A Option sets options such as credentials, tls, etc.
+type Option func(*options)
+
+// WithBasicAuth is an Option to set BasicAuth
+func WithBasicAuth(auth *BasicAuth) Option {
+	return func(o *options) {
+		o.auth = auth
 	}
 }
 
-func (s *SOAPClient) AddHeader(header interface{}) {
+// WithTLS is an Option to set tls config
+func WithTLS(tls *tls.Config) Option {
+	return func(o *options) {
+		o.tlsCfg = tls
+	}
+}
+
+// DialTimeout is an Option to set default HTTP dial timeout
+func DialTimeout(t time.Duration) Option {
+	return func(o *options) {
+		o.timeout = t
+	}
+}
+
+type BasicAuth struct {
+	Login    string
+	Password string
+}
+
+// Client is soap client
+type Client struct {
+	url     string
+	opts    *options
+	headers []interface{}
+}
+
+// NewClient creates new SOAP client instance
+func NewClient(url string, opt ...Option) *Client {
+	opts := defaultOptions
+	for _, o := range opt {
+		o(&opts)
+	}
+	return &Client{
+		url:  url,
+		opts: &opts,
+	}
+}
+
+// AddHeader adds envelope header
+func (s *Client) AddHeader(header interface{}) {
 	s.headers = append(s.headers, header)
 }
 
-func (s *SOAPClient) Call(soapAction string, request, response interface{}) error {
+// Call performs HTTP POST request
+func (s *Client) Call(soapAction string, request, response interface{}) error {
 	envelope := SOAPEnvelope{}
 
 	if s.headers != nil && len(s.headers) > 0 {
@@ -218,7 +255,6 @@ func (s *SOAPClient) Call(soapAction string, request, response interface{}) erro
 	buffer := new(bytes.Buffer)
 
 	encoder := xml.NewEncoder(buffer)
-	//encoder.Indent("  ", "    ")
 
 	if err := encoder.Encode(envelope); err != nil {
 		return err
@@ -228,25 +264,24 @@ func (s *SOAPClient) Call(soapAction string, request, response interface{}) erro
 		return err
 	}
 
-	log.Println(buffer.String())
-
 	req, err := http.NewRequest("POST", s.url, buffer)
 	if err != nil {
 		return err
 	}
-	if s.auth != nil {
-		req.SetBasicAuth(s.auth.Login, s.auth.Password)
+	if s.opts.auth != nil {
+		req.SetBasicAuth(s.opts.auth.Login, s.opts.auth.Password)
 	}
 
 	req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
 	req.Header.Add("SOAPAction", soapAction)
-
 	req.Header.Set("User-Agent", "gowsdl/0.1")
 	req.Close = true
 
 	tr := &http.Transport{
-		TLSClientConfig: s.tlsCfg,
-		Dial: dialTimeout,
+		TLSClientConfig: s.opts.tlsCfg,
+		Dial: func(network, addr string) (net.Conn, error) {
+			return net.DialTimeout(network, addr, s.opts.timeout)
+		},
 	}
 
 	client := &http.Client{Transport: tr}
@@ -261,11 +296,9 @@ func (s *SOAPClient) Call(soapAction string, request, response interface{}) erro
 		return err
 	}
 	if len(rawbody) == 0 {
-		log.Println("empty response")
 		return nil
 	}
 
-	log.Println(string(rawbody))
 	respEnvelope := new(SOAPEnvelope)
 	respEnvelope.Body = SOAPBody{Content: response}
 	err = xml.Unmarshal(rawbody, respEnvelope)
@@ -280,4 +313,3 @@ func (s *SOAPClient) Call(soapAction string, request, response interface{}) erro
 
 	return nil
 }
-`
