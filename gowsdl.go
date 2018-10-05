@@ -287,6 +287,7 @@ func (g *GoWSDL) genOperations() ([]byte, error) {
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           g.makePublicFn,
+		"makePrivate":          makePrivate,
 		"findType":             g.findType,
 		"findSOAPAction":       g.findSOAPAction,
 		"findServiceAddress":   g.findServiceAddress,
@@ -530,6 +531,16 @@ func makePublic(identifier string) string {
 	}
 
 	field[0] = unicode.ToUpper(field[0])
+	return string(field)
+}
+
+func makePrivate(identifier string) string {
+	field := []rune(identifier)
+	if len(field) == 0 {
+		return identifier
+	}
+
+	field[0] = unicode.ToLower(field[0])
 	return string(field)
 }
 
