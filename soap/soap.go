@@ -210,8 +210,8 @@ func WithTLS(tls *tls.Config) Option {
 	}
 }
 
-// DialTimeout is an Option to set default HTTP dial timeout
-func DialTimeout(t time.Duration) Option {
+// WithTimeout is an Option to set default HTTP dial timeout
+func WithTimeout(t time.Duration) Option {
 	return func(o *options) {
 		o.timeout = t
 	}
