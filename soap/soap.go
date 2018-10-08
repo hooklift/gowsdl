@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"encoding/xml"
 	"io/ioutil"
-	"math/rand"
 	"net"
 	"net/http"
 	"time"
@@ -30,99 +29,8 @@ type SOAPBody struct {
 	Content interface{} `xml:",omitempty"`
 }
 
-type SOAPFault struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault"`
-
-	Code   string `xml:"faultcode,omitempty"`
-	String string `xml:"faultstring,omitempty"`
-	Actor  string `xml:"faultactor,omitempty"`
-	Detail string `xml:"detail,omitempty"`
-}
-
-const (
-	// Predefined WSS namespaces to be used in
-	WssNsWSSE string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
-	WssNsWSU  string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
-	WssNsType string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText"
-)
-
-type WSSSecurityHeader struct {
-	XMLName   xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ wsse:Security"`
-	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
-
-	MustUnderstand string `xml:"mustUnderstand,attr,omitempty"`
-
-	Token *WSSUsernameToken `xml:",omitempty"`
-}
-
-type WSSUsernameToken struct {
-	XMLName   xml.Name `xml:"wsse:UsernameToken"`
-	XmlNSWsu  string   `xml:"xmlns:wsu,attr"`
-	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
-
-	Id string `xml:"wsu:Id,attr,omitempty"`
-
-	Username *WSSUsername `xml:",omitempty"`
-	Password *WSSPassword `xml:",omitempty"`
-}
-
-type WSSUsername struct {
-	XMLName   xml.Name `xml:"wsse:Username"`
-	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
-
-	Data string `xml:",chardata"`
-}
-
-type WSSPassword struct {
-	XMLName   xml.Name `xml:"wsse:Password"`
-	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
-	XmlNSType string   `xml:"Type,attr"`
-
-	Data string `xml:",chardata"`
-}
-
-// **********
-// Accepted solution from http://stackoverflow.com/questions/22892120/how-to-generate-a-random-string-of-a-fixed-length-in-golang
-// Author: Icza - http://stackoverflow.com/users/1705598/icza
-
-const (
-	letterBytes   = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	letterIdxBits = 6                    // 6 bits to represent a letter index
-	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
-)
-
-func randStringBytesMaskImprSrc(n int) string {
-	src := rand.NewSource(time.Now().UnixNano())
-	b := make([]byte, n)
-	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
-	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
-		}
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			b[i] = letterBytes[idx]
-			i--
-		}
-		cache >>= letterIdxBits
-		remain--
-	}
-	return string(b)
-}
-
-// **********
-
-// NewWSSSecurityHeader creates WSSSecurityHeader instance
-func NewWSSSecurityHeader(user, pass, mustUnderstand string) *WSSSecurityHeader {
-	hdr := &WSSSecurityHeader{XmlNSWsse: WssNsWSSE, MustUnderstand: mustUnderstand}
-	hdr.Token = &WSSUsernameToken{XmlNSWsu: WssNsWSU, XmlNSWsse: WssNsWSSE, Id: "UsernameToken-" + randStringBytesMaskImprSrc(9)}
-	hdr.Token.Username = &WSSUsername{XmlNSWsse: WssNsWSSE, Data: user}
-	hdr.Token.Password = &WSSPassword{XmlNSWsse: WssNsWSSE, XmlNSType: WssNsType, Data: pass}
-	return hdr
-}
-
-// UnmarshalXML unmarshals given xml
-func (b *SOAPBody) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+// UnmarshalXML unmarshals SOAPBody xml
+func (b *SOAPBody) UnmarshalXML(d *xml.Decoder, _ xml.StartElement) error {
 	if b.Content == nil {
 		return xml.UnmarshalError("Content must be a pointer to a struct")
 	}
@@ -172,8 +80,68 @@ Loop:
 	return nil
 }
 
+type SOAPFault struct {
+	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault"`
+
+	Code   string `xml:"faultcode,omitempty"`
+	String string `xml:"faultstring,omitempty"`
+	Actor  string `xml:"faultactor,omitempty"`
+	Detail string `xml:"detail,omitempty"`
+}
+
 func (f *SOAPFault) Error() string {
 	return f.String
+}
+
+const (
+	// Predefined WSS namespaces to be used in
+	WssNsWSSE string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+	WssNsWSU  string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+	WssNsType string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText"
+)
+
+type WSSSecurityHeader struct {
+	XMLName   xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ wsse:Security"`
+	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
+
+	MustUnderstand string `xml:"mustUnderstand,attr,omitempty"`
+
+	Token *WSSUsernameToken `xml:",omitempty"`
+}
+
+type WSSUsernameToken struct {
+	XMLName   xml.Name `xml:"wsse:UsernameToken"`
+	XmlNSWsu  string   `xml:"xmlns:wsu,attr"`
+	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
+
+	Id string `xml:"wsu:Id,attr,omitempty"`
+
+	Username *WSSUsername `xml:",omitempty"`
+	Password *WSSPassword `xml:",omitempty"`
+}
+
+type WSSUsername struct {
+	XMLName   xml.Name `xml:"wsse:Username"`
+	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
+
+	Data string `xml:",chardata"`
+}
+
+type WSSPassword struct {
+	XMLName   xml.Name `xml:"wsse:Password"`
+	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
+	XmlNSType string   `xml:"Type,attr"`
+
+	Data string `xml:",chardata"`
+}
+
+// NewWSSSecurityHeader creates WSSSecurityHeader instance
+func NewWSSSecurityHeader(user, pass, tokenID, mustUnderstand string) *WSSSecurityHeader {
+	hdr := &WSSSecurityHeader{XmlNSWsse: WssNsWSSE, MustUnderstand: mustUnderstand}
+	hdr.Token = &WSSUsernameToken{XmlNSWsu: WssNsWSU, XmlNSWsse: WssNsWSSE, Id: tokenID}
+	hdr.Token.Username = &WSSUsername{XmlNSWsse: WssNsWSSE, Data: user}
+	hdr.Token.Password = &WSSPassword{XmlNSWsse: WssNsWSSE, XmlNSType: WssNsType, Data: pass}
+	return hdr
 }
 
 type basicAuth struct {
@@ -186,6 +154,7 @@ type options struct {
 	tlsCfg             *tls.Config
 	auth               *basicAuth
 	timeout            time.Duration
+	httpHeaders        map[string]string
 }
 
 var defaultOptions = options{
@@ -214,6 +183,20 @@ func WithTLS(tls *tls.Config) Option {
 func WithTimeout(t time.Duration) Option {
 	return func(o *options) {
 		o.timeout = t
+	}
+}
+
+// WithInsecureSkipVerify is an Option to set insecure skip verify
+func WithInsecureSkipVerify(skipVerify bool) Option {
+	return func(o *options) {
+		o.insecureSkipVerify = skipVerify
+	}
+}
+
+// WithHTTPHeaders is an Option to set global HTTP headers for all requests
+func WithHTTPHeaders(headers map[string]string) Option {
+	return func(o *options) {
+		o.httpHeaders = headers
 	}
 }
 
@@ -274,8 +257,12 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 
 	req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
 	req.Header.Add("SOAPAction", soapAction)
-	// TODO: allow to set global headers
 	req.Header.Set("User-Agent", "gowsdl/0.1")
+	if s.opts.httpHeaders != nil {
+		for k, v := range s.opts.httpHeaders {
+			req.Header.Set(k, v)
+		}
+	}
 	req.Close = true
 
 	tr := &http.Transport{

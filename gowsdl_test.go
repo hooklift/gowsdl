@@ -124,21 +124,6 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 	}
 }
 
-func TestSOAPHeaderGeneratesWithoutErrors(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/ferry.wsdl", "myservice", false, true)
-	if err != nil {
-		t.Error(err)
-	}
-
-	resp, err := g.Start()
-	if err != nil {
-		t.Error(err)
-	}
-	if !strings.Contains(string(resp["operations"]), "SetHeader") {
-		t.Error("SetHeader method should be generated in the service operation")
-	}
-}
-
 func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 	enumStringTest := func(t *testing.T, fixtureWsdl string, varName string, typeName string, enumString string) {
 		g, err := NewGoWSDL("fixtures/"+fixtureWsdl, "myservice", false, true)
