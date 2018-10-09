@@ -154,11 +154,6 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 		log.Println(err)
 	}
 
-	gocode["soap"], err = g.genSOAPClient()
-	if err != nil {
-		log.Println(err)
-	}
-
 	return gocode, nil
 }
 
@@ -287,6 +282,7 @@ func (g *GoWSDL) genOperations() ([]byte, error) {
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           g.makePublicFn,
+		"makePrivate":          makePrivate,
 		"findType":             g.findType,
 		"findSOAPAction":       g.findSOAPAction,
 		"findServiceAddress":   g.findServiceAddress,
@@ -314,17 +310,6 @@ func (g *GoWSDL) genHeader() ([]byte, error) {
 
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("header").Funcs(funcMap).Parse(headerTmpl))
-	err := tmpl.Execute(data, g.pkg)
-	if err != nil {
-		return nil, err
-	}
-
-	return data.Bytes(), nil
-}
-
-func (g *GoWSDL) genSOAPClient() ([]byte, error) {
-	data := new(bytes.Buffer)
-	tmpl := template.Must(template.New("soapclient").Parse(soapTmpl))
 	err := tmpl.Execute(data, g.pkg)
 	if err != nil {
 		return nil, err
@@ -530,6 +515,16 @@ func makePublic(identifier string) string {
 	}
 
 	field[0] = unicode.ToUpper(field[0])
+	return string(field)
+}
+
+func makePrivate(identifier string) string {
+	field := []rune(identifier)
+	if len(field) == 0 {
+		return identifier
+	}
+
+	field[0] = unicode.ToLower(field[0])
 	return string(field)
 }
 

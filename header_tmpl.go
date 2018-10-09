@@ -8,15 +8,9 @@ var headerTmpl = `
 package {{.}}
 
 import (
-	"bytes"
-	"crypto/tls"
 	"encoding/xml"
-	"io/ioutil"
-	"log"
-	"math/rand"
-	"net"
-	"net/http"
 	"time"
+	"github.com/hooklift/gowsdl/soap"
 
 	{{/*range .Imports*/}}
 		{{/*.*/}}
