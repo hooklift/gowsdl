@@ -150,16 +150,14 @@ type basicAuth struct {
 }
 
 type options struct {
-	insecureSkipVerify bool
-	tlsCfg             *tls.Config
-	auth               *basicAuth
-	timeout            time.Duration
-	httpHeaders        map[string]string
+	tlsCfg      *tls.Config
+	auth        *basicAuth
+	timeout     time.Duration
+	httpHeaders map[string]string
 }
 
 var defaultOptions = options{
-	insecureSkipVerify: false,
-	timeout:            time.Duration(30 * time.Second),
+	timeout: time.Duration(30 * time.Second),
 }
 
 // A Option sets options such as credentials, tls, etc.
@@ -183,13 +181,6 @@ func WithTLS(tls *tls.Config) Option {
 func WithTimeout(t time.Duration) Option {
 	return func(o *options) {
 		o.timeout = t
-	}
-}
-
-// WithInsecureSkipVerify is an Option to set insecure skip verify
-func WithInsecureSkipVerify(skipVerify bool) Option {
-	return func(o *options) {
-		o.insecureSkipVerify = skipVerify
 	}
 }
 
