@@ -11,15 +11,9 @@ import (
 )
 
 type SOAPEnvelope struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	Header  *SOAPHeader
+	XMLName xml.Name      `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
+	Headers []interface{} `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"`
 	Body    SOAPBody
-}
-
-type SOAPHeader struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"`
-
-	Items []interface{} `xml:",omitempty"`
 }
 
 type SOAPBody struct {
@@ -220,9 +214,7 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 	envelope := SOAPEnvelope{}
 
 	if s.headers != nil && len(s.headers) > 0 {
-		soapHeader := &SOAPHeader{Items: make([]interface{}, len(s.headers))}
-		copy(soapHeader.Items, s.headers)
-		envelope.Header = soapHeader
+		envelope.Headers = s.headers
 	}
 
 	envelope.Body.Content = request

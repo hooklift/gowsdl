@@ -11,15 +11,15 @@ const wsdlNamespace = "http://schemas.xmlsoap.org/wsdl/"
 // WSDL represents the global structure of a WSDL file.
 type WSDL struct {
 	Xmlns           map[string]string `xml:"-"`
-	Name            string          `xml:"name,attr"`
-	TargetNamespace string          `xml:"targetNamespace,attr"`
-	Imports         []*WSDLImport   `xml:"import"`
-	Doc             string          `xml:"documentation"`
-	Types           WSDLType        `xml:"http://schemas.xmlsoap.org/wsdl/ types"`
-	Messages        []*WSDLMessage  `xml:"http://schemas.xmlsoap.org/wsdl/ message"`
-	PortTypes       []*WSDLPortType `xml:"http://schemas.xmlsoap.org/wsdl/ portType"`
-	Binding         []*WSDLBinding  `xml:"http://schemas.xmlsoap.org/wsdl/ binding"`
-	Service         []*WSDLService  `xml:"http://schemas.xmlsoap.org/wsdl/ service"`
+	Name            string            `xml:"name,attr"`
+	TargetNamespace string            `xml:"targetNamespace,attr"`
+	Imports         []*WSDLImport     `xml:"import"`
+	Doc             string            `xml:"documentation"`
+	Types           WSDLType          `xml:"http://schemas.xmlsoap.org/wsdl/ types"`
+	Messages        []*WSDLMessage    `xml:"http://schemas.xmlsoap.org/wsdl/ message"`
+	PortTypes       []*WSDLPortType   `xml:"http://schemas.xmlsoap.org/wsdl/ portType"`
+	Binding         []*WSDLBinding    `xml:"http://schemas.xmlsoap.org/wsdl/ binding"`
+	Service         []*WSDLService    `xml:"http://schemas.xmlsoap.org/wsdl/ service"`
 }
 
 // UnmarshalXML implements interface xml.Unmarshaler for XSDSchema.
