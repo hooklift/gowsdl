@@ -556,7 +556,6 @@ var basicTypes = map[string]string{
 }
 
 func isBasicType(identifier string) bool {
-
 	if _, exsits := basicTypes[identifier]; exsits {
 		return true
 	}
