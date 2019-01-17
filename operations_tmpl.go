@@ -6,55 +6,42 @@ package gowsdl
 
 var opsTmpl = `
 {{range .}}
-	{{$portType := .Name | makePublic}}
-	type {{$portType}} struct {
-		client *SOAPClient
+	{{$privateType := .Name | makePrivate}}
+	{{$exportType := .Name | makePublic}}
+
+	type {{$exportType}} interface {
+		{{range .Operations}}
+			{{$faults := len .Faults}}
+			{{$soapAction := findSOAPAction .Name $privateType}}
+			{{$requestType := findType .Input.Message | replaceReservedWords | makePublic}}
+			{{$responseType := findType .Output.Message | replaceReservedWords | makePublic}}
+
+			{{/*if ne $soapAction ""*/}}
+			{{if gt $faults 0}}
+			// Error can be either of the following types:
+			// {{range .Faults}}
+			//   - {{.Name}} {{.Doc}}{{end}}{{end}}
+			{{if ne .Doc ""}}/* {{.Doc}} */{{end}}
+			{{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{$responseType}}, error)
+			{{/*end*/}}
+		{{end}}
 	}
 
-	func New{{$portType}}(url string, tls bool, auth *BasicAuth) *{{$portType}} {
-		if url == "" {
-			url = {{findServiceAddress .Name | printf "%q"}}
-		}
-		client := NewSOAPClient(url, tls, auth)
+	type {{$privateType}} struct {
+		client *soap.Client
+	}
 
-		return &{{$portType}}{
+	func New{{$exportType}}(client *soap.Client) {{$exportType}} {
+		return &{{$privateType}}{
 			client: client,
 		}
-	}
-
-	func New{{$portType}}WithTLSConfig(url string, tlsCfg *tls.Config, auth *BasicAuth) *{{$portType}} {
-		if url == "" {
-			url = {{findServiceAddress .Name | printf "%q"}}
-		}
-		client := NewSOAPClientWithTLSConfig(url, tlsCfg, auth)
-
-		return &{{$portType}}{
-			client: client,
-		}
-	}
-
-	func (service *{{$portType}}) AddHeader(header interface{}) {
-		service.client.AddHeader(header)
-	}
-
-	// Backwards-compatible function: use AddHeader instead
-	func (service *{{$portType}}) SetHeader(header interface{}) {
-		service.client.AddHeader(header)
 	}
 
 	{{range .Operations}}
-		{{$faults := len .Faults}}
 		{{$requestType := findType .Input.Message | replaceReservedWords | makePublic}}
-		{{$soapAction := findSOAPAction .Name $portType}}
+		{{$soapAction := findSOAPAction .Name $privateType}}
 		{{$responseType := findType .Output.Message | replaceReservedWords | makePublic}}
-
-		{{/*if ne $soapAction ""*/}}
-		{{if gt $faults 0}}
-		// Error can be either of the following types:
-		// {{range .Faults}}
-		//   - {{.Name}} {{.Doc}}{{end}}{{end}}
-		{{if ne .Doc ""}}/* {{.Doc}} */{{end}}
-		func (service *{{$portType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{$responseType}}, error) {
+		func (service *{{$privateType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{$responseType}}, error) {
 			response := new({{$responseType}})
 			err := service.client.Call("{{$soapAction}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, response)
 			if err != nil {
@@ -63,7 +50,6 @@ var opsTmpl = `
 
 			return response, nil
 		}
-		{{/*end*/}}
 	{{end}}
 {{end}}
 `

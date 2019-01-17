@@ -154,11 +154,6 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 		log.Println(err)
 	}
 
-	gocode["soap"], err = g.genSOAPClient()
-	if err != nil {
-		log.Println(err)
-	}
-
 	return gocode, nil
 }
 
@@ -269,6 +264,7 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"comment":              comment,
 		"removeNS":             removeNS,
 		"goString":             goString,
+		"findNameByType":       g.findNameByType,
 	}
 
 	data := new(bytes.Buffer)
@@ -287,6 +283,7 @@ func (g *GoWSDL) genOperations() ([]byte, error) {
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           g.makePublicFn,
+		"makePrivate":          makePrivate,
 		"findType":             g.findType,
 		"findSOAPAction":       g.findSOAPAction,
 		"findServiceAddress":   g.findServiceAddress,
@@ -314,17 +311,6 @@ func (g *GoWSDL) genHeader() ([]byte, error) {
 
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("header").Funcs(funcMap).Parse(headerTmpl))
-	err := tmpl.Execute(data, g.pkg)
-	if err != nil {
-		return nil, err
-	}
-
-	return data.Bytes(), nil
-}
-
-func (g *GoWSDL) genSOAPClient() ([]byte, error) {
-	data := new(bytes.Buffer)
-	tmpl := template.Must(template.New("soapclient").Parse(soapTmpl))
 	err := tmpl.Execute(data, g.pkg)
 	if err != nil {
 		return nil, err
@@ -483,11 +469,24 @@ func (g *GoWSDL) findType(message string) string {
 	return ""
 }
 
+// Given a type, check if there's SimpleType with that type, and return its name.
+func (g *GoWSDL) findNameByType(name string) string {
+	name = stripns(name)
+	for _, schema := range g.wsdl.Types.Schemas {
+		for _, elem := range schema.Elements {
+			if stripns(elem.Type) == name {
+				return elem.Name
+			}
+		}
+	}
+	return name
+}
+
 // TODO(c4milo): Add support for namespaces instead of striping them out
 // TODO(c4milo): improve runtime complexity if performance turns out to be an issue.
 func (g *GoWSDL) findSOAPAction(operation, portType string) string {
 	for _, binding := range g.wsdl.Binding {
-		if stripns(binding.Type) != portType {
+		if strings.ToUpper(stripns(binding.Type)) != strings.ToUpper(portType) {
 			continue
 		}
 
@@ -560,6 +559,16 @@ func isBasicType(identifier string) bool {
 		return true
 	}
 	return false
+}
+
+func makePrivate(identifier string) string {
+	field := []rune(identifier)
+	if len(field) == 0 {
+		return identifier
+	}
+
+	field[0] = unicode.ToLower(field[0])
+	return string(field)
 }
 
 func comment(text string) string {

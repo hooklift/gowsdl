@@ -77,8 +77,6 @@ func TestAttributeRef(t *testing.T) {
 	}
 
 	expected := `type ResponseStatus struct {
-	XMLName	xml.Name	` + "`" + `xml:"http://www.mnb.hu/webservices/ ResponseStatus"` + "`" + `
-
 	Status	[]struct {
 		Value	string
 
@@ -121,21 +119,6 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 			fmt.Println(string(data.Bytes()))
 			t.Error(err)
 		}
-	}
-}
-
-func TestSOAPHeaderGeneratesWithoutErrors(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/ferry.wsdl", "myservice", false, true)
-	if err != nil {
-		t.Error(err)
-	}
-
-	resp, err := g.Start()
-	if err != nil {
-		t.Error(err)
-	}
-	if !strings.Contains(string(resp["operations"]), "SetHeader") {
-		t.Error("SetHeader method should be generated in the service operation")
 	}
 }
 
