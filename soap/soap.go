@@ -147,7 +147,6 @@ type options struct {
 	tlsCfg      *tls.Config
 	auth        *basicAuth
 	timeout     time.Duration
-	idletimeout time.Duration
 	contimeout  time.Duration
 	tlshshaketimeout time.Duration
 	httpHeaders map[string]string
@@ -155,7 +154,6 @@ type options struct {
 
 var defaultOptions = options{
 	timeout: time.Duration(30 * time.Second),
-	idletimeout: time.Duration(60*time.Second),
 	contimeout: time.Duration(90*time.Second),
 	tlshshaketimeout: time.Duration(15*time.Second),
 }
@@ -170,13 +168,6 @@ func WithTLSHandshakeTimeout(t time.Duration) Option {
 	}
 }
 
-
-// WithIdleConTimeout is an Option to set default idle connection timeout
-func WithIdleConTimeout(t time.Duration) Option {
-	return func(o *options) {
-		o.idletimeout = t
-	}
-}
 
 // WithRequestTimeout is an Option to set default end-end connection timeout
 func WithRequestTimeout(t time.Duration) Option {
@@ -281,7 +272,6 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 		Dial: func(network, addr string) (net.Conn, error) {
 			return net.DialTimeout(network, addr, s.opts.timeout)
 		},
-		IdleConnTimeout:s.opts.idletimeout,
 		TLSHandshakeTimeout: s.opts.tlshshaketimeout,
 	}
 
