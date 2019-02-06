@@ -1,7 +1,6 @@
 package gen
 
 import (
-	"context"
 	"encoding/xml"
 	"time"
 
@@ -40,7 +39,7 @@ func NewStockQuotePortType(client *soap.Client) StockQuotePortType {
 
 func (service *stockQuotePortType) GetLastTradePrice(request *TradePriceRequest) (*TradePrice, error) {
 	response := new(TradePrice)
-	err := service.client.Call(context.Background(), "http://example.com/GetLastTradePrice", request, response)
+	err := service.client.Call("http://example.com/GetLastTradePrice", request, response)
 	if err != nil {
 		return nil, err
 	}
