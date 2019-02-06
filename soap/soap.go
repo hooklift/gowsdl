@@ -149,7 +149,7 @@ type options struct {
 	timeout          time.Duration
 	contimeout       time.Duration
 	tlshshaketimeout time.Duration
-	client           httpClient
+	client           HTTPClient
 	httpHeaders      map[string]string
 }
 
@@ -165,7 +165,7 @@ type Option func(*options)
 // WithHTTPClient is an Option to set the HTTP client to use
 // This cannot be used with WithTLSHandshakeTimeout, WithTLS,
 // WithTimeout options
-func WithHTTPClient(c httpClient) Option {
+func WithHTTPClient(c HTTPClient) Option {
 	return func(o *options) {
 		o.client = c
 	}
@@ -223,7 +223,9 @@ type Client struct {
 	headers []interface{}
 }
 
-type httpClient interface {
+// HTTPClient is a client which can make HTTP requests
+// An example implementation is net/http.Client
+type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
