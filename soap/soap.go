@@ -247,8 +247,17 @@ func (s *Client) AddHeader(header interface{}) {
 	s.headers = append(s.headers, header)
 }
 
+// CallCtx performs HTTP POST request with a context
+func (s *Client) CallCtx(ctx context.Context, soapAction string, request, response interface{}) error {
+	return s.call(ctx, soapAction, request, response)
+}
+
 // Call performs HTTP POST request
-func (s *Client) Call(ctx context.Context, soapAction string, request, response interface{}) error {
+func (s *Client) Call(soapAction string, request, response interface{}) error {
+	return s.call(context.Background(), soapAction, request, response)
+}
+
+func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}) error {
 	envelope := SOAPEnvelope{}
 
 	if s.headers != nil && len(s.headers) > 0 {

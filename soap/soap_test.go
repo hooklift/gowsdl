@@ -1,7 +1,6 @@
 package soap
 
 import (
-	"context"
 	"encoding/xml"
 	"net/http"
 	"net/http/httptest"
@@ -53,7 +52,7 @@ func TestClient_Call(t *testing.T) {
 	client := NewClient(ts.URL)
 	req := &Ping{Request: &PingRequest{Message: "Hi"}}
 	reply := &PingResponse{}
-	if err := client.Call(context.Background(), "GetData", req, reply); err != nil {
+	if err := client.Call("GetData", req, reply); err != nil {
 		t.Fatalf("couln't call service: %v", err)
 	}
 
@@ -106,7 +105,7 @@ func TestClient_Send_Correct_Headers(t *testing.T) {
 		client := NewClient(ts.URL, WithHTTPHeaders(test.reqHeaders))
 		req := struct{}{}
 		reply := struct{}{}
-		client.Call(context.Background(), test.action, req, reply)
+		client.Call(test.action, req, reply)
 
 		for k, v := range test.expectedHeaders {
 			h := gotHeaders.Get(k)
