@@ -86,9 +86,9 @@ var typesTmpl = `
 	{{end}}
 
 	{{range .Elements}}
+		{{$name := .Name}}
 		{{if not .Type}}
 			{{/* ComplexTypeLocal */}}
-			{{$name := .Name}}
 			{{with .ComplexType}}
 				type {{$name | replaceReservedWords | makePublic}} struct {
 					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$name}}\"`" + `
@@ -105,6 +105,8 @@ var typesTmpl = `
 					{{end}}
 				}
 			{{end}}
+		{{else}}
+			type {{$name | replaceReservedWords | makePublic}} {{toGoType .Type | removePointerFromType}}
 		{{end}}
 	{{end}}
 

@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"text/template"
@@ -256,15 +257,16 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 
 func (g *GoWSDL) genTypes() ([]byte, error) {
 	funcMap := template.FuncMap{
-		"toGoType":             toGoType,
-		"stripns":              stripns,
-		"replaceReservedWords": replaceReservedWords,
-		"makePublic":           g.makePublicFn,
-		"makeFieldPublic":      makePublic,
-		"comment":              comment,
-		"removeNS":             removeNS,
-		"goString":             goString,
-		"findNameByType":       g.findNameByType,
+		"toGoType":              toGoType,
+		"stripns":               stripns,
+		"replaceReservedWords":  replaceReservedWords,
+		"makePublic":            g.makePublicFn,
+		"makeFieldPublic":       makePublic,
+		"comment":               comment,
+		"removeNS":              removeNS,
+		"goString":              goString,
+		"findNameByType":        g.findNameByType,
+		"removePointerFromType": removePointerFromType,
 	}
 
 	data := new(bytes.Buffer)
@@ -424,6 +426,10 @@ func toGoType(xsdType string) string {
 	}
 
 	return "*" + replaceReservedWords(makePublic(t))
+}
+
+func removePointerFromType(goType string) string {
+	return regexp.MustCompile("^\\s*\\*").ReplaceAllLiteralString(goType, "")
 }
 
 // Given a message, finds its type.
