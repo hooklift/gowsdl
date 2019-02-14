@@ -22,7 +22,7 @@ var opsTmpl = `
 			// {{range .Faults}}
 			//   - {{.Name}} {{.Doc}}{{end}}{{end}}
 			{{if ne .Doc ""}}/* {{.Doc}} */{{end}}
-			{{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{$responseType}}, error)
+			{{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) ({{if ne $responseType ""}}*{{$responseType}}, {{end}}error)
 			{{/*end*/}}
 		{{end}}
 	}
@@ -41,14 +41,14 @@ var opsTmpl = `
 		{{$requestType := findType .Input.Message | replaceReservedWords | makePublic}}
 		{{$soapAction := findSOAPAction .Name $privateType}}
 		{{$responseType := findType .Output.Message | replaceReservedWords | makePublic}}
-		func (service *{{$privateType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) (*{{$responseType}}, error) {
-			response := new({{$responseType}})
-			err := service.client.Call("{{$soapAction}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, response)
+		func (service *{{$privateType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) ({{if ne $responseType ""}}*{{$responseType}}, {{end}}error) {
+			{{if ne $responseType ""}}response := new({{$responseType}}){{end}}
+			err := service.client.Call("{{$soapAction}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, {{if ne $responseType ""}}response{{else}}struct{}{}{{end}})
 			if err != nil {
-				return nil, err
+				return {{if ne $responseType ""}}nil, {{end}}err
 			}
 
-			return response, nil
+			return {{if ne $responseType ""}}response, {{end}}nil
 		}
 	{{end}}
 {{end}}
