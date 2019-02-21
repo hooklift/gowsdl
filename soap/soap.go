@@ -2,6 +2,7 @@ package soap
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/xml"
 	"io/ioutil"
@@ -246,8 +247,17 @@ func (s *Client) AddHeader(header interface{}) {
 	s.headers = append(s.headers, header)
 }
 
+// CallContext performs HTTP POST request with a context
+func (s *Client) CallContext(ctx context.Context, soapAction string, request, response interface{}) error {
+	return s.call(ctx, soapAction, request, response)
+}
+
 // Call performs HTTP POST request
 func (s *Client) Call(soapAction string, request, response interface{}) error {
+	return s.call(context.Background(), soapAction, request, response)
+}
+
+func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}) error {
 	envelope := SOAPEnvelope{}
 
 	if s.headers != nil && len(s.headers) > 0 {
@@ -275,6 +285,7 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 		req.SetBasicAuth(s.opts.auth.Login, s.opts.auth.Password)
 	}
 
+	req.WithContext(ctx)
 	req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
 	req.Header.Add("SOAPAction", soapAction)
 	req.Header.Set("User-Agent", "gowsdl/0.1")
@@ -289,8 +300,9 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 	if client == nil {
 		tr := &http.Transport{
 			TLSClientConfig: s.opts.tlsCfg,
-			Dial: func(network, addr string) (net.Conn, error) {
-				return net.DialTimeout(network, addr, s.opts.timeout)
+			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+				d := net.Dialer{Timeout: s.opts.timeout}
+				return d.DialContext(ctx, network, addr)
 			},
 			TLSHandshakeTimeout: s.opts.tlshshaketimeout,
 		}
