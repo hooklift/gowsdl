@@ -10,6 +10,7 @@ var headerTmpl = `
 package {{.}}
 
 import (
+	"context"
 	"encoding/xml"
 	"time"
 	"github.com/hooklift/gowsdl/soap"
