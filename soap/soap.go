@@ -5,9 +5,10 @@ import (
 	"crypto/tls"
 	"encoding/xml"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"time"
+
+	ntlmssp "github.com/Azure/go-ntlmssp"
 )
 
 type SOAPEnvelope struct {
@@ -283,18 +284,13 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 			req.Header.Set(k, v)
 		}
 	}
-	req.Close = true
+	// req.Close = true     YB: Don't close the request header
 
-	client := s.opts.client
-	if client == nil {
-		tr := &http.Transport{
-			TLSClientConfig: s.opts.tlsCfg,
-			Dial: func(network, addr string) (net.Conn, error) {
-				return net.DialTimeout(network, addr, s.opts.timeout)
-			},
-			TLSHandshakeTimeout: s.opts.tlshshaketimeout,
-		}
-		client = &http.Client{Timeout: s.opts.contimeout, Transport: tr}
+	// YB: Use ntlmssp as a transport
+	client := &http.Client{
+		Transport: ntlmssp.Negotiator{
+			RoundTripper: &http.Transport{},
+		},
 	}
 
 	res, err := client.Do(req)

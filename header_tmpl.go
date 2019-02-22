@@ -12,7 +12,7 @@ package {{.}}
 import (
 	"encoding/xml"
 	"time"
-	"github.com/hooklift/gowsdl/soap"
+	"github.com/factrylabs/gowsdl/soap"
 
 	{{/*range .Imports*/}}
 		{{/*.*/}}
@@ -22,4 +22,38 @@ import (
 // against "unused imports"
 var _ time.Time
 var _ xml.Name
+
+
+// YB : Added custom timestamp to parse all kinds of different datetime formats
+type customTimestamp struct {
+	time.Time
+}
+
+// UnmarshalXML will parse the time.Time in different ways - as Navision uses them
+func (c *customTimestamp) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var v string
+	d.DecodeElement(&v, &start)
+
+	parse, err := time.Parse("2006-01-02T15:04:05Z07:00", v)
+	if err == nil {
+		*c = customTimestamp{parse}
+		return nil
+	}
+
+	parse, err = time.Parse("2006-01-02T15:04:05", v)
+	if err == nil {
+		*c = customTimestamp{parse}
+		return nil
+	}
+
+	parse, err = time.Parse("2006-01-02", v)
+	if err == nil {
+		*c = customTimestamp{parse}
+		return nil
+	}
+
+	// if we reach here: an error occurred..
+	return fmt.Errorf("Could not parse datetime for %v", v)
+
+}
 `
