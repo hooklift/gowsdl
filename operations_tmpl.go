@@ -51,8 +51,8 @@ var opsTmpl = `
 			return {{if ne $responseType ""}}response, {{end}}nil
 		}
 
-		func (service *{{$privateType}}) {{makePublic .Name | replaceReservedWords}} (ctx context.Context, {{if ne $requestType ""}}request *{{$requestType}}{{end}}) ({{if ne $responseType ""}}*{{$responseType}}, {{end}}error) {
-			return service.{{makePublic .Name | replaceReservedWords}}(
+		func (service *{{$privateType}}) {{makePublic .Name | replaceReservedWords}} ({{if ne $requestType ""}}request *{{$requestType}}{{end}}) ({{if ne $responseType ""}}*{{$responseType}}, {{end}}error) {
+			return service.{{makePublic .Name | replaceReservedWords}}Context(
 				context.Background(),
 				{{if ne $requestType ""}}request,{{end}}
 			)
