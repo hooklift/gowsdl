@@ -11,6 +11,7 @@ package {{.}}
 
 import (
 	"encoding/xml"
+	"fmt"
 	"time"
 	"github.com/factrylabs/gowsdl/soap"
 
