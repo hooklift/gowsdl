@@ -5,11 +5,20 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/xml"
-	"io/ioutil"
+	"fmt"
 	"net"
 	"net/http"
 	"time"
 )
+
+type SOAPEncoder interface {
+	Encode(v interface{}) error
+	Flush() error
+}
+
+type SOAPDecoder interface {
+	Decode(v interface{}) error
+}
 
 type SOAPEnvelope struct {
 	XMLName xml.Name      `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
@@ -90,9 +99,10 @@ func (f *SOAPFault) Error() string {
 
 const (
 	// Predefined WSS namespaces to be used in
-	WssNsWSSE string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
-	WssNsWSU  string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
-	WssNsType string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText"
+	WssNsWSSE       string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+	WssNsWSU        string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+	WssNsType       string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText"
+	mtomContentType string = `multipart/related; start-info="application/soap+xml"; type="application/xop+xml"; boundary="%s"`
 )
 
 type WSSSecurityHeader struct {
@@ -152,6 +162,7 @@ type options struct {
 	tlshshaketimeout time.Duration
 	client           HTTPClient
 	httpHeaders      map[string]string
+	mtom             bool
 }
 
 var defaultOptions = options{
@@ -217,6 +228,14 @@ func WithHTTPHeaders(headers map[string]string) Option {
 	}
 }
 
+// WithMTOM is an Option to set Message Transmission Optimization Mechanism
+// MTOM encodes fields of type Binary using XOP.
+func WithMTOM() Option {
+	return func(o *options) {
+		o.mtom = true
+	}
+}
+
 // Client is soap client
 type Client struct {
 	url     string
@@ -266,8 +285,12 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 
 	envelope.Body.Content = request
 	buffer := new(bytes.Buffer)
-
-	encoder := xml.NewEncoder(buffer)
+	var encoder SOAPEncoder
+	if s.opts.mtom {
+		encoder = newMtomEncoder(buffer)
+	} else {
+		encoder = xml.NewEncoder(buffer)
+	}
 
 	if err := encoder.Encode(envelope); err != nil {
 		return err
@@ -286,7 +309,12 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 
 	req.WithContext(ctx)
-	req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
+
+	if s.opts.mtom {
+		req.Header.Add("Content-Type", fmt.Sprintf(mtomContentType, encoder.(*mtomEncoder).Boundary()))
+	} else {
+		req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
+	}
 	req.Header.Add("SOAPAction", soapAction)
 	req.Header.Set("User-Agent", "gowsdl/0.1")
 	if s.opts.httpHeaders != nil {
@@ -315,18 +343,22 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 	defer res.Body.Close()
 
-	rawbody, err := ioutil.ReadAll(res.Body)
+	respEnvelope := new(SOAPEnvelope)
+	respEnvelope.Body = SOAPBody{Content: response}
+
+	mtomBoundary, err := getMtomHeader(res.Header.Get("Content-Type"))
 	if err != nil {
 		return err
 	}
-	if len(rawbody) == 0 {
-		return nil
+
+	var dec SOAPDecoder
+	if mtomBoundary != "" {
+		dec = newMtomDecoder(res.Body, mtomBoundary)
+	} else {
+		dec = xml.NewDecoder(res.Body)
 	}
 
-	respEnvelope := new(SOAPEnvelope)
-	respEnvelope.Body = SOAPBody{Content: response}
-	err = xml.Unmarshal(rawbody, respEnvelope)
-	if err != nil {
+	if err := dec.Decode(respEnvelope); err != nil {
 		return err
 	}
 

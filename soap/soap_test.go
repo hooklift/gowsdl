@@ -1,7 +1,9 @@
 package soap
 
 import (
+	"bytes"
 	"encoding/xml"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,7 +18,8 @@ type Ping struct {
 type PingRequest struct {
 	// XMLName xml.Name `xml:"http://example.com/service.xsd PingRequest"`
 
-	Message string `xml:"Message,omitempty"`
+	Message    string  `xml:"Message,omitempty"`
+	Attachment *Binary `xml:"Attachment,omitempty"`
 }
 
 type PingResponse struct {
@@ -28,7 +31,8 @@ type PingResponse struct {
 type PingReply struct {
 	// XMLName xml.Name `xml:"http://example.com/service.xsd PingReply"`
 
-	Message string `xml:"Message,omitempty"`
+	Message    string `xml:"Message,omitempty"`
+	Attachment []byte `xml:"Attachment,omitempty"`
 }
 
 func TestClient_Call(t *testing.T) {
@@ -113,5 +117,31 @@ func TestClient_Send_Correct_Headers(t *testing.T) {
 				t.Errorf("got %s wanted %s", h, v)
 			}
 		}
+	}
+}
+
+func TestClient_MTOM(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		for k, v := range r.Header {
+			w.Header().Set(k, v[0])
+		}
+		bodyBuf, _ := ioutil.ReadAll(r.Body)
+		w.Write(bodyBuf)
+	}))
+	defer ts.Close()
+
+	client := NewClient(ts.URL, WithMTOM())
+	req := &PingRequest{Attachment: NewBinary([]byte("Attached data")).SetContentType("text/plain")}
+	reply := &PingRequest{}
+	if err := client.Call("GetData", req, reply); err != nil {
+		t.Fatalf("couln't call service: %v", err)
+	}
+
+	if !bytes.Equal(reply.Attachment.Bytes(), req.Attachment.Bytes()) {
+		t.Errorf("got %s wanted %s", reply.Attachment.Bytes(), req.Attachment.Bytes())
+	}
+
+	if reply.Attachment.ContentType() != req.Attachment.ContentType() {
+		t.Errorf("got %s wanted %s", reply.Attachment.Bytes(), req.Attachment.ContentType())
 	}
 }
