@@ -293,6 +293,8 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 		},
 	}
 
+	defer req.Body.Close()
+
 	res, err := client.Do(req)
 	if err != nil {
 		return err
