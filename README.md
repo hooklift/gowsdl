@@ -1,4 +1,11 @@
 # WSDL to Go
+## FACTRY fork
+This Factry fork fixes a couple of issues with the original gowsdl:
+* enables proper autentication with Navision - using ntlsm
+* custom datetime handling, to properly parse Dates (yyyy-mm-dd)
+
+## Original readme
+
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/hooklift/gowsdl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![GoDoc](https://godoc.org/github.com/hooklift/gowsdl?status.svg)](https://godoc.org/github.com/hooklift/gowsdl)
