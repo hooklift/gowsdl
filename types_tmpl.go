@@ -10,6 +10,10 @@ var typesTmpl = `
 	{{if .Doc}} {{.Doc | comment}} {{end}}
 	{{if ne .List.ItemType ""}}
 		type {{$type}} []{{toGoType .List.ItemType }}
+	{{else if ne .Union.MemberTypes ""}}
+		type {{$type}} string
+	{{else if .Union.SimpleType}}
+		type {{$type}} string
 	{{else}}
 		type {{$type}} {{toGoType .Restriction.Base}}
 	{{end}}
