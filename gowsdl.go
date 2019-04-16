@@ -201,6 +201,10 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 		if g.resolvedXSDExternals[location.String()] {
 			return nil
 		}
+		if g.resolvedXSDExternals == nil {
+			g.resolvedXSDExternals = make(map[string]bool, maxRecursion)
+		}
+		g.resolvedXSDExternals[schemaKey] = true
 
 		var data []byte
 		if data, err = g.fetchFile(location); err != nil {
@@ -225,11 +229,6 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 		}
 
 		g.wsdl.Types.Schemas = append(g.wsdl.Types.Schemas, newschema)
-
-		if g.resolvedXSDExternals == nil {
-			g.resolvedXSDExternals = make(map[string]bool, maxRecursion)
-		}
-		g.resolvedXSDExternals[schemaKey] = true
 
 		return nil
 	}
