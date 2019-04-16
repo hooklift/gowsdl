@@ -258,6 +258,7 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 func (g *GoWSDL) genTypes() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":              toGoType,
+		"unionToGoStringType":   unionToGoStringType,
 		"stripns":               stripns,
 		"replaceReservedWords":  replaceReservedWords,
 		"makePublic":            g.makePublicFn,
@@ -426,6 +427,11 @@ func toGoType(xsdType string) string {
 	}
 
 	return "*" + replaceReservedWords(makePublic(t))
+}
+
+
+func unionToGoStringType(xsdType string) string {
+	return "string"
 }
 
 func removePointerFromType(goType string) string {
