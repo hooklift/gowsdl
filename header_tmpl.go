@@ -53,6 +53,12 @@ func (c *CustomTimestamp) UnmarshalXML(d *xml.Decoder, start xml.StartElement) e
 		return nil
 	}
 
+	parse, err = time.Parse("15:04:05", v)
+	if err == nil {
+		*c = CustomTimestamp{parse}
+		return nil
+	}
+
 	// if we reach here: an error occurred..
 	return fmt.Errorf("Could not parse datetime for %v", v)
 
