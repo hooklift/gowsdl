@@ -42,7 +42,11 @@ var typesTmpl = `
 {{define "Attributes"}}
 	{{range .}}
 		{{if .Doc}} {{.Doc | comment}} {{end}}
-		{{ .Name | makeFieldPublic}} {{toGoType .Type}} ` + "`" + `xml:"{{.Name}},attr,omitempty"` + "`" + `
+		{{ if ne .Type "" }}
+			{{ .Name | makeFieldPublic}} {{toGoType .Type}} ` + "`" + `xml:"{{.Name}},attr,omitempty"` + "`" + `
+		{{ else }}
+			{{ .Name | makeFieldPublic}} string ` + "`" + `xml:"{{.Name}},attr,omitempty"` + "`" + `
+		{{ end }}
 	{{end}}
 {{end}}
 
@@ -76,7 +80,11 @@ var typesTmpl = `
 		{{if not .Type}}
 			{{if .SimpleType}}
 				{{if .Doc}} {{.Doc | comment}} {{end}}
-				{{ .Name | makeFieldPublic}} {{toGoType .SimpleType.Restriction.Base}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
+				{{if ne .SimpleType.List.ItemType ""}}
+					{{ .Name | makeFieldPublic}} []{{toGoType .SimpleType.List.ItemType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
+				{{else}}
+					{{ .Name | makeFieldPublic}} {{toGoType .SimpleType.Restriction.Base}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
+				{{end}}
 			{{else}}
 				{{template "ComplexTypeInline" .}}
 			{{end}}
