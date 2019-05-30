@@ -348,6 +348,11 @@ var reservedWords = map[string]string{
 	"var":         "var_",
 }
 
+var reservedCharacters = map[rune]string{
+	'_': "_",
+	'+': "Plus",
+}
+
 // Replaces Go reserved keywords to avoid compilation issues
 func replaceReservedWords(identifier string) string {
 	value := reservedWords[identifier]
@@ -359,14 +364,16 @@ func replaceReservedWords(identifier string) string {
 
 // Normalizes value to be used as a valid Go identifier, avoiding compilation issues
 func normalize(value string) string {
-	mapping := func(r rune) rune {
-		if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' {
-			return r
+	normalized := ""
+	for _, r := range value {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			normalized += string(r)
+		} else if replacement, found := reservedCharacters[r]; found {
+			normalized += replacement
 		}
-		return -1
 	}
 
-	return strings.Map(mapping, value)
+	return normalized
 }
 
 func goString(s string) string {

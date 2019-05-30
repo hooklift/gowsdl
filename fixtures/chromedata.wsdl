@@ -201,6 +201,7 @@
             <simpleType name="DriveTrain">
                 <restriction base="string">
                     <enumeration value="Front Wheel Drive" />
+                    <enumeration value="Front Wheel Drive+" />
                     <enumeration value="Rear Wheel Drive" />
                     <enumeration value="All Wheel Drive" />
                     <enumeration value="Four Wheel Drive" />

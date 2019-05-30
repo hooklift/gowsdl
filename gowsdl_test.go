@@ -144,6 +144,7 @@ func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 		}
 	}
 	enumStringTest(t, "chromedata.wsdl", "DriveTrainFrontWheelDrive", "DriveTrain", "Front Wheel Drive")
+	enumStringTest(t, "chromedata.wsdl", "DriveTrainFrontWheelDrivePlus", "DriveTrain", "Front Wheel Drive+")
 	enumStringTest(t, "vboxweb.wsdl", "SettingsVersionV1_14", "SettingsVersion", "v1_14")
 
 }
