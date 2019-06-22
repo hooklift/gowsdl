@@ -268,6 +268,7 @@ func NewClient(url string, opt ...Option) *Client {
 }
 
 // AddHeader adds envelope header
+// For correct behavior, every header must contain a `XMLName` field.  Refer to #121 for details
 func (s *Client) AddHeader(header interface{}) {
 	s.headers = append(s.headers, header)
 }
