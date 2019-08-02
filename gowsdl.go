@@ -125,16 +125,21 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 	}
 
 	var wg sync.WaitGroup
+	var mu sync.Mutex
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		var err error
 
-		gocode["types"], err = g.genTypes()
+		types, err := g.genTypes()
 		if err != nil {
 			log.Println("genTypes", "error", err)
 		}
+
+		mu.Lock()
+		defer mu.Unlock()
+		gocode["types"] = types
 	}()
 
 	wg.Add(1)
@@ -142,10 +147,14 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 		defer wg.Done()
 		var err error
 
-		gocode["operations"], err = g.genOperations()
+		ops, err := g.genOperations()
 		if err != nil {
 			log.Println(err)
 		}
+
+		mu.Lock()
+		defer mu.Unlock()
+		gocode["operations"] = ops
 	}()
 
 	wg.Wait()
