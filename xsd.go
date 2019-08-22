@@ -150,6 +150,7 @@ type XSDComplexType struct {
 	ComplexContent XSDComplexContent `xml:"complexContent"`
 	SimpleContent  XSDSimpleContent  `xml:"simpleContent"`
 	Attributes     []*XSDAttribute   `xml:"attribute"`
+	ChoiceSequence []*XSDElement     `xml:"choice>sequence>element"`
 }
 
 // XSDGroup element is used to define a group of elements to be used in complex type definitions.
@@ -181,6 +182,8 @@ type XSDExtension struct {
 	Base       string          `xml:"base,attr"`
 	Attributes []*XSDAttribute `xml:"attribute"`
 	Sequence   []XSDElement    `xml:"sequence>element"`
+        SequenceChoice []*XSDElement   `xml:"sequence>choice>element"`
+        Choice         []XSDElement    `xml:"choice>element"`
 }
 
 // XSDAttribute represent an element attribute. Simple elements cannot have

@@ -37,6 +37,8 @@ var typesTmpl = `
 
 	{{template "Elements" .Extension.Sequence}}
 	{{template "Attributes" .Extension.Attributes}}
+        {{template "Elements" .Extension.Sequence}}
+        {{template "Elements" .Extension.Choice}}
 {{end}}
 
 {{define "Attributes"}}
@@ -67,6 +69,7 @@ var typesTmpl = `
 			{{template "Elements" .SequenceChoice}}
 			{{template "Elements" .All}}
 			{{template "Attributes" .Attributes}}
+                        {{template "Elements" .ChoiceSequence}}
 		{{end}}
 	{{end}}
 	} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
@@ -119,6 +122,7 @@ var typesTmpl = `
 						{{template "Elements" .SequenceChoice}}
 						{{template "Elements" .All}}
 						{{template "Attributes" .Attributes}}
+                                                {{template "Elements" .ChoiceSequence}}
 					{{end}}
 				}
 			{{end}}
@@ -145,6 +149,7 @@ var typesTmpl = `
 				{{template "Elements" .SequenceChoice}}
 				{{template "Elements" .All}}
 				{{template "Attributes" .Attributes}}
+                                {{template "Elements" .ChoiceSequence}}
 			{{end}}
 		}
 	{{end}}
