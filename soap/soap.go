@@ -219,9 +219,10 @@ func WithHTTPHeaders(headers map[string]string) Option {
 
 // Client is soap client
 type Client struct {
-	url     string
-	opts    *options
-	headers []interface{}
+	url        string
+	opts       *options
+	headers    []interface{}
+	httpClient HTTPClient
 }
 
 // HTTPClient is a client which can make HTTP requests
@@ -236,9 +237,16 @@ func NewClient(url string, opt ...Option) *Client {
 	for _, o := range opt {
 		o(&opts)
 	}
+	client := &http.Client{
+		Timeout: time.Minute * 2,
+		Transport: ntlmssp.Negotiator{
+			RoundTripper: &http.Transport{},
+		},
+	}
 	return &Client{
-		url:  url,
-		opts: &opts,
+		url:        url,
+		opts:       &opts,
+		httpClient: client,
 	}
 }
 
@@ -284,18 +292,10 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 			req.Header.Set(k, v)
 		}
 	}
-	// req.Close = true     YB: Don't close the request header
-
-	// YB: Use ntlmssp as a transport
-	client := &http.Client{
-		Transport: ntlmssp.Negotiator{
-			RoundTripper: &http.Transport{},
-		},
-	}
 
 	defer req.Body.Close()
 
-	res, err := client.Do(req)
+	res, err := s.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
