@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"text/template"
@@ -25,6 +26,9 @@ import (
 )
 
 const maxRecursion uint8 = 20
+
+var attributeGroupsCache []*XSDAttributeGroup = []*XSDAttributeGroup{}
+var complexInlineCacheHierachy []map[string]*XSDElement = []map[string]*XSDElement{}
 
 // GoWSDL defines the struct for WSDL generator.
 type GoWSDL struct {
@@ -132,6 +136,9 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 		var err error
 
 		gocode["types"], err = g.genTypes()
+		buffer := new(bytes.Buffer)
+		g.genTypesComplexInline(buffer)
+		gocode["typesComplexInline"], err = buffer.Bytes(),nil
 		if err != nil {
 			log.Println("genTypes", "error", err)
 		}
@@ -256,26 +263,61 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 
 func (g *GoWSDL) genTypes() ([]byte, error) {
 	funcMap := template.FuncMap{
-		"toGoType":              toGoType,
-		"stripns":               stripns,
-		"replaceReservedWords":  replaceReservedWords,
-		"makePublic":            g.makePublicFn,
-		"makeFieldPublic":       makePublic,
-		"comment":               comment,
-		"removeNS":              removeNS,
-		"goString":              goString,
-		"findNameByType":        g.findNameByType,
-		"removePointerFromType": removePointerFromType,
+		"toGoType":                       toGoType,
+		"stripns":                        stripns,
+		"replaceReservedWords":           replaceReservedWords,
+		"makePublic":                     g.makePublicFn,
+		"makeFieldPublic":                makePublic,
+		"comment":                        comment,
+		"removeNS":                       removeNS,
+		"goString":                       goString,
+		"findNameByType":                 g.findNameByType,
+		"removePointerFromType":          removePointerFromType,
+		"getAttributesFromGroup":         getAttributesFromGroup,
+		"setElementInComplexInlineCache": setElementInComplexInlineCache,
 	}
 
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("types").Funcs(funcMap).Parse(typesTmpl))
+	attributeGroupsCache = getAttributesGroupFromSchema(g.wsdl.Types.Schemas)
 	err := tmpl.Execute(data, g.wsdl.Types)
 	if err != nil {
 		return nil, err
 	}
 
 	return data.Bytes(), nil
+}
+
+func (g *GoWSDL) genTypesComplexInline(buffer *bytes.Buffer) (error) {
+	funcMap := template.FuncMap{
+		"toGoType":                       toGoType,
+		"stripns":                        stripns,
+		"replaceReservedWords":           replaceReservedWords,
+		"makePublic":                     g.makePublicFn,
+		"makeFieldPublic":                makePublic,
+		"comment":                        comment,
+		"removeNS":                       removeNS,
+		"goString":                       goString,
+		"findNameByType":                 g.findNameByType,
+		"removePointerFromType":          removePointerFromType,
+		"getAttributesFromGroup":         getAttributesFromGroup,
+		"setElementInComplexInlineCache": setElementInComplexInlineCache,
+		"getComplexInlineCache":          getComplexInlineCache,
+	}
+
+	data := new(bytes.Buffer)
+	tmpl := template.Must(template.New("typescomplexInline").Funcs(funcMap).Parse(typesTmplComplexInline))
+	err := tmpl.Execute(data, g.wsdl.Types)
+	if err != nil {
+		return  err
+	}
+
+	var inlineBuffer []byte = data.Bytes()
+	buffer.Write(inlineBuffer)
+	if len(complexInlineCacheHierachy[len(complexInlineCacheHierachy)-1]) > 0 {
+		g.genTypesComplexInline(buffer)
+	}
+	return  nil
 }
 
 func (g *GoWSDL) genOperations() ([]byte, error) {
@@ -385,9 +427,9 @@ var xsd2GoTypes = map[string]string{
 	"byte":          "int8",
 	"long":          "int64",
 	"boolean":       "bool",
-	"datetime":      "time.Time",
-	"date":          "time.Time",
-	"time":          "time.Time",
+	"datetime":      "string",
+	"date":          "string",
+	"time":          "string",
 	"base64binary":  "[]byte",
 	"hexbinary":     "[]byte",
 	"unsignedint":   "uint32",
@@ -425,6 +467,26 @@ func toGoType(xsdType string) string {
 	}
 
 	return "*" + replaceReservedWords(makePublic(t))
+}
+
+func getAttributesFromGroup(refType string) []*XSDAttribute {
+	var attributeGroup *XSDAttributeGroup
+	for _, val := range attributeGroupsCache {
+		if val.Name == refType {
+			attributeGroup = val
+			break
+		}
+	}
+	return attributeGroup.Attributes
+}
+func getAttributesGroupFromSchema(schemas []*XSDSchema) []*XSDAttributeGroup {
+	attributeGroups := []*XSDAttributeGroup{}
+	for _, schema := range schemas {
+		for _, val := range schema.AttributeGroups {
+			attributeGroups = append(attributeGroups, val)
+		}
+	}
+	return attributeGroups
 }
 
 func removePointerFromType(goType string) string {
@@ -600,4 +662,50 @@ func comment(text string) string {
 		return output
 	}
 	return ""
+}
+func setElementInComplexInlineCache(element *XSDElement) string {
+	var name string
+	if(!strings.Contains(element.Name,"__")){
+		name = strings.Join([]string{element.Name, "__", strconv.FormatInt(1, 10)}, "")
+	}else{
+		name = element.Name
+	}
+
+	generatedName := checkElementInCache(name)
+	if(len(complexInlineCacheHierachy) == 0){
+		complexInlineCacheHierachy = append(complexInlineCacheHierachy, make(map[string]*XSDElement))
+	}
+	complexInlineCacheHierachy[len(complexInlineCacheHierachy)-1][generatedName] = element
+	return generatedName
+}
+func checkElementInCache(name string) string {
+	ok := checkElementInCacheHierachy(name)
+	var increment int64 = 1
+	if ok {
+		slice := strings.Split(name, "__")
+		if len(slice) > 1 {
+			increment, _ = strconv.ParseInt(slice[1], 10, 32)
+			increment++
+		}
+		return checkElementInCache(strings.Join([]string{slice[0], "__", strconv.FormatInt(increment, 10)}, ""))
+	} else {
+		return name
+	}
+}
+
+func checkElementInCacheHierachy(name string) bool{
+	for _,cache :=range complexInlineCacheHierachy{
+		_, ok := cache[name]
+		if(ok){
+			return true
+		}
+	}
+	return false
+}
+
+func getComplexInlineCache() map[string]*XSDElement {
+	len := len(complexInlineCacheHierachy)
+	complexCache := complexInlineCacheHierachy[len-1]
+	complexInlineCacheHierachy = append(complexInlineCacheHierachy, make(map[string]*XSDElement))
+	return complexCache
 }

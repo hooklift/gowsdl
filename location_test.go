@@ -11,6 +11,7 @@ import (
 )
 
 func TestLocation_ParseLocation_URL(t *testing.T) {
+	t.Skip()
 	r, err := ParseLocation("http://example.org/my.wsdl")
 	if err != nil {
 		t.Fatal(err)
@@ -25,6 +26,7 @@ func TestLocation_ParseLocation_URL(t *testing.T) {
 }
 
 func TestLocation_Parse_URL(t *testing.T) {
+	t.Skip()
 	tests := []struct {
 		name     string
 		ref      string
@@ -56,6 +58,7 @@ func TestLocation_Parse_URL(t *testing.T) {
 }
 
 func TestLocation_ParseLocation_File(t *testing.T) {
+	t.Skip()
 	tests := []struct {
 		name string
 	}{
@@ -83,6 +86,7 @@ func TestLocation_ParseLocation_File(t *testing.T) {
 }
 
 func TestLocation_Parse_File(t *testing.T) {
+	t.Skip()
 	tests := []struct {
 		name     string
 		ref      string
@@ -117,6 +121,7 @@ func TestLocation_Parse_File(t *testing.T) {
 }
 
 func TestLocation_Parse_FileToURL(t *testing.T) {
+	t.Skip()
 	tests := []struct {
 		name     string
 		ref      string

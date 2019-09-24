@@ -124,6 +124,7 @@ func main() {
 	data := new(bytes.Buffer)
 	data.Write(gocode["header"])
 	data.Write(gocode["types"])
+	data.Write(gocode["typesComplexInline"])
 	data.Write(gocode["operations"])
 	data.Write(gocode["soap"])
 
