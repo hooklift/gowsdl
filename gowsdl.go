@@ -264,6 +264,7 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 func (g *GoWSDL) genTypes() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":                       toGoType,
+		"toGoTypeNoPointer":              toGoTypeNoPointer,
 		"stripns":                        stripns,
 		"replaceReservedWords":           replaceReservedWords,
 		"makePublic":                     g.makePublicFn,
@@ -291,6 +292,7 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 func (g *GoWSDL) genTypesComplexInline(buffer *bytes.Buffer) (error) {
 	funcMap := template.FuncMap{
 		"toGoType":                       toGoType,
+		"toGoTypeNoPointer":              toGoTypeNoPointer,
 		"stripns":                        stripns,
 		"replaceReservedWords":           replaceReservedWords,
 		"makePublic":                     g.makePublicFn,
@@ -323,6 +325,7 @@ func (g *GoWSDL) genTypesComplexInline(buffer *bytes.Buffer) (error) {
 func (g *GoWSDL) genOperations() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":             toGoType,
+		"toGoTypeNoPointer":    toGoTypeNoPointer,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           g.makePublicFn,
@@ -345,6 +348,7 @@ func (g *GoWSDL) genOperations() ([]byte, error) {
 func (g *GoWSDL) genHeader() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":             toGoType,
+		"toGoTypeNoPointer":    toGoTypeNoPointer,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           g.makePublicFn,
@@ -467,6 +471,25 @@ func toGoType(xsdType string) string {
 	}
 
 	return "*" + replaceReservedWords(makePublic(t))
+}
+
+func toGoTypeNoPointer(xsdType string) string {
+	// Handles name space, ie. xsd:string, xs:string
+	r := strings.Split(xsdType, ":")
+
+	t := r[0]
+
+	if len(r) == 2 {
+		t = r[1]
+	}
+
+	value := xsd2GoTypes[strings.ToLower(t)]
+
+	if value != "" {
+		return value
+	}
+
+	return replaceReservedWords(makePublic(t))
 }
 
 func getAttributesFromGroup(refType string) []*XSDAttribute {

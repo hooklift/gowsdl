@@ -16,7 +16,7 @@ var typesTmpl = `
 		{{else if .Union.SimpleType}}
 			type {{$type}} string
 		{{else}}
-			type {{$type}} {{toGoType .Restriction.Base}}
+			type {{$type}} {{toGoTypeNoPointer .Restriction.Base}}
 		{{end}}
         {{if .Restriction.SimpleType}} 
         {{template "SimpleType" .Restriction.SimpleType}}
@@ -66,7 +66,7 @@ var typesTmpl = `
 	{{end}}
 
 	{{define "SimpleContent"}}
-		Value {{toGoType .Extension.Base}} ` + "`" + `xml:",chardata"` + "`" + `
+		Value {{toGoTypeNoPointer .Extension.Base}} ` + "`" + `xml:",chardata"` + "`" + `
 		{{template "Attributes" .Extension.Attributes}}
 		{{template "AttributeGroups" .Extension.AttributeGroup}}
 	{{end}}
