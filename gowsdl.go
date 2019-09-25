@@ -138,7 +138,7 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 		gocode["types"], err = g.genTypes()
 		buffer := new(bytes.Buffer)
 		g.genTypesComplexInline(buffer)
-		gocode["typesComplexInline"], err = buffer.Bytes(),nil
+		gocode["typesComplexInline"], err = buffer.Bytes(), nil
 		if err != nil {
 			log.Println("genTypes", "error", err)
 		}
@@ -289,7 +289,7 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 	return data.Bytes(), nil
 }
 
-func (g *GoWSDL) genTypesComplexInline(buffer *bytes.Buffer) (error) {
+func (g *GoWSDL) genTypesComplexInline(buffer *bytes.Buffer) error {
 	funcMap := template.FuncMap{
 		"toGoType":                       toGoType,
 		"toGoTypeNoPointer":              toGoTypeNoPointer,
@@ -311,7 +311,7 @@ func (g *GoWSDL) genTypesComplexInline(buffer *bytes.Buffer) (error) {
 	tmpl := template.Must(template.New("typescomplexInline").Funcs(funcMap).Parse(typesTmplComplexInline))
 	err := tmpl.Execute(data, g.wsdl.Types)
 	if err != nil {
-		return  err
+		return err
 	}
 
 	var inlineBuffer []byte = data.Bytes()
@@ -319,7 +319,7 @@ func (g *GoWSDL) genTypesComplexInline(buffer *bytes.Buffer) (error) {
 	if len(complexInlineCacheHierachy[len(complexInlineCacheHierachy)-1]) > 0 {
 		g.genTypesComplexInline(buffer)
 	}
-	return  nil
+	return nil
 }
 
 func (g *GoWSDL) genOperations() ([]byte, error) {
@@ -441,6 +441,32 @@ var xsd2GoTypes = map[string]string{
 	"unsignedbyte":  "byte",
 	"unsignedlong":  "uint64",
 	"anytype":       "interface{}",
+
+	//handling extra types
+	//date types
+	"duration":   "string",
+	"gyearmonth": "string",
+	"gyear":      "string",
+	"gmonthday":  "string",
+	"gday":       "string",
+	"gmonth":     "string",
+	//string types
+	"anyuri":   "string",
+	"qname":    "string",
+	"language": "string",
+	"name":     "string",
+	"nmtoken":  "string",
+	"ncname":   "string",
+	"nmtokens": "string",
+	"id":       "string",
+	"idref":    "string",
+	"idrefs":   "string",
+	"entity":   "string",
+	"entities": "string",
+	//numbers
+	"nonpositiveinteger": "int32",
+	"nonnegativeinteger": "int32",
+	"positiveinteger":    "int32",
 }
 
 func removeNS(xsdType string) string {
@@ -688,14 +714,14 @@ func comment(text string) string {
 }
 func setElementInComplexInlineCache(element *XSDElement) string {
 	var name string
-	if(!strings.Contains(element.Name,"__")){
+	if !strings.Contains(element.Name, "__") {
 		name = strings.Join([]string{element.Name, "__", strconv.FormatInt(1, 10)}, "")
-	}else{
+	} else {
 		name = element.Name
 	}
 
 	generatedName := checkElementInCache(name)
-	if(len(complexInlineCacheHierachy) == 0){
+	if len(complexInlineCacheHierachy) == 0 {
 		complexInlineCacheHierachy = append(complexInlineCacheHierachy, make(map[string]*XSDElement))
 	}
 	complexInlineCacheHierachy[len(complexInlineCacheHierachy)-1][generatedName] = element
@@ -716,10 +742,10 @@ func checkElementInCache(name string) string {
 	}
 }
 
-func checkElementInCacheHierachy(name string) bool{
-	for _,cache :=range complexInlineCacheHierachy{
+func checkElementInCacheHierachy(name string) bool {
+	for _, cache := range complexInlineCacheHierachy {
 		_, ok := cache[name]
-		if(ok){
+		if ok {
 			return true
 		}
 	}
