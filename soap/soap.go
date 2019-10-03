@@ -308,7 +308,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		req.SetBasicAuth(s.opts.auth.Login, s.opts.auth.Password)
 	}
 
-	req.WithContext(ctx)
+	req = req.WithContext(ctx)
 
 	if s.opts.mtom {
 		req.Header.Add("Content-Type", fmt.Sprintf(mtomContentType, encoder.(*mtomEncoder).Boundary()))
