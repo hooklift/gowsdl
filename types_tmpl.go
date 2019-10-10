@@ -81,22 +81,22 @@ var typesTmpl = `
 			{{if .SimpleType}}
 				{{if .Doc}} {{.Doc | comment}} {{end}}
 				{{if ne .SimpleType.List.ItemType ""}}
-					{{ .Name | makeFieldPublic}} []{{toGoType .SimpleType.List.ItemType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
+					{{ .Name | makeFieldPublic}} []{{toGoType .SimpleType.List.ItemType}} ` + "`" + `xml:"{{getQualifiedName .Name}},omitempty"` + "`" + `
 				{{else}}
-					{{ .Name | makeFieldPublic}} {{toGoType .SimpleType.Restriction.Base}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
+					{{ .Name | makeFieldPublic}} {{toGoType .SimpleType.Restriction.Base}} ` + "`" + `xml:"{{getQualifiedName .Name}},omitempty"` + "`" + `
 				{{end}}
 			{{else}}
 				{{template "ComplexTypeInline" .}}
 			{{end}}
 		{{else}}
 			{{if .Doc}}{{.Doc | comment}} {{end}}
-			{{replaceReservedWords .Name | makeFieldPublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + ` {{end}}
+			{{replaceReservedWords .Name | makeFieldPublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{getQualifiedName .Name}},omitempty"` + "`" + ` {{end}}
 		{{end}}
 	{{end}}
 {{end}}
 
 {{range .Schemas}}
-	{{ $targetNamespace := .TargetNamespace }}
+	{{setTargetNamespace .TargetNamespace}}
 
 	{{range .SimpleType}}
 		{{template "SimpleType" .}}
@@ -108,7 +108,7 @@ var typesTmpl = `
 			{{/* ComplexTypeLocal */}}
 			{{with .ComplexType}}
 				type {{$name | replaceReservedWords | makePublic}} struct {
-					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$name}}\"`" + `
+					XMLName xml.Name ` + "`xml:\"{{getQualifiedName $name}}\"`" + `
 					{{if ne .ComplexContent.Extension.Base ""}}
 						{{template "ComplexContent" .ComplexContent}}
 					{{else if ne .SimpleContent.Extension.Base ""}}
@@ -133,7 +133,7 @@ var typesTmpl = `
 		type {{$name}} struct {
 			{{$typ := findNameByType .Name}}
 			{{if ne $name $typ}}
-				XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$typ}}\"`" + `
+				XMLName xml.Name ` + "`xml:\"{{getQualifiedName $typ}}\"`" + `
 			{{end}}
 			{{if ne .ComplexContent.Extension.Base ""}}
 				{{template "ComplexContent" .ComplexContent}}
@@ -148,5 +148,8 @@ var typesTmpl = `
 			{{end}}
 		}
 	{{end}}
+
+	{{setTargetNamespace ""}}
+
 {{end}}
 `

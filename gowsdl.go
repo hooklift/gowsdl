@@ -255,6 +255,22 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 }
 
 func (g *GoWSDL) genTypes() ([]byte, error) {
+
+	globalTargetNamespace := ""
+
+	setTargetNamespace := func(ns string) string {
+		globalTargetNamespace = ns
+		return ""
+	}
+
+	getQualifiedName := func(name string) string {
+		if globalTargetNamespace != "" {
+			return globalTargetNamespace + " " + name
+		} else {
+			return name
+		}
+	}
+
 	funcMap := template.FuncMap{
 		"toGoType":              toGoType,
 		"stripns":               stripns,
@@ -266,6 +282,8 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"goString":              goString,
 		"findNameByType":        g.findNameByType,
 		"removePointerFromType": removePointerFromType,
+		"setTargetNamespace":    setTargetNamespace,
+		"getQualifiedName":      getQualifiedName,
 	}
 
 	data := new(bytes.Buffer)
