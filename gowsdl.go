@@ -23,6 +23,7 @@ import (
 	"text/template"
 	"time"
 	"unicode"
+	"net/url"
 )
 
 const maxRecursion uint8 = 20
@@ -35,6 +36,7 @@ type GoWSDL struct {
 	loc                   *Location
 	pkg                   string
 	ignoreTLS             bool
+	proxy                 string
 	makePublicFn          func(string) string
 	wsdl                  *WSDL
 	resolvedXSDExternals  map[string]bool
@@ -57,16 +59,33 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, timeout)
 }
 
-func downloadFile(url string, ignoreTLS bool) ([]byte, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: ignoreTLS,
-		},
-		Dial: dialTimeout,
+func downloadFile(fileUrl string, ignoreTLS bool , proxy string) ([]byte, error) {
+	var tr *http.Transport
+	if ignoreTLS && proxy != "" {
+		proxyURL, err := url.Parse(proxy)
+		if err != nil {
+			log.Println(err)
+		}
+
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: ignoreTLS,
+			},
+			Dial: dialTimeout,
+			Proxy:http.ProxyURL(proxyURL),
+		}
+	} else {
+		tr  = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: ignoreTLS,
+			},
+			Dial: dialTimeout,
+		}
+
 	}
 	client := &http.Client{Transport: tr}
 
-	resp, err := client.Get(url)
+	resp, err := client.Get(fileUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +104,7 @@ func downloadFile(url string, ignoreTLS bool) ([]byte, error) {
 }
 
 // NewGoWSDL initializes WSDL generator.
-func NewGoWSDL(file, pkg string, ignoreTLS bool, exportAllTypes bool) (*GoWSDL, error) {
+func NewGoWSDL(file, pkg string, ignoreTLS bool, proxy string , exportAllTypes bool) (*GoWSDL, error) {
 	file = strings.TrimSpace(file)
 	if file == "" {
 		return nil, errors.New("WSDL file is required to generate Go proxy")
@@ -109,6 +128,7 @@ func NewGoWSDL(file, pkg string, ignoreTLS bool, exportAllTypes bool) (*GoWSDL, 
 		loc:          r,
 		pkg:          pkg,
 		ignoreTLS:    ignoreTLS,
+		proxy:        proxy,
 		makePublicFn: makePublicFn,
 	}, nil
 }
@@ -171,7 +191,7 @@ func (g *GoWSDL) fetchFile(loc *Location) (data []byte, err error) {
 		data, err = ioutil.ReadFile(loc.f)
 	} else {
 		log.Println("Downloading", "file", loc.u.String())
-		data, err = downloadFile(loc.u.String(), g.ignoreTLS)
+		data, err = downloadFile(loc.u.String(), g.ignoreTLS ,g.proxy)
 	}
 	return
 }
@@ -283,6 +303,7 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 	attributeGroupsCache = getAttributesGroupFromSchema(g.wsdl.Types.Schemas)
 	err := tmpl.Execute(data, g.wsdl.Types)
 	if err != nil {
+		log.Fatal(err)
 		return nil, err
 	}
 
@@ -525,6 +546,9 @@ func getAttributesFromGroup(refType string) []*XSDAttribute {
 			attributeGroup = val
 			break
 		}
+	}
+	if attributeGroup == nil{
+		return nil
 	}
 	return attributeGroup.Attributes
 }
