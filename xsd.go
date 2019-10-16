@@ -131,38 +131,37 @@ type XSDImport struct {
 
 // XSDElement represents a Schema element.
 type XSDElement struct {
-	XMLName     xml.Name        `xml:"element"`
-	Name        string          `xml:"name,attr"`
-	Doc         string          `xml:"annotation>documentation"`
-	Nillable    bool            `xml:"nillable,attr"`
-	Type        string          `xml:"type,attr"`
-	Ref         string          `xml:"ref,attr"`
-	MinOccurs   string          `xml:"minOccurs,attr"`
-	MaxOccurs   string          `xml:"maxOccurs,attr"`
-	ComplexType *XSDComplexType `xml:"complexType"` //local
-	SimpleType  *XSDSimpleType  `xml:"simpleType"`
-	Groups      []*XSDGroup     `xml:"group"`
+	XMLName        xml.Name             `xml:"element"`
+	Name           string               `xml:"name,attr"`
+	Doc            string               `xml:"annotation>documentation"`
+	Nillable       bool                 `xml:"nillable,attr"`
+	Type           string               `xml:"type,attr"`
+	Ref            string               `xml:"ref,attr"`
+	MinOccurs      string               `xml:"minOccurs,attr"`
+	MaxOccurs      string               `xml:"maxOccurs,attr"`
+	ComplexType    *XSDComplexType      `xml:"complexType"` //local
+	SimpleType     *XSDSimpleType       `xml:"simpleType"`
+	Groups         []*XSDGroup          `xml:"group"`
 	AttributeGroup []*XSDAttributeGroup `xml:"attributeGroup"`
 }
 
 // XSDComplexType represents a Schema complex type.
 type XSDComplexType struct {
-	XMLName        xml.Name             `xml:"complexType"`
-	Abstract       bool                 `xml:"abstract,attr"`
-	Name           string               `xml:"name,attr"`
-	Mixed          bool                 `xml:"mixed,attr"`
-	Sequence       []*XSDElement        `xml:"sequence>element"`
-	Choice         []*XSDElement        `xml:"choice>element"`
-	SequenceChoice []*XSDElement        `xml:"sequence>choice>element"`
-	SequenceChoiceSequence []*XSDElement `xml:"sequence>choice>sequence>element"`
-	All            []*XSDElement        `xml:"all>element"`
-	ComplexContent XSDComplexContent    `xml:"complexContent"`
-	SimpleContent  XSDSimpleContent     `xml:"simpleContent"`
-	Attributes     []*XSDAttribute      `xml:"attribute"`
-	ChoiceSequence []*XSDElement        `xml:"choice>sequence>element"`
-	AttributeGroup []*XSDAttributeGroup `xml:"attributeGroup"`
-	SequenceSequence  []*XSDElement     `xml:"sequence>sequence>element"`
-
+	XMLName                xml.Name             `xml:"complexType"`
+	Abstract               bool                 `xml:"abstract,attr"`
+	Name                   string               `xml:"name,attr"`
+	Mixed                  bool                 `xml:"mixed,attr"`
+	Sequence               []*XSDElement        `xml:"sequence>element"`
+	Choice                 []*XSDElement        `xml:"choice>element"`
+	SequenceChoice         []*XSDElement        `xml:"sequence>choice>element"`
+	SequenceChoiceSequence []*XSDElement        `xml:"sequence>choice>sequence>element"`
+	All                    []*XSDElement        `xml:"all>element"`
+	ComplexContent         XSDComplexContent    `xml:"complexContent"`
+	SimpleContent          XSDSimpleContent     `xml:"simpleContent"`
+	Attributes             []*XSDAttribute      `xml:"attribute"`
+	ChoiceSequence         []*XSDElement        `xml:"choice>sequence>element"`
+	AttributeGroup         []*XSDAttributeGroup `xml:"attributeGroup"`
+	SequenceSequence       []*XSDElement        `xml:"sequence>sequence>element"`
 }
 
 // XSDGroup element is used to define a group of elements to be used in complex type definitions.
@@ -177,8 +176,8 @@ type XSDGroup struct {
 // XSDComplexContent element defines extensions or restrictions on a complex
 // type that contains mixed content or elements only.
 type XSDComplexContent struct {
-	XMLName   xml.Name     `xml:"complexContent"`
-	Extension XSDExtension `xml:"extension"`
+	XMLName     xml.Name       `xml:"complexContent"`
+	Extension   XSDExtension   `xml:"extension"`
 	Restriction XSDRestriction `xml:"restriction"`
 }
 
@@ -189,23 +188,23 @@ type XSDSimpleContent struct {
 	Extension XSDExtension `xml:"extension"`
 }
 type XSDAttributeGroup struct {
-	XMLName    xml.Name        `xml:"attributeGroup"`
-	Name       string          `xml:"name,attr"`
-	Ref        string          `xml:"ref,attr"`
-	Attributes []*XSDAttribute `xml:"attribute"`
-	//AttributeGroup []*XSDAttributeGroup `xml:"attributeGroup"`
+	XMLName        xml.Name             `xml:"attributeGroup"`
+	Name           string               `xml:"name,attr"`
+	Ref            string               `xml:"ref,attr"`
+	Attributes     []*XSDAttribute      `xml:"attribute"`
+	AttributeGroup []*XSDAttributeGroup `xml:"attributeGroup"`
 }
 
 // XSDExtension element extends an existing simpleType or complexType element.
 type XSDExtension struct {
-	XMLName        xml.Name             `xml:"extension"`
-	Base           string               `xml:"base,attr"`
-	Attributes     []*XSDAttribute      `xml:"attribute"`
-	Sequence       []XSDElement         `xml:"sequence>element"`
-	SequenceChoice []*XSDElement        `xml:"sequence>choice>element"`
-	SequenceChoiceSequence []*XSDElement `xml:"sequence>choice>sequence>element"`
-	Choice         []XSDElement         `xml:"choice>element"`
-	AttributeGroup []*XSDAttributeGroup `xml:"attributeGroup"`
+	XMLName                xml.Name             `xml:"extension"`
+	Base                   string               `xml:"base,attr"`
+	Attributes             []*XSDAttribute      `xml:"attribute"`
+	Sequence               []XSDElement         `xml:"sequence>element"`
+	SequenceChoice         []*XSDElement        `xml:"sequence>choice>element"`
+	SequenceChoiceSequence []*XSDElement        `xml:"sequence>choice>sequence>element"`
+	Choice                 []XSDElement         `xml:"choice>element"`
+	AttributeGroup         []*XSDAttributeGroup `xml:"attributeGroup"`
 }
 
 // XSDAttribute represent an element attribute. Simple elements cannot have
@@ -256,9 +255,9 @@ type XSDRestriction struct {
 	Length       XSDRestrictionValue   `xml:"length"`
 	MinLength    XSDRestrictionValue   `xml:"minLength"`
 	MaxLength    XSDRestrictionValue   `xml:"maxLength"`
-	Sequence       []XSDElement         `xml:"sequence>element"`
-	Attributes     []*XSDAttribute      `xml:"attribute"`
-	SimpleType     *XSDSimpleType       `xml:"simpleType"`
+	Sequence     []XSDElement          `xml:"sequence>element"`
+	Attributes   []*XSDAttribute       `xml:"attribute"`
+	SimpleType   *XSDSimpleType        `xml:"simpleType"`
 }
 
 // XSDRestrictionValue represents a restriction value.

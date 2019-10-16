@@ -14,6 +14,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -23,7 +24,6 @@ import (
 	"text/template"
 	"time"
 	"unicode"
-	"net/url"
 )
 
 const maxRecursion uint8 = 20
@@ -59,7 +59,7 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, timeout)
 }
 
-func downloadFile(fileUrl string, ignoreTLS bool , proxy string) ([]byte, error) {
+func downloadFile(fileUrl string, ignoreTLS bool, proxy string) ([]byte, error) {
 	var tr *http.Transport
 	if ignoreTLS && proxy != "" {
 		proxyURL, err := url.Parse(proxy)
@@ -71,11 +71,11 @@ func downloadFile(fileUrl string, ignoreTLS bool , proxy string) ([]byte, error)
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: ignoreTLS,
 			},
-			Dial: dialTimeout,
-			Proxy:http.ProxyURL(proxyURL),
+			Dial:  dialTimeout,
+			Proxy: http.ProxyURL(proxyURL),
 		}
 	} else {
-		tr  = &http.Transport{
+		tr = &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: ignoreTLS,
 			},
@@ -104,7 +104,7 @@ func downloadFile(fileUrl string, ignoreTLS bool , proxy string) ([]byte, error)
 }
 
 // NewGoWSDL initializes WSDL generator.
-func NewGoWSDL(file, pkg string, ignoreTLS bool, proxy string , exportAllTypes bool) (*GoWSDL, error) {
+func NewGoWSDL(file, pkg string, ignoreTLS bool, proxy string, exportAllTypes bool) (*GoWSDL, error) {
 	file = strings.TrimSpace(file)
 	if file == "" {
 		return nil, errors.New("WSDL file is required to generate Go proxy")
@@ -191,7 +191,7 @@ func (g *GoWSDL) fetchFile(loc *Location) (data []byte, err error) {
 		data, err = ioutil.ReadFile(loc.f)
 	} else {
 		log.Println("Downloading", "file", loc.u.String())
-		data, err = downloadFile(loc.u.String(), g.ignoreTLS ,g.proxy)
+		data, err = downloadFile(loc.u.String(), g.ignoreTLS, g.proxy)
 	}
 	return
 }
@@ -541,17 +541,28 @@ func toGoTypeNoPointer(xsdType string) string {
 
 func getAttributesFromGroup(refType string) []*XSDAttribute {
 	var attributeGroup *XSDAttributeGroup
+	var attributes []*XSDAttribute = []*XSDAttribute{}
 	for _, val := range attributeGroupsCache {
 		if val.Name == refType {
 			attributeGroup = val
 			break
 		}
 	}
-	if attributeGroup == nil{
-		return nil
+	if attributeGroup == nil {
+		return []*XSDAttribute{}
 	}
-	return attributeGroup.Attributes
+	attributes = attributeGroup.Attributes
+
+	if attributeGroup.AttributeGroup != nil && len(attributeGroup.AttributeGroup) > 0 {
+		for _, attributeGroupInline := range attributeGroup.AttributeGroup {
+			attributesInline := getAttributesFromGroup(attributeGroupInline.Ref)
+			attributes = append(attributes, attributesInline...)
+		}
+	}
+
+	return attributes
 }
+
 func getAttributesGroupFromSchema(schemas []*XSDSchema) []*XSDAttributeGroup {
 	attributeGroups := []*XSDAttributeGroup{}
 	for _, schema := range schemas {
