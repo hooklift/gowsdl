@@ -123,9 +123,33 @@ var typesTmpl = `
 		{{template "SimpleType" .}}
 	{{end}}
 
-   {{range .Elements}}
+	{{range .Elements}}
   		{{$name := .Name}}
 		{{if not .Type}}
+			{{with .SimpleType}}
+				{{if .Doc}} {{.Doc | comment}} {{end}}
+				{{if ne .List.ItemType ""}}
+					type {{$name}} []{{toGoType .List.ItemType }}
+				{{else if ne .Union.MemberTypes ""}}
+					type {{$name}} string
+				{{else if .Union.SimpleType}}
+					type {{$name}} string
+				{{else}}
+					type {{$name}} {{toGoTypeNoPointer .Restriction.Base}}
+				{{end}}
+				{{if .Restriction.SimpleType}} 
+				{{template "SimpleType" .Restriction.SimpleType}}
+				{{end}}
+				{{if .Restriction.Enumeration}}
+					const (
+							{{with .Restriction}}
+								{{range .Enumeration}}
+								{{if .Doc}} {{.Doc | comment}} {{end}}
+								{{$name}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$name}} = "{{goString .Value}}" {{end}}
+							{{end}}
+							)
+				{{end}}
+          	{{end}}
 		{{/* ComplexTypeLocal */}}
          {{with .ComplexType}}
               type {{$name | replaceReservedWords | makePublic}} struct {  XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$name}}\"`" + `
@@ -145,11 +169,11 @@ var typesTmpl = `
                         {{template "AttributeGroups" .AttributeGroup}}
 					{{end}}
 				}
-			{{end}}
+         {{end}}
 		{{else}}
 			type {{$name | replaceReservedWords | makePublic}} {{toGoType .Type | removePointerFromType}}
 		{{end}}
-	{{end}}
+    {{end}}
 
 	{{range .ComplexTypes}}
 		{{/* ComplexTypeGlobal */}}
@@ -289,6 +313,31 @@ var typesTmplComplexInline = `
 
 {{ range $Key, $Value  := getComplexInlineCache }}
  type {{replaceReservedWords $Key | makePublic}} struct {
+    {{with  $Value.SimpleType}}
+                {{$name := $Key}}
+				{{if .Doc}} {{.Doc | comment}} {{end}}
+				{{if ne .List.ItemType ""}}
+					type {{$name}} []{{toGoType .List.ItemType }}
+				{{else if ne .Union.MemberTypes ""}}
+					type {{$name}} string
+				{{else if .Union.SimpleType}}
+					type {{$name}} string
+				{{else}}
+					type {{$name}} {{toGoTypeNoPointer .Restriction.Base}}
+				{{end}}
+				{{if .Restriction.SimpleType}} 
+				{{template "SimpleType" .Restriction.SimpleType}}
+				{{end}}
+				{{if .Restriction.Enumeration}}
+					const (
+							{{with .Restriction}}
+								{{range .Enumeration}}
+								{{if .Doc}} {{.Doc | comment}} {{end}}
+								{{$name}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$name}} = "{{goString .Value}}" {{end}}
+							{{end}}
+							)
+				{{end}}
+    {{end}}
 	{{with $Value.ComplexType}}
 		{{if ne .ComplexContent.Extension.Base ""}}
 			{{template "ComplexContent" .ComplexContent}}

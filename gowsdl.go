@@ -29,7 +29,7 @@ import (
 const maxRecursion uint8 = 20
 
 var attributeGroupsCache []*XSDAttributeGroup = []*XSDAttributeGroup{}
-var complexInlineCacheHierachy []map[string]*XSDElement = []map[string]*XSDElement{}
+var complexInlineCacheHierarchy []map[string]*XSDElement = []map[string]*XSDElement{}
 
 // GoWSDL defines the struct for WSDL generator.
 type GoWSDL struct {
@@ -330,14 +330,14 @@ func (g *GoWSDL) genTypesComplexInline(buffer *bytes.Buffer) error {
 
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("typescomplexInline").Funcs(funcMap).Parse(typesTmplComplexInline))
-	err := tmpl.Execute(data, g.wsdl.Types)
+	err := tmpl.Execute(data, nil)
 	if err != nil {
 		return err
 	}
 
 	var inlineBuffer []byte = data.Bytes()
 	buffer.Write(inlineBuffer)
-	if len(complexInlineCacheHierachy[len(complexInlineCacheHierachy)-1]) > 0 {
+	if len(complexInlineCacheHierarchy[len(complexInlineCacheHierarchy)-1]) > 0 {
 		g.genTypesComplexInline(buffer)
 	}
 	return nil
@@ -756,10 +756,10 @@ func setElementInComplexInlineCache(element *XSDElement) string {
 	}
 
 	generatedName := checkElementInCache(name)
-	if len(complexInlineCacheHierachy) == 0 {
-		complexInlineCacheHierachy = append(complexInlineCacheHierachy, make(map[string]*XSDElement))
+	if len(complexInlineCacheHierarchy) == 0 {
+		complexInlineCacheHierarchy = append(complexInlineCacheHierarchy, make(map[string]*XSDElement))
 	}
-	complexInlineCacheHierachy[len(complexInlineCacheHierachy)-1][generatedName] = element
+	complexInlineCacheHierarchy[len(complexInlineCacheHierarchy)-1][generatedName] = element
 	return generatedName
 }
 func checkElementInCache(name string) string {
@@ -778,7 +778,7 @@ func checkElementInCache(name string) string {
 }
 
 func checkElementInCacheHierachy(name string) bool {
-	for _, cache := range complexInlineCacheHierachy {
+	for _, cache := range complexInlineCacheHierarchy {
 		_, ok := cache[name]
 		if ok {
 			return true
@@ -788,8 +788,8 @@ func checkElementInCacheHierachy(name string) bool {
 }
 
 func getComplexInlineCache() map[string]*XSDElement {
-	len := len(complexInlineCacheHierachy)
-	complexCache := complexInlineCacheHierachy[len-1]
-	complexInlineCacheHierachy = append(complexInlineCacheHierachy, make(map[string]*XSDElement))
+	len := len(complexInlineCacheHierarchy)
+	complexCache := complexInlineCacheHierarchy[len-1]
+	complexInlineCacheHierarchy = append(complexInlineCacheHierarchy, make(map[string]*XSDElement))
 	return complexCache
 }
