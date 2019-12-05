@@ -14,9 +14,11 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"text/template"
@@ -26,11 +28,15 @@ import (
 
 const maxRecursion uint8 = 20
 
+var attributeGroupsCache []*XSDAttributeGroup = []*XSDAttributeGroup{}
+var complexInlineCacheHierarchy []map[string]*XSDElement = []map[string]*XSDElement{}
+
 // GoWSDL defines the struct for WSDL generator.
 type GoWSDL struct {
 	loc                   *Location
 	pkg                   string
 	ignoreTLS             bool
+	proxy                 string
 	makePublicFn          func(string) string
 	wsdl                  *WSDL
 	resolvedXSDExternals  map[string]bool
@@ -53,16 +59,33 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 	return net.DialTimeout(network, addr, timeout)
 }
 
-func downloadFile(url string, ignoreTLS bool) ([]byte, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: ignoreTLS,
-		},
-		Dial: dialTimeout,
+func downloadFile(fileUrl string, ignoreTLS bool, proxy string) ([]byte, error) {
+	var tr *http.Transport
+	if ignoreTLS && proxy != "" {
+		proxyURL, err := url.Parse(proxy)
+		if err != nil {
+			log.Println(err)
+		}
+
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: ignoreTLS,
+			},
+			Dial:  dialTimeout,
+			Proxy: http.ProxyURL(proxyURL),
+		}
+	} else {
+		tr = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: ignoreTLS,
+			},
+			Dial: dialTimeout,
+		}
+
 	}
 	client := &http.Client{Transport: tr}
 
-	resp, err := client.Get(url)
+	resp, err := client.Get(fileUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +104,7 @@ func downloadFile(url string, ignoreTLS bool) ([]byte, error) {
 }
 
 // NewGoWSDL initializes WSDL generator.
-func NewGoWSDL(file, pkg string, ignoreTLS bool, exportAllTypes bool) (*GoWSDL, error) {
+func NewGoWSDL(file, pkg string, ignoreTLS bool, proxy string, exportAllTypes bool) (*GoWSDL, error) {
 	file = strings.TrimSpace(file)
 	if file == "" {
 		return nil, errors.New("WSDL file is required to generate Go proxy")
@@ -105,6 +128,7 @@ func NewGoWSDL(file, pkg string, ignoreTLS bool, exportAllTypes bool) (*GoWSDL, 
 		loc:          r,
 		pkg:          pkg,
 		ignoreTLS:    ignoreTLS,
+		proxy:        proxy,
 		makePublicFn: makePublicFn,
 	}, nil
 }
@@ -132,6 +156,9 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 		var err error
 
 		gocode["types"], err = g.genTypes()
+		buffer := new(bytes.Buffer)
+		g.genTypesComplexInline(buffer)
+		gocode["typesComplexInline"], err = buffer.Bytes(), nil
 		if err != nil {
 			log.Println("genTypes", "error", err)
 		}
@@ -164,7 +191,7 @@ func (g *GoWSDL) fetchFile(loc *Location) (data []byte, err error) {
 		data, err = ioutil.ReadFile(loc.f)
 	} else {
 		log.Println("Downloading", "file", loc.u.String())
-		data, err = downloadFile(loc.u.String(), g.ignoreTLS)
+		data, err = downloadFile(loc.u.String(), g.ignoreTLS, g.proxy)
 	}
 	return
 }
@@ -256,31 +283,70 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 
 func (g *GoWSDL) genTypes() ([]byte, error) {
 	funcMap := template.FuncMap{
-		"toGoType":              toGoType,
-		"stripns":               stripns,
-		"replaceReservedWords":  replaceReservedWords,
-		"makePublic":            g.makePublicFn,
-		"makeFieldPublic":       makePublic,
-		"comment":               comment,
-		"removeNS":              removeNS,
-		"goString":              goString,
-		"findNameByType":        g.findNameByType,
-		"removePointerFromType": removePointerFromType,
+		"toGoType":                       toGoType,
+		"toGoTypeNoPointer":              toGoTypeNoPointer,
+		"stripns":                        stripns,
+		"replaceReservedWords":           replaceReservedWords,
+		"makePublic":                     g.makePublicFn,
+		"makeFieldPublic":                makePublic,
+		"comment":                        comment,
+		"removeNS":                       removeNS,
+		"goString":                       goString,
+		"findNameByType":                 g.findNameByType,
+		"removePointerFromType":          removePointerFromType,
+		"getAttributesFromGroup":         getAttributesFromGroup,
+		"setElementInComplexInlineCache": setElementInComplexInlineCache,
 	}
 
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("types").Funcs(funcMap).Parse(typesTmpl))
+	attributeGroupsCache = getAttributesGroupFromSchema(g.wsdl.Types.Schemas)
 	err := tmpl.Execute(data, g.wsdl.Types)
 	if err != nil {
+		log.Fatal(err)
 		return nil, err
 	}
 
 	return data.Bytes(), nil
 }
 
+func (g *GoWSDL) genTypesComplexInline(buffer *bytes.Buffer) error {
+	funcMap := template.FuncMap{
+		"toGoType":                       toGoType,
+		"toGoTypeNoPointer":              toGoTypeNoPointer,
+		"stripns":                        stripns,
+		"replaceReservedWords":           replaceReservedWords,
+		"makePublic":                     g.makePublicFn,
+		"makeFieldPublic":                makePublic,
+		"comment":                        comment,
+		"removeNS":                       removeNS,
+		"goString":                       goString,
+		"findNameByType":                 g.findNameByType,
+		"removePointerFromType":          removePointerFromType,
+		"getAttributesFromGroup":         getAttributesFromGroup,
+		"setElementInComplexInlineCache": setElementInComplexInlineCache,
+		"getComplexInlineCache":          getComplexInlineCache,
+	}
+
+	data := new(bytes.Buffer)
+	tmpl := template.Must(template.New("typescomplexInline").Funcs(funcMap).Parse(typesTmplComplexInline))
+	err := tmpl.Execute(data, nil)
+	if err != nil {
+		return err
+	}
+
+	var inlineBuffer []byte = data.Bytes()
+	buffer.Write(inlineBuffer)
+	if len(complexInlineCacheHierarchy[len(complexInlineCacheHierarchy)-1]) > 0 {
+		g.genTypesComplexInline(buffer)
+	}
+	return nil
+}
+
 func (g *GoWSDL) genOperations() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":             toGoType,
+		"toGoTypeNoPointer":    toGoTypeNoPointer,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           g.makePublicFn,
@@ -303,6 +369,7 @@ func (g *GoWSDL) genOperations() ([]byte, error) {
 func (g *GoWSDL) genHeader() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":             toGoType,
+		"toGoTypeNoPointer":    toGoTypeNoPointer,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
 		"makePublic":           g.makePublicFn,
@@ -385,9 +452,9 @@ var xsd2GoTypes = map[string]string{
 	"byte":          "int8",
 	"long":          "int64",
 	"boolean":       "bool",
-	"datetime":      "time.Time",
-	"date":          "time.Time",
-	"time":          "time.Time",
+	"datetime":      "string",
+	"date":          "string",
+	"time":          "string",
 	"base64binary":  "[]byte",
 	"hexbinary":     "[]byte",
 	"unsignedint":   "uint32",
@@ -395,6 +462,32 @@ var xsd2GoTypes = map[string]string{
 	"unsignedbyte":  "byte",
 	"unsignedlong":  "uint64",
 	"anytype":       "interface{}",
+
+	//handling extra types
+	//date types
+	"duration":   "string",
+	"gyearmonth": "string",
+	"gyear":      "string",
+	"gmonthday":  "string",
+	"gday":       "string",
+	"gmonth":     "string",
+	//string types
+	"anyuri":   "string",
+	"qname":    "string",
+	"language": "string",
+	"name":     "string",
+	"nmtoken":  "string",
+	"ncname":   "string",
+	"nmtokens": "string",
+	"id":       "string",
+	"idref":    "string",
+	"idrefs":   "string",
+	"entity":   "string",
+	"entities": "string",
+	//numbers
+	"nonpositiveinteger": "int32",
+	"nonnegativeinteger": "int32",
+	"positiveinteger":    "int32",
 }
 
 func removeNS(xsdType string) string {
@@ -425,6 +518,59 @@ func toGoType(xsdType string) string {
 	}
 
 	return "*" + replaceReservedWords(makePublic(t))
+}
+
+func toGoTypeNoPointer(xsdType string) string {
+	// Handles name space, ie. xsd:string, xs:string
+	r := strings.Split(xsdType, ":")
+
+	t := r[0]
+
+	if len(r) == 2 {
+		t = r[1]
+	}
+
+	value := xsd2GoTypes[strings.ToLower(t)]
+
+	if value != "" {
+		return value
+	}
+
+	return replaceReservedWords(makePublic(t))
+}
+
+func getAttributesFromGroup(refType string) []*XSDAttribute {
+	var attributeGroup *XSDAttributeGroup
+	var attributes []*XSDAttribute = []*XSDAttribute{}
+	for _, val := range attributeGroupsCache {
+		if val.Name == refType {
+			attributeGroup = val
+			break
+		}
+	}
+	if attributeGroup == nil {
+		return []*XSDAttribute{}
+	}
+	attributes = attributeGroup.Attributes
+
+	if attributeGroup.AttributeGroup != nil && len(attributeGroup.AttributeGroup) > 0 {
+		for _, attributeGroupInline := range attributeGroup.AttributeGroup {
+			attributesInline := getAttributesFromGroup(attributeGroupInline.Ref)
+			attributes = append(attributes, attributesInline...)
+		}
+	}
+
+	return attributes
+}
+
+func getAttributesGroupFromSchema(schemas []*XSDSchema) []*XSDAttributeGroup {
+	attributeGroups := []*XSDAttributeGroup{}
+	for _, schema := range schemas {
+		for _, val := range schema.AttributeGroups {
+			attributeGroups = append(attributeGroups, val)
+		}
+	}
+	return attributeGroups
 }
 
 func removePointerFromType(goType string) string {
@@ -600,4 +746,50 @@ func comment(text string) string {
 		return output
 	}
 	return ""
+}
+func setElementInComplexInlineCache(element *XSDElement) string {
+	var name string
+	if !strings.Contains(element.Name, "__") {
+		name = strings.Join([]string{element.Name, "__", strconv.FormatInt(1, 10)}, "")
+	} else {
+		name = element.Name
+	}
+
+	generatedName := checkElementInCache(name)
+	if len(complexInlineCacheHierarchy) == 0 {
+		complexInlineCacheHierarchy = append(complexInlineCacheHierarchy, make(map[string]*XSDElement))
+	}
+	complexInlineCacheHierarchy[len(complexInlineCacheHierarchy)-1][generatedName] = element
+	return generatedName
+}
+func checkElementInCache(name string) string {
+	ok := checkElementInCacheHierachy(name)
+	var increment int64 = 1
+	if ok {
+		slice := strings.Split(name, "__")
+		if len(slice) > 1 {
+			increment, _ = strconv.ParseInt(slice[1], 10, 32)
+			increment++
+		}
+		return checkElementInCache(strings.Join([]string{slice[0], "__", strconv.FormatInt(increment, 10)}, ""))
+	} else {
+		return name
+	}
+}
+
+func checkElementInCacheHierachy(name string) bool {
+	for _, cache := range complexInlineCacheHierarchy {
+		_, ok := cache[name]
+		if ok {
+			return true
+		}
+	}
+	return false
+}
+
+func getComplexInlineCache() map[string]*XSDElement {
+	len := len(complexInlineCacheHierarchy)
+	complexCache := complexInlineCacheHierarchy[len-1]
+	complexInlineCacheHierarchy = append(complexInlineCacheHierarchy, make(map[string]*XSDElement))
+	return complexCache
 }

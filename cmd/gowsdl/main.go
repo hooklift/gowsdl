@@ -67,6 +67,7 @@ var vers = flag.Bool("v", false, "Shows gowsdl version")
 var pkg = flag.String("p", "myservice", "Package under which code will be generated")
 var outFile = flag.String("o", "myservice.go", "File where the generated code will be saved")
 var insecure = flag.Bool("i", false, "Skips TLS Verification")
+var proxy = flag.String("x", "", "Setting up proxy server")
 var makePublic = flag.Bool("make-public", true, "Make the generated types public/exported")
 
 func init() {
@@ -101,7 +102,7 @@ func main() {
 	}
 
 	// load wsdl
-	gowsdl, err := gen.NewGoWSDL(wsdlPath, *pkg, *insecure, *makePublic)
+	gowsdl, err := gen.NewGoWSDL(wsdlPath, *pkg, *insecure, *proxy, *makePublic)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -124,6 +125,7 @@ func main() {
 	data := new(bytes.Buffer)
 	data.Write(gocode["header"])
 	data.Write(gocode["types"])
+	data.Write(gocode["typesComplexInline"])
 	data.Write(gocode["operations"])
 	data.Write(gocode["soap"])
 

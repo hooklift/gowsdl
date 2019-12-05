@@ -3,8 +3,7 @@ ARCH 		:= $(shell go env | grep GOARCH | cut -d '"' -f 2)
 BRANCH		:= $(shell git rev-parse --abbrev-ref HEAD)
 LDFLAGS 	:= -ldflags "-X main.Version=$(VERSION) -X main.Name=$(NAME)"
 
-test:
-	go test ./...
+
 
 build:
 	go build -o build/$(NAME) $(LDFLAGS) cmd/$(NAME)/main.go
