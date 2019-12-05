@@ -95,7 +95,7 @@ var typesTmpl = `
 {{define "Elements"}}
 	{{range .}}
 		{{if ne .Ref ""}}
-			{{removeNS .Ref | replaceReservedWords  | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Ref | toGoType}} ` + "`" + `xml:"{{.Ref | removeNS}},omitempty"` + "`" + `
+			{{removeNS .Ref | replaceReservedWords  | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Ref | toGoType}} ` + "`" + `xml:"{{.Ref }},omitempty"` + "`" + `
 		{{else}}
 		{{if not .Type}}
 			{{if .SimpleType}}
@@ -107,11 +107,11 @@ var typesTmpl = `
 				{{end}}
 			{{else}}
                 {{ $complexInlineName := setElementInComplexInlineCache .}}
-                 {{replaceReservedWords .Name | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}*  {{$complexInlineName}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
+                 {{replaceReservedWords .Name | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}*  {{$complexInlineName}} ` + "`" + `xml:"{{.Name | removeNS}},omitempty"` + "`" + `
 			{{end}}
 		{{else}}
 			{{if .Doc}}{{.Doc | comment}} {{end}}
-			{{replaceReservedWords .Name | makeFieldPublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + ` {{end}}
+			{{replaceReservedWords .Name | makeFieldPublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name | removeNS }},omitempty"` + "`" + ` {{end}}
 		{{end}}
 	{{end}}
 {{end}}
@@ -150,9 +150,11 @@ var typesTmpl = `
 							)
 				{{end}}
           	{{end}}
-		{{/* ComplexTypeLocal */}}
-         {{with .ComplexType}}
-              type {{$name | replaceReservedWords | makePublic}} struct {  XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$name}}\"`" + `
+		    {{/* ComplexTypeLocal */}}
+            {{with .ComplexType}}
+                type {{$name | replaceReservedWords | makePublic}} struct {  
+                     //namespace : {{$targetNamespace}}
+					XMLNSAttribute string  ` + "`" + `xml:"xmlns,attr,omitempty"` + "`" + `
 					{{if ne .ComplexContent.Extension.Base ""}}
 						{{template "ComplexContent" .ComplexContent}}
 					{{else if ne .SimpleContent.Extension.Base ""}}
@@ -169,7 +171,7 @@ var typesTmpl = `
                         {{template "AttributeGroups" .AttributeGroup}}
 					{{end}}
 				}
-         {{end}}
+            {{end}}
 		{{else}}
 			type {{$name | replaceReservedWords | makePublic}} {{toGoType .Type | removePointerFromType}}
 		{{end}}
@@ -181,7 +183,8 @@ var typesTmpl = `
 		type {{$name}} struct {
 			{{$typ := findNameByType .Name}}
 			{{if ne $name $typ}}
-				
+				  //namespace : {{$targetNamespace}}
+					XMLNSAttribute string  ` + "`" + `xml:"xmlns,attr,omitempty"` + "`" + `
 			{{end}}
 			{{if ne .ComplexContent.Extension.Base ""}}
 				{{template "ComplexContent" .ComplexContent}}
@@ -266,7 +269,7 @@ var typesTmplComplexInline = `
 {{end}}
 
 {{define "ComplexTypeInline"}}
-	{{replaceReservedWords .Key | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}struct {
+	{{replaceReservedWords .Key | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}} struct {
 	{{with .ComplexType}}
 		{{if ne .ComplexContent.Extension.Base ""}}
 			{{template "ComplexContent" .ComplexContent}}
@@ -290,7 +293,7 @@ var typesTmplComplexInline = `
 {{define "Elements"}}
 	{{range .}}
 		{{if ne .Ref ""}}
-			{{removeNS .Ref | replaceReservedWords  | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Ref | toGoType}} ` + "`" + `xml:"{{.Ref | removeNS}},omitempty"` + "`" + `
+			{{removeNS .Ref | replaceReservedWords  | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Ref | toGoType}} ` + "`" + `xml:"{{.Ref }},omitempty"` + "`" + `
 		{{else}}
 		{{if not .Type}}
 			{{if .SimpleType}}
@@ -302,11 +305,11 @@ var typesTmplComplexInline = `
 				{{end}}
 			{{else}}
 				 {{ $complexInlineName := setElementInComplexInlineCache .}}
-                 {{replaceReservedWords .Name | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}*  {{$complexInlineName}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + ` 
+                 {{replaceReservedWords .Name | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}*  {{$complexInlineName}} ` + "`" + `xml:"{{.Name | removeNS}},omitempty"` + "`" + ` 
 			{{end}}
 		{{else}}
 			{{if .Doc}}{{.Doc | comment}} {{end}}
-			{{replaceReservedWords .Name | makeFieldPublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + ` {{end}}
+			{{replaceReservedWords .Name | makeFieldPublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name | removeNS}},omitempty"` + "`" + ` {{end}}
 		{{end}}
 	{{end}}
 {{end}}
@@ -349,7 +352,7 @@ var typesTmplComplexInline = `
 			{{template "Elements" .SequenceChoice}}
             {{template "Elements" .SequenceChoiceSequence}} 
 			{{template "Elements" .All}}
-			{{template "Attributes" .Attributes}}
+			{{template "Attributes" .Attributes}}	
             {{template "Elements" .ChoiceSequence}}
             {{template "AttributeGroups" .AttributeGroup}}
 		{{end}}

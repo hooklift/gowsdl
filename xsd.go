@@ -5,10 +5,23 @@
 package gowsdl
 
 import (
+	"bytes"
 	"encoding/xml"
+	"strconv"
+	"strings"
 )
 
 const xmlschema11 = "http://www.w3.org/2001/XMLSchema"
+
+type NameSpaceCache struct {
+	latest string
+	cache  map[string]string
+}
+
+var nameSpaceCache NameSpaceCache = NameSpaceCache{
+	latest: "ns",
+	cache:  map[string]string{},
+}
 
 // XSDSchema represents an entire Schema structure.
 type XSDSchema struct {
@@ -30,6 +43,9 @@ type XSDSchema struct {
 
 // UnmarshalXML implements interface xml.Unmarshaler for XSDSchema.
 func (s *XSDSchema) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+
+	nameSpaceCache.cache["http://www.iata.org/IATA/EDIST/2017.2"] = "ns"
+
 	s.Xmlns = make(map[string]string)
 	s.XMLName = start.Name
 	for _, attr := range start.Attr {
@@ -80,6 +96,7 @@ Loop:
 				if err := d.DecodeElement(x, &t); err != nil {
 					return err
 				}
+				//checkNameSpace(s.TargetNamespace, x)
 				s.Elements = append(s.Elements, x)
 			case "attribute":
 				x := new(XSDAttribute)
@@ -92,12 +109,14 @@ Loop:
 				if err := d.DecodeElement(x, &t); err != nil {
 					return err
 				}
+				//addDisplayNameForComplexTypes(s.TargetNamespace, x)
 				s.ComplexTypes = append(s.ComplexTypes, x)
 			case "simpleType":
 				x := new(XSDSimpleType)
 				if err := d.DecodeElement(x, &t); err != nil {
 					return err
 				}
+				//processXSDSimpleType(s.TargetNamespace, x)
 				s.SimpleType = append(s.SimpleType, x)
 			case "attributeGroup":
 				x := new(XSDAttributeGroup)
@@ -143,6 +162,8 @@ type XSDElement struct {
 	SimpleType     *XSDSimpleType       `xml:"simpleType"`
 	Groups         []*XSDGroup          `xml:"group"`
 	AttributeGroup []*XSDAttributeGroup `xml:"attributeGroup"`
+	DisplayName    string
+	RefDisplayName string
 }
 
 // XSDComplexType represents a Schema complex type.
@@ -166,11 +187,11 @@ type XSDComplexType struct {
 
 // XSDGroup element is used to define a group of elements to be used in complex type definitions.
 type XSDGroup struct {
-	Name     string       `xml:"name,attr"`
-	Ref      string       `xml:"ref,attr"`
-	Sequence []XSDElement `xml:"sequence>element"`
-	Choice   []XSDElement `xml:"choice>element"`
-	All      []XSDElement `xml:"all>element"`
+	Name     string        `xml:"name,attr"`
+	Ref      string        `xml:"ref,attr"`
+	Sequence []*XSDElement `xml:"sequence>element"`
+	Choice   []*XSDElement `xml:"choice>element"`
+	All      []*XSDElement `xml:"all>element"`
 }
 
 // XSDComplexContent element defines extensions or restrictions on a complex
@@ -200,10 +221,10 @@ type XSDExtension struct {
 	XMLName                xml.Name             `xml:"extension"`
 	Base                   string               `xml:"base,attr"`
 	Attributes             []*XSDAttribute      `xml:"attribute"`
-	Sequence               []XSDElement         `xml:"sequence>element"`
+	Sequence               []*XSDElement        `xml:"sequence>element"`
 	SequenceChoice         []*XSDElement        `xml:"sequence>choice>element"`
 	SequenceChoiceSequence []*XSDElement        `xml:"sequence>choice>sequence>element"`
-	Choice                 []XSDElement         `xml:"choice>element"`
+	Choice                 []*XSDElement        `xml:"choice>element"`
 	AttributeGroup         []*XSDAttributeGroup `xml:"attributeGroup"`
 }
 
@@ -255,7 +276,7 @@ type XSDRestriction struct {
 	Length       XSDRestrictionValue   `xml:"length"`
 	MinLength    XSDRestrictionValue   `xml:"minLength"`
 	MaxLength    XSDRestrictionValue   `xml:"maxLength"`
-	Sequence     []XSDElement          `xml:"sequence>element"`
+	Sequence     []*XSDElement         `xml:"sequence>element"`
 	Attributes   []*XSDAttribute       `xml:"attribute"`
 	SimpleType   *XSDSimpleType        `xml:"simpleType"`
 }
@@ -264,4 +285,172 @@ type XSDRestriction struct {
 type XSDRestrictionValue struct {
 	Doc   string `xml:"annotation>documentation"`
 	Value string `xml:"value,attr"`
+}
+
+func checkNameSpace(targetNameSpaceName string, element *XSDElement) {
+	var b bytes.Buffer
+	latest := nameSpaceCache.latest
+	if len(nameSpaceCache.cache) > 0 && nameSpaceCache.cache[targetNameSpaceName] != "" {
+		latest = nameSpaceCache.cache[targetNameSpaceName]
+	} else {
+		var tokens []string = strings.Split(latest, "s")
+		var num int
+		if len(tokens) < 2 {
+			num = 1
+		} else {
+			num, _ = strconv.Atoi(tokens[1])
+			num = num + 1
+		}
+		b.WriteString("ns")
+		b.WriteString(strconv.Itoa(num))
+		latest = b.String()
+		nameSpaceCache.latest = latest
+		nameSpaceCache.cache[targetNameSpaceName] = latest
+	}
+	element.DisplayName = latest + ":" + element.Name
+	if element.Ref != "" {
+		element.RefDisplayName = removeNameSpace(latest, element.Ref)
+	}
+
+	if element.ComplexType != nil {
+		addDisplayNameForComplexTypes(targetNameSpaceName, element.ComplexType)
+	}
+	if element.Groups != nil {
+		for _, element := range element.Groups {
+			processXSDGroup(targetNameSpaceName, element)
+		}
+	}
+
+}
+
+func processXSDGroup(targetNameSpaceName string, group *XSDGroup) {
+	if group.Sequence != nil {
+		for _, element := range group.Sequence {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	if group.Choice != nil {
+		for _, element := range group.Choice {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	if group.All != nil {
+		for _, element := range group.All {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+
+}
+
+func addDisplayNameForComplexTypes(targetNameSpaceName string, complexType *XSDComplexType) {
+	if complexType.ChoiceSequence != nil {
+		for _, element := range complexType.ChoiceSequence {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	if complexType.Choice != nil {
+		for _, element := range complexType.Choice {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	if complexType.All != nil {
+		for _, element := range complexType.All {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	if complexType.Sequence != nil {
+		for _, element := range complexType.Sequence {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	if complexType.SequenceChoice != nil {
+		for _, element := range complexType.SequenceChoice {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	if complexType.SequenceChoiceSequence != nil {
+		for _, element := range complexType.SequenceChoiceSequence {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	if complexType.SequenceSequence != nil {
+		for _, element := range complexType.SequenceSequence {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	complexType.SimpleContent = processXSDSimpleContent(targetNameSpaceName, complexType.SimpleContent)
+	complexType.ComplexContent = processXSDComplexContent(targetNameSpaceName, complexType.ComplexContent)
+
+}
+
+func processXSDSimpleContent(targetNameSpaceName string, simpleContent XSDSimpleContent) XSDSimpleContent {
+	simpleContent.Extension = processExtension(targetNameSpaceName, simpleContent.Extension)
+	return simpleContent
+}
+func processXSDComplexContent(targetNameSpaceName string, complexContent XSDComplexContent) XSDComplexContent {
+	complexContent.Extension = processExtension(targetNameSpaceName, complexContent.Extension)
+	return complexContent
+}
+
+func processExtension(targetNameSpaceName string, extension XSDExtension) XSDExtension {
+	if extension.SequenceChoiceSequence != nil {
+		for _, element := range extension.SequenceChoiceSequence {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	if extension.SequenceChoice != nil {
+		for _, element := range extension.SequenceChoice {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	if extension.Sequence != nil {
+		for _, element := range extension.Sequence {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+
+	if extension.Choice != nil {
+		for _, element := range extension.Choice {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+
+	return extension
+}
+
+func processRestriction(targetNameSpaceName string, restriction XSDRestriction) XSDRestriction {
+	if restriction.Sequence != nil {
+		for _, element := range restriction.Sequence {
+			checkNameSpace(targetNameSpaceName, element)
+		}
+	}
+	if restriction.SimpleType != nil {
+		processXSDSimpleType(targetNameSpaceName, restriction.SimpleType)
+	}
+
+	return restriction
+}
+
+func processXSDSimpleType(targetNameSpaceName string, simpleType *XSDSimpleType) {
+	simpleType.Restriction = processRestriction(targetNameSpaceName, simpleType.Restriction)
+
+	if simpleType.List.SimpleType != nil {
+		processXSDSimpleType(targetNameSpaceName, simpleType.List.SimpleType)
+	}
+	if simpleType.Union.SimpleType != nil {
+		for _, element := range simpleType.Union.SimpleType {
+			processXSDSimpleType(targetNameSpaceName, element)
+		}
+	}
+}
+
+func removeNameSpace(latestSpace string, xsdType string) string {
+	// Handles name space, ie. xsd:string, xs:string
+	r := strings.Split(xsdType, ":")
+
+	if len(r) == 2 {
+		return r[1]
+	}
+
+	return latestSpace + ":" + r[0]
 }
