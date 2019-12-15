@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" targetNamespace="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+  <xs:complexType name="Partner">
+    <xs:sequence>
+      <xs:element name="Identifier" type="PartnerIdentification"/>
+      <xs:element name="ContactInformation" type="ContactInformation" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="PartnerIdentification">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="Authority" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="ContactInformation">
+    <xs:sequence>
+      <xs:element name="Contact" type="xs:string"/>
+      <xs:element name="EmailAddress" type="xs:string" minOccurs="0"/>
+      <xs:element name="FaxNumber" type="xs:string" minOccurs="0"/>
+      <xs:element name="TelephoneNumber" type="xs:string" minOccurs="0"/>
+      <xs:element name="ContactTypeIdentifier" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

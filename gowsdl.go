@@ -256,16 +256,17 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 
 func (g *GoWSDL) genTypes() ([]byte, error) {
 	funcMap := template.FuncMap{
-		"toGoType":              toGoType,
-		"stripns":               stripns,
-		"replaceReservedWords":  replaceReservedWords,
-		"makePublic":            g.makePublicFn,
-		"makeFieldPublic":       makePublic,
-		"comment":               comment,
-		"removeNS":              removeNS,
-		"goString":              goString,
-		"findNameByType":        g.findNameByType,
-		"removePointerFromType": removePointerFromType,
+		"toGoType":                 toGoType,
+		"stripns":                  stripns,
+		"replaceReservedWords":     replaceReservedWords,
+		"replaceAttrReservedWords": replaceAttrReservedWords,
+		"makePublic":               g.makePublicFn,
+		"makeFieldPublic":          makePublic,
+		"comment":                  comment,
+		"removeNS":                 removeNS,
+		"goString":                 goString,
+		"findNameByType":           g.findNameByType,
+		"removePointerFromType":    removePointerFromType,
 	}
 
 	data := new(bytes.Buffer)
@@ -348,9 +349,47 @@ var reservedWords = map[string]string{
 	"var":         "var_",
 }
 
+var reservedWordsInAttr = map[string]string{
+	"break":       "break_",
+	"default":     "default_",
+	"func":        "func_",
+	"interface":   "interface_",
+	"select":      "select_",
+	"case":        "case_",
+	"defer":       "defer_",
+	"go":          "go_",
+	"map":         "map_",
+	"struct":      "struct_",
+	"chan":        "chan_",
+	"else":        "else_",
+	"goto":        "goto_",
+	"package":     "package_",
+	"switch":      "switch_",
+	"const":       "const_",
+	"fallthrough": "fallthrough_",
+	"if":          "if_",
+	"range":       "range_",
+	"type":        "type_",
+	"continue":    "continue_",
+	"for":         "for_",
+	"import":      "import_",
+	"return":      "return_",
+	"var":         "var_",
+	"string":      "astring",
+}
+
 // Replaces Go reserved keywords to avoid compilation issues
 func replaceReservedWords(identifier string) string {
 	value := reservedWords[identifier]
+	if value != "" {
+		return value
+	}
+	return normalize(identifier)
+}
+
+// Replaces Go reserved keywords to avoid compilation issues
+func replaceAttrReservedWords(identifier string) string {
+	value := reservedWordsInAttr[identifier]
 	if value != "" {
 		return value
 	}
@@ -394,7 +433,9 @@ var xsd2GoTypes = map[string]string{
 	"unsignedshort": "uint16",
 	"unsignedbyte":  "byte",
 	"unsignedlong":  "uint64",
-	"anytype":       "interface{}",
+	"anytype":       "AnyType",
+	"ncname":        "NCName",
+	"anyuri":        "AnyURI",
 }
 
 func removeNS(xsdType string) string {

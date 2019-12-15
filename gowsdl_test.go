@@ -12,6 +12,9 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
+	"io/ioutil"
+	"log"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -53,7 +56,7 @@ func TestComplexTypeWithInlineSimpleType(t *testing.T) {
 	expected := `type GetInfo struct {
 	XMLName	xml.Name	` + "`" + `xml:"http://www.mnb.hu/webservices/ GetInfo"` + "`" + `
 
-	Id	string	` + "`" + `xml:"Id,omitempty"` + "`" + `
+	Id	string	` + "`" + `xml:"Id,omitempty" json:"Id,omitempty"` + "`" + `
 }`
 	if actual != expected {
 		t.Error("got " + actual + " want " + expected)
@@ -78,15 +81,17 @@ func TestAttributeRef(t *testing.T) {
 
 	expected := `type ResponseStatus struct {
 	Status	[]struct {
-		Value	string
+		Value	string  ` + "`" + `xml:",chardata" json:"-,"` + "`" + `
 
-		Code	string	` + "`" + `xml:"code,attr,omitempty"` + "`" + `
-	}	` + "`" + `xml:"status,omitempty"` + "`" + `
+		Code	string	` + "`" + `xml:"code,attr,omitempty" json:"code,omitempty"` + "`" + `
+	}	` + "`" + `xml:"status,omitempty" json:"status,omitempty"` + "`" + `
 
-	ResponseCode	string	` + "`" + `xml:"responseCode,attr,omitempty"` + "`" + `
+	ResponseCode	string	` + "`" + `xml:"responseCode,attr,omitempty" json:"responseCode,omitempty"` + "`" + `
 }`
+	actual = string(bytes.ReplaceAll([]byte(actual), []byte("\t"), []byte("  ")))
+	expected = string(bytes.ReplaceAll([]byte(expected), []byte("\t"), []byte("  ")))
 	if actual != expected {
-		t.Error("got " + actual + " want " + expected)
+		t.Error("got \n" + actual + " want \n" + expected)
 	}
 }
 
@@ -146,6 +151,43 @@ func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 	enumStringTest(t, "chromedata.wsdl", "DriveTrainFrontWheelDrive", "DriveTrain", "Front Wheel Drive")
 	enumStringTest(t, "vboxweb.wsdl", "SettingsVersionV1_14", "SettingsVersion", "v1_14")
 
+}
+
+func TestEPCISWSDL(t *testing.T) {
+	log.SetFlags(0)
+	log.SetOutput(os.Stdout)
+
+	g, err := NewGoWSDL("./fixtures/epcis/EPCglobal-epcis-query-1_2.wsdl", "myservice", true, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := g.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+	data := new(bytes.Buffer)
+	data.Write(resp["header"])
+	data.Write(resp["types"])
+	data.Write(resp["operations"])
+	data.Write(resp["soap"])
+
+	// go fmt the generated code
+	source, err := format.Source(data.Bytes())
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedBytes, err := ioutil.ReadFile("./fixtures/epcis/epcisquery.src")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	actual := string(source)
+	expected := string(expectedBytes)
+	if actual != expected {
+		_ = ioutil.WriteFile("./fixtures/epcis/epcisquery_gen.src", source, 0664)
+		t.Error("got source ./fixtures/epcis/epcisquery_gen.src but expected ./fixtures/epcis/epcisquery.src")
+	}
 }
 
 func getTypeDeclaration(resp map[string][]byte, name string) (string, error) {

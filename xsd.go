@@ -137,6 +137,16 @@ type XSDElement struct {
 	Groups      []*XSDGroup     `xml:"group"`
 }
 
+// XSDElement represents a Schema element.
+type XSDAny struct {
+	XMLName         xml.Name `xml:"any"`
+	Doc             string   `xml:"annotation>documentation"`
+	MinOccurs       string   `xml:"minOccurs,attr"`
+	MaxOccurs       string   `xml:"maxOccurs,attr"`
+	Namespace       string   `xml:"namespace,attr"`
+	ProcessContents string   `xml:"processContents,attr"`
+}
+
 // XSDComplexType represents a Schema complex type.
 type XSDComplexType struct {
 	XMLName        xml.Name          `xml:"complexType"`
@@ -150,6 +160,7 @@ type XSDComplexType struct {
 	ComplexContent XSDComplexContent `xml:"complexContent"`
 	SimpleContent  XSDSimpleContent  `xml:"simpleContent"`
 	Attributes     []*XSDAttribute   `xml:"attribute"`
+	Any            []*XSDAny         `xml:"sequence>any"`
 }
 
 // XSDGroup element is used to define a group of elements to be used in complex type definitions.
