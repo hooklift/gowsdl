@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" targetNamespace="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+  <xs:simpleType name="MimeTypeQualifier">
+    <xs:annotation>
+      <xs:documentation>The MIME type as defined by IANA. Please refer to
+            http://www.iana.org/assignments/media-types/ for a list of types.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="Language">
+    <xs:annotation>
+      <xs:documentation>ISO 639-2; 1998 representation of Language name. Refer to http://www.loc.gov/standards/iso639-2/iso639jac.html to get the latest version of the standard.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+</xs:schema>

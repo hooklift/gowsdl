@@ -43,15 +43,16 @@ var typesTmpl = `
 	{{range .}}
 		{{if .Doc}} {{.Doc | comment}} {{end}}
 		{{ if ne .Type "" }}
-			{{ .Name | makeFieldPublic}} {{toGoType .Type}} ` + "`" + `xml:"{{.Name}},attr,omitempty"` + "`" + `
+			{{ .Name | makeFieldPublic}} {{toGoType .Type}} ` + "`" + `xml:"{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
 		{{ else }}
-			{{ .Name | makeFieldPublic}} string ` + "`" + `xml:"{{.Name}},attr,omitempty"` + "`" + `
+			{{ .Name | makeFieldPublic}} string ` + "`" + `xml:"{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
 		{{ end }}
 	{{end}}
 {{end}}
 
 {{define "SimpleContent"}}
-	Value {{toGoType .Extension.Base}}{{template "Attributes" .Extension.Attributes}}
+	Value {{toGoType .Extension.Base}} ` + "`xml:\",chardata\" json:\"-,\"`" + `
+	{{template "Attributes" .Extension.Attributes}}
 {{end}}
 
 {{define "ComplexTypeInline"}}
@@ -69,29 +70,35 @@ var typesTmpl = `
 			{{template "Attributes" .Attributes}}
 		{{end}}
 	{{end}}
-	} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
+	} ` + "`" + `xml:"{{.Name}},omitempty" json:"{{.Name}},omitempty"` + "`" + `
 {{end}}
 
 {{define "Elements"}}
 	{{range .}}
 		{{if ne .Ref ""}}
-			{{removeNS .Ref | replaceReservedWords  | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Ref | toGoType}} ` + "`" + `xml:"{{.Ref | removeNS}},omitempty"` + "`" + `
+			{{removeNS .Ref | replaceReservedWords  | makePublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Ref | toGoType}} ` + "`" + `xml:"{{.Ref | removeNS}},omitempty" json:"{{.Ref | removeNS}},omitempty"` + "`" + `
 		{{else}}
 		{{if not .Type}}
 			{{if .SimpleType}}
 				{{if .Doc}} {{.Doc | comment}} {{end}}
 				{{if ne .SimpleType.List.ItemType ""}}
-					{{ .Name | makeFieldPublic}} []{{toGoType .SimpleType.List.ItemType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
+					{{ .Name | makeFieldPublic}} []{{toGoType .SimpleType.List.ItemType}} ` + "`" + `xml:"{{.Name}},omitempty" json:"{{.Name}},omitempty"` + "`" + `
 				{{else}}
-					{{ .Name | makeFieldPublic}} {{toGoType .SimpleType.Restriction.Base}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + `
+					{{ .Name | makeFieldPublic}} {{toGoType .SimpleType.Restriction.Base}} ` + "`" + `xml:"{{.Name}},omitempty" json:"{{.Name}},omitempty"` + "`" + `
 				{{end}}
 			{{else}}
 				{{template "ComplexTypeInline" .}}
 			{{end}}
 		{{else}}
 			{{if .Doc}}{{.Doc | comment}} {{end}}
-			{{replaceReservedWords .Name | makeFieldPublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name}},omitempty"` + "`" + ` {{end}}
+			{{replaceAttrReservedWords .Name | makeFieldPublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{.Type | toGoType}} ` + "`" + `xml:"{{.Name}},omitempty" json:"{{.Name}},omitempty"` + "`" + ` {{end}}
 		{{end}}
+	{{end}}
+{{end}}
+
+{{define "Any"}}
+	{{range .}}
+		Items     []string ` + "`" + `xml:",any" json:"items,omitempty"` + "`" + `
 	{{end}}
 {{end}}
 
@@ -115,6 +122,7 @@ var typesTmpl = `
 						{{template "SimpleContent" .SimpleContent}}
 					{{else}}
 						{{template "Elements" .Sequence}}
+						{{template "Any" .Any}}
 						{{template "Elements" .Choice}}
 						{{template "Elements" .SequenceChoice}}
 						{{template "Elements" .All}}
@@ -123,30 +131,38 @@ var typesTmpl = `
 				}
 			{{end}}
 		{{else}}
-			type {{$name | replaceReservedWords | makePublic}} {{toGoType .Type | removePointerFromType}}
+			{{if ne ($name | replaceReservedWords | makePublic) (toGoType .Type | removePointerFromType)}}
+				type {{$name | replaceReservedWords | makePublic}} {{toGoType .Type | removePointerFromType}}
+			{{end}}
 		{{end}}
 	{{end}}
 
 	{{range .ComplexTypes}}
 		{{/* ComplexTypeGlobal */}}
 		{{$name := replaceReservedWords .Name | makePublic}}
-		type {{$name}} struct {
-			{{$typ := findNameByType .Name}}
-			{{if ne $name $typ}}
-				XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$typ}}\"`" + `
-			{{end}}
-			{{if ne .ComplexContent.Extension.Base ""}}
-				{{template "ComplexContent" .ComplexContent}}
-			{{else if ne .SimpleContent.Extension.Base ""}}
-				{{template "SimpleContent" .SimpleContent}}
-			{{else}}
-				{{template "Elements" .Sequence}}
-				{{template "Elements" .Choice}}
-				{{template "Elements" .SequenceChoice}}
-				{{template "Elements" .All}}
-				{{template "Attributes" .Attributes}}
-			{{end}}
-		}
+		{{if eq (toGoType .SimpleContent.Extension.Base) "string"}}
+			type {{$name}} string
+		{{else}}
+			type {{$name}} struct {
+				{{$typ := findNameByType .Name}}
+				{{if ne $name $typ}}
+					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$typ}}\"`" + `
+				{{end}}
+				
+				{{if ne .ComplexContent.Extension.Base ""}}
+					{{template "ComplexContent" .ComplexContent}}
+				{{else if ne .SimpleContent.Extension.Base ""}}
+					{{template "SimpleContent" .SimpleContent}}
+				{{else}}
+					{{template "Elements" .Sequence}}
+					{{template "Any" .Any}}
+					{{template "Elements" .Choice}}
+					{{template "Elements" .SequenceChoice}}
+					{{template "Elements" .All}}
+					{{template "Attributes" .Attributes}}
+				{{end}}
+			}
+		{{end}}	
 	{{end}}
 {{end}}
 `

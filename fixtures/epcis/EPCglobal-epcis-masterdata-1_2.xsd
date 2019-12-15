@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:epcismd="urn:epcglobal:epcis-masterdata:xsd:1" 
+   xmlns:sbdh="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" 
+   xmlns:epcglobal="urn:epcglobal:xsd:1"
+   xmlns:epcis="urn:epcglobal:epcis:xsd:1"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+   targetNamespace="urn:epcglobal:epcis-masterdata:xsd:1" 
+   elementFormDefault="unqualified" 
+   attributeFormDefault="unqualified" 
+   version="1.2">
+  <xsd:annotation>
+    <xsd:documentation xml:lang="en">
+      <epcglobal:copyright> Copyright (C) 2006-2016 GS1 AISBL, All Rights Reserved.</epcglobal:copyright>
+      <epcglobal:disclaimer>
+THIS DOCUMENT IS PROVIDED “AS IS” WITH NO WARRANTIES WHATSOEVER, INCLUDING ANY WARRANTY OF MERCHANTABILITY, NONINFRINGMENT, FITNESS FOR PARTICULAR PURPOSE, OR ANY WARRANTY OTHER WISE ARISING OUT OF THIS SPECIFICATION. GS1 disclaims all liability for any damages arising from use or misuse of this Standard, whether special, indirect, consequential, or compensatory damages, and including liability for infringement of any intellectual property rights, relating to use of information in or reliance upon this document.
+GS1 retains the right to make changes to this document at any time, without notice. GS1 makes no warranty for the use of this document and assumes no responsibility for any errors which may appear in the document, nor does it make a commitment to update the information contained herein.
+      </epcglobal:disclaimer>
+      <epcglobal:specification>EPC INFORMATION SERVICE (EPCIS) Version 1.2</epcglobal:specification>
+    </xsd:documentation>
+  </xsd:annotation>
+  <xsd:import namespace="urn:epcglobal:xsd:1" schemaLocation="./EPCglobal.xsd"/>
+  <xsd:import 
+     namespace="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" 
+     schemaLocation="./StandardBusinessDocumentHeader.xsd"/>
+  <xsd:import 
+    namespace="urn:epcglobal:epcis:xsd:1" 
+    schemaLocation="./EPCglobal-epcis-1_2.xsd"/>
+
+  <!-- MasterData CORE ELEMENTS -->
+  <xsd:element name="EPCISMasterDataDocument" type="epcismd:EPCISMasterDataDocumentType"/>
+  <xsd:complexType name="EPCISMasterDataDocumentType">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+      MasterData document that contains a Header and a Body.
+              </xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="epcglobal:Document">
+        <xsd:sequence>
+          <xsd:element name="EPCISHeader" type="epcis:EPCISHeaderType" minOccurs="0"/>
+          <xsd:element name="EPCISBody" type="epcismd:EPCISMasterDataBodyType"/>
+          <xsd:element name="extension" type="epcismd:EPCISMasterDataDocumentExtensionType" minOccurs="0"/>
+          <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+        <xsd:anyAttribute processContents="lax"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="EPCISMasterDataBodyType">
+    <xsd:annotation>
+      <xsd:documentation xml:lang="en">
+      MasterData specific body that contains Vocabularies.
+              </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="VocabularyList" type="epcis:VocabularyListType" minOccurs="0"/>
+      <xsd:element name="extension" type="epcismd:EPCISMasterDataBodyExtensionType" minOccurs="0"/>
+      <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:anyAttribute processContents="lax"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="EPCISMasterDataDocumentExtensionType">
+    <xsd:sequence>
+      <xsd:any namespace="##local" processContents="lax" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:anyAttribute processContents="lax"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="EPCISMasterDataHeaderExtensionType">
+    <xsd:sequence>
+      <xsd:any namespace="##local" processContents="lax" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:anyAttribute processContents="lax"/>
+  </xsd:complexType>
+
+  <xsd:complexType name="EPCISMasterDataBodyExtensionType">
+    <xsd:sequence>
+      <xsd:any namespace="##local" processContents="lax" maxOccurs="unbounded"/>
+    </xsd:sequence>
+    <xsd:anyAttribute processContents="lax"/>
+  </xsd:complexType>
+
+</xsd:schema>
