@@ -14,8 +14,10 @@ var typesTmpl = `
 		type {{$type}} string
 	{{else if .Union.SimpleType}}
 		type {{$type}} string
-	{{else}}
+	{{else if .Restriction.Base}}
 		type {{$type}} {{toGoType .Restriction.Base}}
+    {{else}}
+		type {{$type}} interface{}
 	{{end}}
 
 	{{if .Restriction.Enumeration}}
