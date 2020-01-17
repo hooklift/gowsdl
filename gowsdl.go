@@ -29,6 +29,7 @@ const maxRecursion uint8 = 20
 // GoWSDL defines the struct for WSDL generator.
 type GoWSDL struct {
 	loc                   *Location
+	rawWSDL				  []byte
 	pkg                   string
 	ignoreTLS             bool
 	makePublicFn          func(string) string
@@ -148,12 +149,32 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 		}
 	}()
 
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var err error
+
+		gocode["server"], err = g.genServer()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
+
+
+
 	wg.Wait()
 
 	gocode["header"], err = g.genHeader()
 	if err != nil {
 		log.Println(err)
 	}
+
+	gocode["server_header"], err = g.genServerHeader()
+	if err != nil {
+		log.Println(err)
+	}
+
+	gocode["server_wsdl"] = []byte( "var wsdl = `"  + string(g.rawWSDL) + "`")
 
 	return gocode, nil
 }
@@ -180,6 +201,7 @@ func (g *GoWSDL) unmarshal() error {
 	if err != nil {
 		return err
 	}
+	g.rawWSDL = data
 
 	for _, schema := range g.wsdl.Types.Schemas {
 		err = g.resolveXSDExternals(schema, g.loc)
@@ -301,6 +323,27 @@ func (g *GoWSDL) genOperations() ([]byte, error) {
 	return data.Bytes(), nil
 }
 
+func (g *GoWSDL) genServer() ([]byte, error) {
+	funcMap := template.FuncMap{
+		"toGoType":             toGoType,
+		"stripns":              stripns,
+		"replaceReservedWords": replaceReservedWords,
+		"makePublic":           g.makePublicFn,
+		"findType":             g.findType,
+		"findSOAPAction":       g.findSOAPAction,
+		"findServiceAddress":   g.findServiceAddress,
+	}
+
+	data := new(bytes.Buffer)
+	tmpl := template.Must(template.New("server").Funcs(funcMap).Parse(serverTmpl))
+	err := tmpl.Execute(data, g.wsdl.PortTypes)
+	if err != nil {
+		return nil, err
+	}
+
+	return data.Bytes(), nil
+}
+
 func (g *GoWSDL) genHeader() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":             toGoType,
@@ -313,6 +356,26 @@ func (g *GoWSDL) genHeader() ([]byte, error) {
 
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("header").Funcs(funcMap).Parse(headerTmpl))
+	err := tmpl.Execute(data, g.pkg)
+	if err != nil {
+		return nil, err
+	}
+
+	return data.Bytes(), nil
+}
+
+func (g *GoWSDL) genServerHeader() ([]byte, error) {
+	funcMap := template.FuncMap{
+		"toGoType":             toGoType,
+		"stripns":              stripns,
+		"replaceReservedWords": replaceReservedWords,
+		"makePublic":           g.makePublicFn,
+		"findType":             g.findType,
+		"comment":              comment,
+	}
+
+	data := new(bytes.Buffer)
+	tmpl := template.Must(template.New("server_header").Funcs(funcMap).Parse(serverHeaderTmpl))
 	err := tmpl.Execute(data, g.pkg)
 	if err != nil {
 		return nil, err
