@@ -260,6 +260,7 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"stripns":                  stripns,
 		"replaceReservedWords":     replaceReservedWords,
 		"replaceAttrReservedWords": replaceAttrReservedWords,
+		"normalize":                normalize,
 		"makePublic":               g.makePublicFn,
 		"makeFieldPublic":          makePublic,
 		"comment":                  comment,
@@ -284,6 +285,7 @@ func (g *GoWSDL) genOperations() ([]byte, error) {
 		"toGoType":             toGoType,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
+		"normalize":            normalize,
 		"makePublic":           g.makePublicFn,
 		"makePrivate":          makePrivate,
 		"findType":             g.findType,
@@ -306,6 +308,7 @@ func (g *GoWSDL) genHeader() ([]byte, error) {
 		"toGoType":             toGoType,
 		"stripns":              stripns,
 		"replaceReservedWords": replaceReservedWords,
+		"normalize":            normalize,
 		"makePublic":           g.makePublicFn,
 		"findType":             g.findType,
 		"comment":              comment,
@@ -399,6 +402,9 @@ func replaceAttrReservedWords(identifier string) string {
 // Normalizes value to be used as a valid Go identifier, avoiding compilation issues
 func normalize(value string) string {
 	mapping := func(r rune) rune {
+		if r == '.' {
+			return '_'
+		}
 		if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' {
 			return r
 		}
@@ -601,7 +607,7 @@ var basicTypes = map[string]string{
 }
 
 func isBasicType(identifier string) bool {
-	if _, exsits := basicTypes[identifier]; exsits {
+	if _, exists := basicTypes[identifier]; exists {
 		return true
 	}
 	return false
