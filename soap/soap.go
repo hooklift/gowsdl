@@ -21,13 +21,13 @@ type SOAPDecoder interface {
 }
 
 type SOAPEnvelope struct {
-	XMLName xml.Name      `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	Headers []interface{} `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"`
+	XMLName xml.Name      `xml:"Envelope"`
+	Headers []interface{} `xml:"Header"`
 	Body    SOAPBody
 }
 
 type SOAPBody struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
+	XMLName xml.Name `xml:"Body"`
 
 	Fault   *SOAPFault  `xml:",omitempty"`
 	Content interface{} `xml:",omitempty"`
@@ -59,7 +59,7 @@ Loop:
 		case xml.StartElement:
 			if consumed {
 				return xml.UnmarshalError("Found multiple elements inside SOAP body; not wrapped-document/literal WS-I compliant")
-			} else if se.Name.Space == "http://schemas.xmlsoap.org/soap/envelope/" && se.Name.Local == "Fault" {
+			} else if (se.Name.Space == "http://schemas.xmlsoap.org/soap/envelope/" || se.Name.Space == "http://www.w3.org/2003/05/soap-envelope") && se.Name.Local == "Fault" {
 				b.Fault = &SOAPFault{}
 				b.Content = nil
 
@@ -85,7 +85,7 @@ Loop:
 }
 
 type SOAPFault struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault"`
+	XMLName xml.Name `xml:"Fault"`
 
 	Code   string `xml:"faultcode,omitempty"`
 	String string `xml:"faultstring,omitempty"`
@@ -106,7 +106,7 @@ const (
 )
 
 type WSSSecurityHeader struct {
-	XMLName   xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ wsse:Security"`
+	XMLName   xml.Name `xml:"wsse:Security"`
 	XmlNSWsse string   `xml:"xmlns:wsse,attr"`
 
 	MustUnderstand string `xml:"mustUnderstand,attr,omitempty"`
