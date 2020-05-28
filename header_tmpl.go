@@ -32,7 +32,7 @@ type CustomTimestamp struct {
 
 // MarshalXML will parse the time.Time back to a string format Navision understands
 func (c *CustomTimestamp) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	return e.EncodeElement(c.Time.Format("2006-01-02T15:04:05Z"), start)
+	return e.EncodeElement(c.Time.UTC().Format("2006-01-02T15:04:05Z"), start)
 }
 
 // UnmarshalXML will parse the time.Time in different ways - as Navision uses them
