@@ -21,9 +21,15 @@ type SOAPDecoder interface {
 }
 
 type SOAPEnvelope struct {
-	XMLName xml.Name      `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	Headers []interface{} `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"`
+	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
+	Header  *SOAPHeader
 	Body    SOAPBody
+}
+
+type SOAPHeader struct {
+	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"`
+
+	Headers []interface{}
 }
 
 type SOAPBody struct {
@@ -262,6 +268,7 @@ func NewClient(url string, opt ...Option) *Client {
 }
 
 // AddHeader adds envelope header
+// For correct behavior, every header must contain a `XMLName` field.  Refer to #121 for details
 func (s *Client) AddHeader(header interface{}) {
 	s.headers = append(s.headers, header)
 }
@@ -280,7 +287,9 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	envelope := SOAPEnvelope{}
 
 	if s.headers != nil && len(s.headers) > 0 {
-		envelope.Headers = s.headers
+		envelope.Header = &SOAPHeader{
+			Headers: s.headers,
+		}
 	}
 
 	envelope.Body.Content = request
