@@ -273,6 +273,12 @@ func (s *Client) AddHeader(header interface{}) {
 	s.headers = append(s.headers, header)
 }
 
+// SetHeaders sets envelope headers, overwriting any existing headers.
+// For correct behavior, every header must contain a `XMLName` field.  Refer to #121 for details
+func (s *Client) SetHeaders(headers ...interface{}) {
+	s.headers = headers
+}
+
 // CallContext performs HTTP POST request with a context
 func (s *Client) CallContext(ctx context.Context, soapAction string, request, response interface{}) error {
 	return s.call(ctx, soapAction, request, response)
