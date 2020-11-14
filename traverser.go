@@ -2,18 +2,21 @@ package gowsdl
 
 import (
 	"encoding/xml"
+	"fmt"
 	"strings"
 )
 
 type traverser struct {
-	c   *XSDSchema
-	all []*XSDSchema
+	c                 *XSDSchema
+	all               []*XSDSchema
+	resolveCollisions map[string]string
 }
 
-func newTraverser(c *XSDSchema, all []*XSDSchema) *traverser {
+func newTraverser(c *XSDSchema, all []*XSDSchema, resolveCollisions map[string]string) *traverser {
 	return &traverser{
-		c:   c,
-		all: all,
+		c:                 c,
+		all:               all,
+		resolveCollisions: resolveCollisions,
 	}
 }
 
@@ -41,6 +44,12 @@ func (t *traverser) traverseElement(elm *XSDElement) {
 	}
 	if elm.SimpleType != nil {
 		t.traverseSimpleType(elm.SimpleType)
+	}
+	{
+		ref := t.qname(elm.Type)
+		if updated, ok := t.resolveCollisions[fmt.Sprintf("%s/%s", ref.Space, ref.Local)]; ok {
+			elm.Type = updated
+		}
 	}
 }
 
