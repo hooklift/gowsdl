@@ -67,6 +67,7 @@ var Name string
 var vers = flag.Bool("v", false, "Shows gowsdl version")
 var pkg = flag.String("p", "myservice", "Package under which code will be generated")
 var outFile = flag.String("o", "myservice.go", "File where the generated code will be saved")
+var dir = flag.String("d", "./", "Directory under which package directory will be created")
 var insecure = flag.Bool("i", false, "Skips TLS Verification")
 var makePublic = flag.Bool("make-public", true, "Make the generated types public/exported")
 
@@ -113,7 +114,7 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	pkg := filepath.Join("./", *pkg)
+	pkg := filepath.Join(*dir, *pkg)
 	err = os.Mkdir(pkg, 0744)
 
 	file, err := os.Create(filepath.Join(pkg, *outFile))
