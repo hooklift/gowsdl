@@ -32,7 +32,6 @@ var opsTmpl = `
 
 	type SOAPCaller interface {
 		CallContext(ctx context.Context, soapAction string, request, response interface{}) error
-		Call(soapAction string, request, response interface{}) error
 	}
 
 	type {{$privateType}} struct {
