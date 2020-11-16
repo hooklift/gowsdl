@@ -5,7 +5,6 @@ package myservice
 import (
 	"context"
 	"encoding/xml"
-	"github.com/hooklift/gowsdl/soap"
 	"time"
 )
 
@@ -983,11 +982,16 @@ type EPCISServicePortType interface {
 	GetVendorVersionContext(ctx context.Context, request *EmptyParms) (*string, error)
 }
 
-type ePCISServicePortType struct {
-	client soap.Caller
+type SOAPCaller interface {
+	CallContext(ctx context.Context, soapAction string, request, response interface{}) error
+	Call(soapAction string, request, response interface{}) error
 }
 
-func NewEPCISServicePortType(client soap.Caller) EPCISServicePortType {
+type ePCISServicePortType struct {
+	client SOAPCaller
+}
+
+func NewEPCISServicePortType(client SOAPCaller) EPCISServicePortType {
 	return &ePCISServicePortType{
 		client: client,
 	}

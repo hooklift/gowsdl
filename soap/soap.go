@@ -242,12 +242,6 @@ func WithMTOM() Option {
 	}
 }
 
-// Caller is interface that pass to ServicePortType.
-type Caller interface {
-	CallContext(ctx context.Context, soapAction string, request, response interface{}) error
-	Call(soapAction string, request, response interface{}) error
-}
-
 // Client is soap client
 type Client struct {
 	url     string
