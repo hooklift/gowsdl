@@ -53,6 +53,7 @@ import (
 	"go/format"
 	"log"
 	"os"
+	"path/filepath"
 
 	gen "github.com/hooklift/gowsdl"
 )
@@ -112,10 +113,10 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	pkg := "./" + *pkg
+	pkg := filepath.Join("./", *pkg)
 	err = os.Mkdir(pkg, 0744)
 
-	file, err := os.Create(pkg + "/" + *outFile)
+	file, err := os.Create(filepath.Join(pkg, *outFile))
 	if err != nil {
 		log.Fatalln(err)
 	}
