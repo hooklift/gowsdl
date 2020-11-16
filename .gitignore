@@ -3,3 +3,4 @@ myservice
 build
 .DS_Store
 dist
+fixtures/epcis/epcisquery_gen.src
