@@ -5,7 +5,6 @@ package gen
 import (
 	"context"
 	"encoding/xml"
-	"github.com/hooklift/gowsdl/soap"
 	"time"
 )
 
@@ -39,11 +38,16 @@ type StockQuotePortType interface {
 	GetLastTradePriceContext(ctx context.Context, request *TradePriceRequest) (*TradePrice, error)
 }
 
-type stockQuotePortType struct {
-	client soap.Caller
+type SOAPCaller interface {
+	CallContext(ctx context.Context, soapAction string, request, response interface{}) error
+	Call(soapAction string, request, response interface{}) error
 }
 
-func NewStockQuotePortType(client soap.Caller) StockQuotePortType {
+type stockQuotePortType struct {
+	client SOAPCaller
+}
+
+func NewStockQuotePortType(client SOAPCaller) StockQuotePortType {
 	return &stockQuotePortType{
 		client: client,
 	}
