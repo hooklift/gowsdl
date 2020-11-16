@@ -984,10 +984,10 @@ type EPCISServicePortType interface {
 }
 
 type ePCISServicePortType struct {
-	client *soap.Client
+	client soap.Caller
 }
 
-func NewEPCISServicePortType(client *soap.Client) EPCISServicePortType {
+func NewEPCISServicePortType(client soap.Caller) EPCISServicePortType {
 	return &ePCISServicePortType{
 		client: client,
 	}

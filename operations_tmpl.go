@@ -30,10 +30,10 @@ var opsTmpl = `
 	}
 
 	type {{$privateType}} struct {
-		client *soap.Client
+		client soap.Caller
 	}
 
-	func New{{$exportType}}(client *soap.Client) {{$exportType}} {
+	func New{{$exportType}}(client soap.Caller) {{$exportType}} {
 		return &{{$privateType}}{
 			client: client,
 		}
