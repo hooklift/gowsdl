@@ -22,6 +22,7 @@ type SOAPDecoder interface {
 
 type SOAPEnvelope struct {
 	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
+	Xsi     string   `xml:"xmlns:xsi,attr"`
 	Header  *SOAPHeader
 	Body    SOAPBody
 }
@@ -290,7 +291,9 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 }
 
 func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}) error {
-	envelope := SOAPEnvelope{}
+	envelope := SOAPEnvelope{
+		Xsi: "http://www.w3.org/2001/XMLSchema-instance",
+	}
 
 	if s.headers != nil && len(s.headers) > 0 {
 		envelope.Header = &SOAPHeader{
@@ -315,6 +318,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		return err
 	}
 
+	// println(string(buffer.Bytes()))
 	req, err := http.NewRequest("POST", s.url, buffer)
 	if err != nil {
 		return err
