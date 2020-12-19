@@ -35,8 +35,12 @@ type SOAPHeader struct {
 type SOAPBody struct {
 	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
 
-	Fault   *SOAPFault  `xml:",omitempty"`
-	Content interface{} `xml:",omitempty"`
+	// 'faultOccurred' indicates whether the XML body included a fault;
+	// we cannot simply store SOAPFault as a pointer to indicate this, since
+	// fault is initialized to non-nil with user-provided detail type.
+	faultOccurred bool
+	Fault         *SOAPFault  `xml:",omitempty"`
+	Content       interface{} `xml:",omitempty"`
 }
 
 // UnmarshalXML unmarshals SOAPBody xml
@@ -66,9 +70,9 @@ Loop:
 			if consumed {
 				return xml.UnmarshalError("Found multiple elements inside SOAP body; not wrapped-document/literal WS-I compliant")
 			} else if se.Name.Space == "http://schemas.xmlsoap.org/soap/envelope/" && se.Name.Local == "Fault" {
-				b.Fault = &SOAPFault{}
 				b.Content = nil
 
+				b.faultOccurred = true
 				err = d.DecodeElement(b.Fault, &se)
 				if err != nil {
 					return err
@@ -90,17 +94,21 @@ Loop:
 	return nil
 }
 
+func (b *SOAPBody) ErrorFromFault() error {
+	if b.faultOccurred {
+		return fmt.Errorf("%s: %s", b.Fault.Code, b.Fault.String)
+	}
+	b.Fault = nil
+	return nil
+}
+
 type SOAPFault struct {
 	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault"`
 
-	Code   string `xml:"faultcode,omitempty"`
-	String string `xml:"faultstring,omitempty"`
-	Actor  string `xml:"faultactor,omitempty"`
-	Detail string `xml:"detail,omitempty"`
-}
-
-func (f *SOAPFault) Error() string {
-	return f.String
+	Code   string      `xml:"faultcode,omitempty"`
+	String string      `xml:"faultstring,omitempty"`
+	Actor  string      `xml:"faultactor,omitempty"`
+	Detail interface{} `xml:"detail,omitempty"`
 }
 
 const (
@@ -281,15 +289,21 @@ func (s *Client) SetHeaders(headers ...interface{}) {
 
 // CallContext performs HTTP POST request with a context
 func (s *Client) CallContext(ctx context.Context, soapAction string, request, response interface{}) error {
-	return s.call(ctx, soapAction, request, response)
+	return s.call(ctx, soapAction, request, response, nil)
 }
 
 // Call performs HTTP POST request
 func (s *Client) Call(soapAction string, request, response interface{}) error {
-	return s.call(context.Background(), soapAction, request, response)
+	return s.call(context.Background(), soapAction, request, response, nil)
 }
 
-func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}) error {
+// CallWithFault performs HTTP POST request.
+// Note that if SOAP fault is returned, it will be stored in the error.
+func (s *Client) CallWithFault(soapAction string, request, response, faultDetail interface{}) error {
+	return s.call(context.Background(), soapAction, request, response, faultDetail)
+}
+
+func (s *Client) call(ctx context.Context, soapAction string, request, response, faultDetail interface{}) error {
 	envelope := SOAPEnvelope{}
 
 	if s.headers != nil && len(s.headers) > 0 {
@@ -359,7 +373,12 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	defer res.Body.Close()
 
 	respEnvelope := new(SOAPEnvelope)
-	respEnvelope.Body = SOAPBody{Content: response}
+	respEnvelope.Body = SOAPBody{
+		Content: response,
+		Fault: &SOAPFault{
+			Detail: faultDetail,
+		},
+	}
 
 	mtomBoundary, err := getMtomHeader(res.Header.Get("Content-Type"))
 	if err != nil {
@@ -377,10 +396,5 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		return err
 	}
 
-	fault := respEnvelope.Body.Fault
-	if fault != nil {
-		return fault
-	}
-
-	return nil
+	return respEnvelope.Body.ErrorFromFault()
 }
