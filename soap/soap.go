@@ -35,12 +35,13 @@ type SOAPHeader struct {
 type SOAPBody struct {
 	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
 
-	// 'faultOccurred' indicates whether the XML body included a fault;
+	Content interface{} `xml:",omitempty"`
+
+	// faultOccurred indicates whether the XML body included a fault;
 	// we cannot simply store SOAPFault as a pointer to indicate this, since
 	// fault is initialized to non-nil with user-provided detail type.
 	faultOccurred bool
-	Fault         *SOAPFault  `xml:",omitempty"`
-	Content       interface{} `xml:",omitempty"`
+	Fault         *SOAPFault `xml:",omitempty"`
 }
 
 // UnmarshalXML unmarshals SOAPBody xml
@@ -96,7 +97,11 @@ Loop:
 
 func (b *SOAPBody) ErrorFromFault() error {
 	if b.faultOccurred {
-		return fmt.Errorf("%s: %s", b.Fault.Code, b.Fault.String)
+		if b.Fault.String != "" {
+			return fmt.Errorf("%s: %s", b.Fault.Code, b.Fault.String)
+		} else {
+			return fmt.Errorf("unknown fault occurred")
+		}
 	}
 	b.Fault = nil
 	return nil
