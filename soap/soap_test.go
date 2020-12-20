@@ -3,6 +3,7 @@ package soap
 import (
 	"bytes"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -149,45 +150,86 @@ func TestClient_MTOM(t *testing.T) {
 	}
 }
 
-type SimpleDetail struct {
-	Node interface{} `xml:"SimpleNode"`
-}
-
 type SimpleNode struct {
 	Detail string      `xml:"Detail,omitempty"`
 	Num    float64     `xml:"Num,omitempty"`
 	Nested *SimpleNode `xml:"Nested,omitempty"`
 }
 
-func Test_CustomNestedFaul(t *testing.T) {
+func (s SimpleNode) String() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("%.2f: %s", s.Num, s.Detail))
+	if s.Nested != nil {
+		sb.WriteString("\n" + s.Nested.String())
+	}
+	return sb.String()
+}
+
+func (s SimpleNode) Error() error {
+	return errors.New(s.String())
+}
+
+func (s SimpleNode) HasData() bool {
+	return true
+}
+
+type Wrapper struct {
+	Item    interface{} `xml:"SimpleNode"`
+	hasData bool
+}
+
+func (w *Wrapper) HasData() bool {
+	return w.hasData
+}
+
+func (w *Wrapper) Error() error {
+	switch w.Item.(type) {
+	case FaultError:
+		return w.Item.(FaultError).Error()
+	}
+	return errors.New("default error")
+}
+
+func Test_SimpleNode(t *testing.T) {
 	input := `<SimpleNode>
   <Name>SimpleNode</Name>
   <Detail>detail message</Detail>
   <Num>6.005</Num>
 </SimpleNode>`
 	decoder := xml.NewDecoder(strings.NewReader(input))
-	var nested interface{}
-	nested = &SimpleNode{}
-	if err := decoder.Decode(&nested); err != nil {
+	var simple interface{}
+	simple = &SimpleNode{}
+	if err := decoder.Decode(&simple); err != nil {
 		t.Fatalf("error decoding: %v", err)
 	}
 	assert.EqualValues(t, &SimpleNode{
 		Detail: "detail message",
 		Num:    6.005,
-	}, nested)
+	}, simple)
 }
 
 func Test_Client_FaultDefault(t *testing.T) {
 	tests := []struct {
-		name       string
-		fault      interface{}
-		emptyFault interface{}
+		name          string
+		hasData       bool
+		wantErrString string
+		fault         interface{}
+		emptyFault    interface{}
 	}{
 		{
-			name: "Empty",
+			name:          "Empty-WithFault",
+			wantErrString: "default error",
+			hasData:       true,
 		},
 		{
-			name: "SimpleNode",
+			name:          "Empty-NoFaultDetail",
+			wantErrString: "soap:Server: Custom error message.",
+			hasData:       false,
+		},
+		{
+			name:          "SimpleNode",
+			wantErrString: "7.70: detail message",
+			hasData:       true,
 			fault: &SimpleNode{
 				Detail: "detail message",
 				Num:    7.7,
@@ -195,7 +237,9 @@ func Test_Client_FaultDefault(t *testing.T) {
 			emptyFault: &SimpleNode{},
 		},
 		{
-			name: "ArrayOfNode",
+			name:          "ArrayOfNode",
+			wantErrString: "default error",
+			hasData:       true,
 			fault: &[]SimpleNode{
 				{
 					Detail: "detail message-1",
@@ -208,7 +252,10 @@ func Test_Client_FaultDefault(t *testing.T) {
 			emptyFault: &[]SimpleNode{},
 		},
 		{
-			name: "NestedNode",
+			name:          "NestedNode",
+			wantErrString: "0.00: detail-1\n" +
+				"0.00: nested-2",
+			hasData:       true,
 			fault: &SimpleNode{
 				Detail: "detail-1",
 				Num:    .003,
@@ -247,15 +294,18 @@ func Test_Client_FaultDefault(t *testing.T) {
 			}))
 			defer ts.Close()
 
-			faultErrString := "soap:Server: Custom error message."
+			faultErrString := tt.wantErrString
 
 			client := NewClient(ts.URL)
 			req := &Ping{Request: &PingRequest{Message: "Hi"}}
 			var reply PingResponse
-			fault := SimpleDetail{Node: tt.emptyFault}
-			if err := client.CallWithFault("GetData", req, &reply, &fault); err != nil {
+			fault := Wrapper{
+				Item:    tt.emptyFault,
+				hasData: tt.hasData,
+			}
+			if err := client.CallWithFaultDetail("GetData", req, &reply, &fault); err != nil {
 				assert.EqualError(t, err, faultErrString)
-				assert.EqualValues(t, tt.fault, fault.Node)
+				assert.EqualValues(t, tt.fault, fault.Item)
 			} else {
 				t.Fatalf("call to ping() should have failed, but succeeded.")
 			}

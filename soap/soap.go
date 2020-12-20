@@ -97,7 +97,9 @@ Loop:
 
 func (b *SOAPBody) ErrorFromFault() error {
 	if b.faultOccurred {
-		if b.Fault.String != "" {
+		if b.Fault.Detail != nil && b.Fault.Detail.HasData() {
+			return b.Fault.Detail.Error()
+		} else if b.Fault.String != "" {
 			return fmt.Errorf("%s: %s", b.Fault.Code, b.Fault.String)
 		} else {
 			return fmt.Errorf("unknown fault occurred")
@@ -107,13 +109,27 @@ func (b *SOAPBody) ErrorFromFault() error {
 	return nil
 }
 
+type DetailContainer struct {
+	Detail interface{}
+}
+
+type FaultError interface {
+	// Error should return a short version of the detail as en error message
+	// to be used in place of "faultcode: faultstring".
+	// Set "HasData()" to always return false if faultcode:faultstring error
+	// message is preferred.
+	Error() error
+	// HasData indicates whether the composite fault contains any data.
+	HasData() bool
+}
+
 type SOAPFault struct {
 	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault"`
 
-	Code   string      `xml:"faultcode,omitempty"`
-	String string      `xml:"faultstring,omitempty"`
-	Actor  string      `xml:"faultactor,omitempty"`
-	Detail interface{} `xml:"detail,omitempty"`
+	Code   string     `xml:"faultcode,omitempty"`
+	String string     `xml:"faultstring,omitempty"`
+	Actor  string     `xml:"faultactor,omitempty"`
+	Detail FaultError `xml:"detail,omitempty"`
 }
 
 const (
@@ -302,13 +318,21 @@ func (s *Client) Call(soapAction string, request, response interface{}) error {
 	return s.call(context.Background(), soapAction, request, response, nil)
 }
 
-// CallWithFault performs HTTP POST request.
+// CallContextWithFault performs HTTP POST request.
 // Note that if SOAP fault is returned, it will be stored in the error.
-func (s *Client) CallWithFault(soapAction string, request, response, faultDetail interface{}) error {
+func (s *Client) CallContextWithFaultDetail(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError) error {
+	return s.call(ctx, soapAction, request, response, faultDetail)
+}
+
+// CallWithFaultDetail performs HTTP POST request.
+// Note that if SOAP fault is returned, it will be stored in the error.
+// the passed in fault detail is expected to implement FaultError interface,
+// which allows to condense the detail into a short error message.
+func (s *Client) CallWithFaultDetail(soapAction string, request, response interface{}, faultDetail FaultError) error {
 	return s.call(context.Background(), soapAction, request, response, faultDetail)
 }
 
-func (s *Client) call(ctx context.Context, soapAction string, request, response, faultDetail interface{}) error {
+func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError) error {
 	envelope := SOAPEnvelope{}
 
 	if s.headers != nil && len(s.headers) > 0 {
