@@ -3,7 +3,6 @@ package soap
 import (
 	"bytes"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -156,17 +155,13 @@ type SimpleNode struct {
 	Nested *SimpleNode `xml:"Nested,omitempty"`
 }
 
-func (s SimpleNode) String() string {
+func (s SimpleNode) ErrorString() string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("%.2f: %s", s.Num, s.Detail))
 	if s.Nested != nil {
-		sb.WriteString("\n" + s.Nested.String())
+		sb.WriteString("\n" + s.Nested.ErrorString())
 	}
 	return sb.String()
-}
-
-func (s SimpleNode) Error() error {
-	return errors.New(s.String())
 }
 
 func (s SimpleNode) HasData() bool {
@@ -182,12 +177,12 @@ func (w *Wrapper) HasData() bool {
 	return w.hasData
 }
 
-func (w *Wrapper) Error() error {
+func (w *Wrapper) ErrorString() string {
 	switch w.Item.(type) {
 	case FaultError:
-		return w.Item.(FaultError).Error()
+		return w.Item.(FaultError).ErrorString()
 	}
-	return errors.New("default error")
+	return "default error"
 }
 
 func Test_SimpleNode(t *testing.T) {
@@ -223,7 +218,7 @@ func Test_Client_FaultDefault(t *testing.T) {
 		},
 		{
 			name:          "Empty-NoFaultDetail",
-			wantErrString: "soap:Server: Custom error message.",
+			wantErrString: "Custom error message.",
 			hasData:       false,
 		},
 		{

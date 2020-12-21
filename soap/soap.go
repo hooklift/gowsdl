@@ -97,13 +97,7 @@ Loop:
 
 func (b *SOAPBody) ErrorFromFault() error {
 	if b.faultOccurred {
-		if b.Fault.Detail != nil && b.Fault.Detail.HasData() {
-			return b.Fault.Detail.Error()
-		} else if b.Fault.String != "" {
-			return fmt.Errorf("%s: %s", b.Fault.Code, b.Fault.String)
-		} else {
-			return fmt.Errorf("unknown fault occurred")
-		}
+		return b.Fault
 	}
 	b.Fault = nil
 	return nil
@@ -114,11 +108,11 @@ type DetailContainer struct {
 }
 
 type FaultError interface {
-	// Error should return a short version of the detail as en error message
-	// to be used in place of "faultcode: faultstring".
-	// Set "HasData()" to always return false if faultcode:faultstring error
+	// ErrorString should return a short version of the detail as a string,
+	// which will be used in place of <faultstring> for the error message.
+	// Set "HasData()" to always return false if <faultstring> error
 	// message is preferred.
-	Error() error
+	ErrorString() string
 	// HasData indicates whether the composite fault contains any data.
 	HasData() bool
 }
@@ -130,6 +124,13 @@ type SOAPFault struct {
 	String string     `xml:"faultstring,omitempty"`
 	Actor  string     `xml:"faultactor,omitempty"`
 	Detail FaultError `xml:"detail,omitempty"`
+}
+
+func (f *SOAPFault) Error() string {
+	if f.Detail != nil && f.Detail.HasData() {
+		return f.Detail.ErrorString()
+	}
+	return f.String
 }
 
 const (
