@@ -455,7 +455,7 @@ func removeNS(xsdType string) string {
 	return r[0]
 }
 
-func toGoType(xsdType string) string {
+func toGoType(xsdType string, nillable bool) string {
 	// Handles name space, ie. xsd:string, xs:string
 	r := strings.Split(xsdType, ":")
 
@@ -468,6 +468,9 @@ func toGoType(xsdType string) string {
 	value := xsd2GoTypes[strings.ToLower(t)]
 
 	if value != "" {
+		if nillable {
+			value = "*" + value
+		}
 		return value
 	}
 
