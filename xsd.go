@@ -23,7 +23,7 @@ type XSDSchema struct {
 	Imports            []*XSDImport      `xml:"import"`
 	Elements           []*XSDElement     `xml:"element"`
 	Attributes         []*XSDAttribute   `xml:"attribute"`
-	ComplexTypes       []*XSDComplexType `xml:"complexType"` //global
+	ComplexTypes       []*XSDComplexType `xml:"complexType"` // global
 	SimpleType         []*XSDSimpleType  `xml:"simpleType"`
 }
 
@@ -132,7 +132,7 @@ type XSDElement struct {
 	Ref         string          `xml:"ref,attr"`
 	MinOccurs   string          `xml:"minOccurs,attr"`
 	MaxOccurs   string          `xml:"maxOccurs,attr"`
-	ComplexType *XSDComplexType `xml:"complexType"` //local
+	ComplexType *XSDComplexType `xml:"complexType"` // local
 	SimpleType  *XSDSimpleType  `xml:"simpleType"`
 	Groups      []*XSDGroup     `xml:"group"`
 }
@@ -192,6 +192,7 @@ type XSDExtension struct {
 	Base       string          `xml:"base,attr"`
 	Attributes []*XSDAttribute `xml:"attribute"`
 	Sequence   []XSDElement    `xml:"sequence>element"`
+	Choice     []*XSDElement   `xml:"choice>element"`
 }
 
 // XSDAttribute represent an element attribute. Simple elements cannot have
