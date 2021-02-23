@@ -38,6 +38,7 @@ var typesTmpl = `
 	{{end}}
 
 	{{template "Elements" .Extension.Sequence}}
+	{{template "Elements" .Extension.Choice}}
 	{{template "Attributes" .Extension.Attributes}}
 {{end}}
 
@@ -150,7 +151,7 @@ var typesTmpl = `
 				{{if ne $name $typ}}
 					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$typ}}\"`" + `
 				{{end}}
-				
+
 				{{if ne .ComplexContent.Extension.Base ""}}
 					{{template "ComplexContent" .ComplexContent}}
 				{{else if ne .SimpleContent.Extension.Base ""}}
@@ -164,7 +165,7 @@ var typesTmpl = `
 					{{template "Attributes" .Attributes}}
 				{{end}}
 			}
-		{{end}}	
+		{{end}}
 	{{end}}
 {{end}}
 `
