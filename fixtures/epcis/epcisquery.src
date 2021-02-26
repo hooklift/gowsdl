@@ -33,7 +33,7 @@ type Document struct {
 	// The date the message was created. Used for auditing and logging.
 	//
 
-	CreationDate time.Time `xml:"creationDate,attr,omitempty" json:"creationDate,omitempty"`
+	CreationDate soap.XsdDateTime `xml:"creationDate,attr,omitempty" json:"creationDate,omitempty"`
 }
 
 type EPC string
@@ -49,7 +49,7 @@ type DocumentIdentification struct {
 
 	MultipleType bool `xml:"MultipleType,omitempty" json:"MultipleType,omitempty"`
 
-	CreationDateAndTime time.Time `xml:"CreationDateAndTime,omitempty" json:"CreationDateAndTime,omitempty"`
+	CreationDateAndTime soap.XsdDateTime `xml:"CreationDateAndTime,omitempty" json:"CreationDateAndTime,omitempty"`
 }
 
 type Partner struct {
@@ -118,11 +118,11 @@ type Scope struct {
 }
 
 type CorrelationInformation struct {
-	RequestingDocumentCreationDateTime time.Time `xml:"RequestingDocumentCreationDateTime,omitempty" json:"RequestingDocumentCreationDateTime,omitempty"`
+	RequestingDocumentCreationDateTime soap.XsdDateTime `xml:"RequestingDocumentCreationDateTime,omitempty" json:"RequestingDocumentCreationDateTime,omitempty"`
 
 	RequestingDocumentInstanceIdentifier string `xml:"RequestingDocumentInstanceIdentifier,omitempty" json:"RequestingDocumentInstanceIdentifier,omitempty"`
 
-	ExpectedResponseDateTime time.Time `xml:"ExpectedResponseDateTime,omitempty" json:"ExpectedResponseDateTime,omitempty"`
+	ExpectedResponseDateTime soap.XsdDateTime `xml:"ExpectedResponseDateTime,omitempty" json:"ExpectedResponseDateTime,omitempty"`
 }
 
 type BusinessService struct {
@@ -414,7 +414,7 @@ type CorrectiveEventIDsType struct {
 }
 
 type ErrorDeclarationType struct {
-	DeclarationTime time.Time `xml:"declarationTime,omitempty" json:"declarationTime,omitempty"`
+	DeclarationTime soap.XsdDateTime `xml:"declarationTime,omitempty" json:"declarationTime,omitempty"`
 
 	Reason *ErrorReasonIDType `xml:"reason,omitempty" json:"reason,omitempty"`
 
@@ -430,9 +430,9 @@ type ErrorDeclarationExtensionType struct {
 }
 
 type EPCISEventType struct {
-	EventTime time.Time `xml:"eventTime,omitempty" json:"eventTime,omitempty"`
+	EventTime soap.XsdDateTime `xml:"eventTime,omitempty" json:"eventTime,omitempty"`
 
-	RecordTime time.Time `xml:"recordTime,omitempty" json:"recordTime,omitempty"`
+	RecordTime soap.XsdDateTime `xml:"recordTime,omitempty" json:"recordTime,omitempty"`
 
 	EventTimeZoneOffset string `xml:"eventTimeZoneOffset,omitempty" json:"eventTimeZoneOffset,omitempty"`
 
@@ -764,7 +764,7 @@ type SubscriptionControls struct {
 
 	Trigger AnyURI `xml:"trigger,omitempty" json:"trigger,omitempty"`
 
-	InitialRecordTime time.Time `xml:"initialRecordTime,omitempty" json:"initialRecordTime,omitempty"`
+	InitialRecordTime soap.XsdDateTime `xml:"initialRecordTime,omitempty" json:"initialRecordTime,omitempty"`
 
 	ReportIfEmpty bool `xml:"reportIfEmpty,omitempty" json:"reportIfEmpty,omitempty"`
 

@@ -432,7 +432,7 @@ var xsd2GoTypes = map[string]string{
 	"boolean":       "bool",
 	"datetime":      "soap.XsdDateTime",
 	"date":          "soap.XsdDate",
-	"time":          "time.Time",
+	"time":          "soap.XsdTime",
 	"base64binary":  "[]byte",
 	"hexbinary":     "[]byte",
 	"unsignedint":   "uint32",

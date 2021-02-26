@@ -316,13 +316,11 @@ func TestXsdDateTime(t *testing.T) {
 		XMLName  xml.Name `xml:"TestDateTime"`
 		Datetime XsdDateTime
 	}
-
 	// test marshalling
 	{
+		// without nanosecond
 		testDateTime := TestDateTime{
-			Datetime: XsdDateTime{
-				Time: time.Date(1951, time.October, 22, 1, 2, 3, 4, time.FixedZone("UTC-8", -8*60*60)),
-			},
+			Datetime: CreateXsdDateTime(time.Date(1951, time.October, 22, 1, 2, 3, 0, time.FixedZone("UTC-8", -8*60*60)), true),
 		}
 		if output, err := xml.MarshalIndent(testDateTime, "", ""); err != nil {
 			t.Error(err)
@@ -334,19 +332,48 @@ func TestXsdDateTime(t *testing.T) {
 			}
 		}
 	}
-
-	// test marshalling of UTC
 	{
+		// with nanosecond
 		testDateTime := TestDateTime{
-			Datetime: XsdDateTime{
-				Time: time.Date(1951, time.October, 22, 1, 2, 3, 4, time.UTC),
-			},
+			Datetime: CreateXsdDateTime(time.Date(1951, time.October, 22, 1, 2, 3, 4, time.FixedZone("UTC-8", -8*60*60)), true),
 		}
 		if output, err := xml.MarshalIndent(testDateTime, "", ""); err != nil {
 			t.Error(err)
 		} else {
 			outputstr := string(output)
-			expected := "<TestDateTime><Datetime>1951-10-22T01:02:03Z</Datetime></TestDateTime>"
+			expected := "<TestDateTime><Datetime>1951-10-22T01:02:03.000000004-08:00</Datetime></TestDateTime>"
+			if outputstr != expected {
+				t.Errorf("Got: %v\nExpected: %v", outputstr, expected)
+			}
+		}
+	}
+
+	// test marshalling of UTC
+	{
+		testDateTime := TestDateTime{
+			Datetime: CreateXsdDateTime(time.Date(1951, time.October, 22, 1, 2, 3, 4, time.UTC), true),
+		}
+		if output, err := xml.MarshalIndent(testDateTime, "", ""); err != nil {
+			t.Error(err)
+		} else {
+			outputstr := string(output)
+			expected := "<TestDateTime><Datetime>1951-10-22T01:02:03.000000004Z</Datetime></TestDateTime>"
+			if outputstr != expected {
+				t.Errorf("Got:      %v\nExpected: %v", outputstr, expected)
+			}
+		}
+	}
+
+	// test marshalling of XsdDateTime without TZ
+	{
+		testDateTime := TestDateTime{
+			Datetime: CreateXsdDateTime(time.Date(1951, time.October, 22, 1, 2, 3, 4, time.UTC), false),
+		}
+		if output, err := xml.MarshalIndent(testDateTime, "", ""); err != nil {
+			t.Error(err)
+		} else {
+			outputstr := string(output)
+			expected := "<TestDateTime><Datetime>1951-10-22T01:02:03.000000004</Datetime></TestDateTime>"
 			if outputstr != expected {
 				t.Errorf("Got:      %v\nExpected: %v", outputstr, expected)
 			}
@@ -356,16 +383,17 @@ func TestXsdDateTime(t *testing.T) {
 	// test unmarshalling
 	{
 		dateTimes := map[string]time.Time{
-			"<TestDateTime><Datetime>1951-10-22T01:02:03-08:00</Datetime></TestDateTime>": time.Date(1951, time.October, 22, 1, 2, 3, 0, time.FixedZone("-0800", -8*60*60)),
-			"<TestDateTime><Datetime>1951-10-22T01:02:03Z</Datetime></TestDateTime>":      time.Date(1951, time.October, 22, 1, 2, 3, 0, time.UTC),
+			"<TestDateTime><Datetime>1951-10-22T01:02:03.000000004-08:00</Datetime></TestDateTime>": time.Date(1951, time.October, 22, 1, 2, 3, 4, time.FixedZone("-0800", -8*60*60)),
+			"<TestDateTime><Datetime>1951-10-22T01:02:03Z</Datetime></TestDateTime>":                time.Date(1951, time.October, 22, 1, 2, 3, 0, time.UTC),
+			"<TestDateTime><Datetime>1951-10-22T01:02:03</Datetime></TestDateTime>":                 time.Date(1951, time.October, 22, 1, 2, 3, 0, time.Local),
 		}
 		for dateTimeStr, dateTimeObj := range dateTimes {
 			parsedDt := TestDateTime{}
 			if err := xml.Unmarshal([]byte(dateTimeStr), &parsedDt); err != nil {
 				t.Error(err)
 			} else {
-				if !parsedDt.Datetime.Time.Equal(dateTimeObj) {
-					t.Errorf("Got:      %#v\nExpected: %#v", parsedDt.Datetime.Time, dateTimeObj)
+				if !parsedDt.Datetime.ToGoTime().Equal(dateTimeObj) {
+					t.Errorf("Got:      %#v\nExpected: %#v", parsedDt.Datetime.ToGoTime(), dateTimeObj)
 				}
 			}
 		}
@@ -382,9 +410,7 @@ func TestXsdDate(t *testing.T) {
 	// test marshalling
 	{
 		testDate := TestDate{
-			Date: XsdDate{
-				Time: time.Date(1951, time.October, 22, 0, 0, 0, 0, time.FixedZone("UTC-8", -8*60*60)),
-			},
+			Date: CreateXsdDate(time.Date(1951, time.October, 22, 0, 0, 0, 0, time.FixedZone("UTC-8", -8*60*60)), false),
 		}
 		if output, err := xml.MarshalIndent(testDate, "", ""); err != nil {
 			t.Error(err)
@@ -397,18 +423,32 @@ func TestXsdDate(t *testing.T) {
 		}
 	}
 
-	// test marshalling of UTC
+	// test marshalling
 	{
 		testDate := TestDate{
-			Date: XsdDate{
-				Time: time.Date(1951, time.October, 22, 0, 0, 0, 0, time.UTC),
-			},
+			Date: CreateXsdDate(time.Date(1951, time.October, 22, 0, 0, 0, 0, time.FixedZone("UTC-8", -8*60*60)), true),
 		}
 		if output, err := xml.MarshalIndent(testDate, "", ""); err != nil {
 			t.Error(err)
 		} else {
 			outputstr := string(output)
-			expected := "<TestDate><Date>1951-10-22</Date></TestDate>"
+			expected := "<TestDate><Date>1951-10-22-08:00</Date></TestDate>"
+			if outputstr != expected {
+				t.Errorf("Got: %v\nExpected: %v", outputstr, expected)
+			}
+		}
+	}
+
+	// test marshalling of UTC
+	{
+		testDate := TestDate{
+			Date: CreateXsdDate(time.Date(1951, time.October, 22, 0, 0, 0, 0, time.UTC), true),
+		}
+		if output, err := xml.MarshalIndent(testDate, "", ""); err != nil {
+			t.Error(err)
+		} else {
+			outputstr := string(output)
+			expected := "<TestDate><Date>1951-10-22Z</Date></TestDate>"
 			if outputstr != expected {
 				t.Errorf("Got:      %v\nExpected: %v", outputstr, expected)
 			}
@@ -418,15 +458,17 @@ func TestXsdDate(t *testing.T) {
 	// test unmarshalling
 	{
 		dates := map[string]time.Time{
-			"<TestDate><Date>1951-10-22</Date></TestDate>": time.Date(1951, time.October, 22, 0, 0, 0, 0, time.Local),
+			"<TestDate><Date>1951-10-22</Date></TestDate>":       time.Date(1951, time.October, 22, 0, 0, 0, 0, time.Local),
+			"<TestDate><Date>1951-10-22Z</Date></TestDate>":      time.Date(1951, time.October, 22, 0, 0, 0, 0, time.UTC),
+			"<TestDate><Date>1951-10-22-08:00</Date></TestDate>": time.Date(1951, time.October, 22, 0, 0, 0, 0, time.FixedZone("UTC-8", -8*60*60)),
 		}
 		for dateStr, dateObj := range dates {
 			parsedDate := TestDate{}
 			if err := xml.Unmarshal([]byte(dateStr), &parsedDate); err != nil {
-				t.Error(err)
+				t.Error(dateStr, err)
 			} else {
-				if !parsedDate.Date.Time.Equal(dateObj) {
-					t.Errorf("Got:      %#v\nExpected: %#v", parsedDate.Date.Time, dateObj)
+				if !parsedDate.Date.ToGoTime().Equal(dateObj) {
+					t.Errorf("Got:      %#v\nExpected: %#v", parsedDate.Date.ToGoTime(), dateObj)
 				}
 			}
 		}
@@ -443,19 +485,13 @@ func TestXsdTime(t *testing.T) {
 	// test marshalling
 	{
 		testTime := TestTime{
-			Time: XsdTime{
-				Hour:     12,
-				Minute:   13,
-				Second:   14,
-				Fraction: 4,
-				Tz:       time.FixedZone("Test", -19800),
-			},
+			Time: CreateXsdTime(12, 13, 14, 4, time.FixedZone("Test", -19800)),
 		}
 		if output, err := xml.MarshalIndent(testTime, "", ""); err != nil {
 			t.Error(err)
 		} else {
 			outputstr := string(output)
-			expected := "<TestTime><Time>12:13:14.4-05:30</Time></TestTime>"
+			expected := "<TestTime><Time>12:13:14.000000004-05:30</Time></TestTime>"
 			if outputstr != expected {
 				t.Errorf("Got: %v\nExpected: %v", outputstr, expected)
 			}
@@ -463,13 +499,7 @@ func TestXsdTime(t *testing.T) {
 	}
 	{
 		testTime := TestTime{
-			Time: XsdTime{
-				Hour:     12,
-				Minute:   13,
-				Second:   14,
-				Fraction: 0,
-				Tz:       time.FixedZone("UTC-8", -8*60*60),
-			},
+			Time: CreateXsdTime(12, 13, 14, 0, time.FixedZone("UTC-8", -8*60*60)),
 		}
 		if output, err := xml.MarshalIndent(testTime, "", ""); err != nil {
 			t.Error(err)
@@ -483,13 +513,7 @@ func TestXsdTime(t *testing.T) {
 	}
 	{
 		testTime := TestTime{
-			Time: XsdTime{
-				Hour:     12,
-				Minute:   13,
-				Second:   14,
-				Fraction: 0,
-				Tz:       nil,
-			},
+			Time: CreateXsdTime(12, 13, 14, 0, nil),
 		}
 		if output, err := xml.MarshalIndent(testTime, "", ""); err != nil {
 			t.Error(err)
@@ -502,17 +526,76 @@ func TestXsdTime(t *testing.T) {
 		}
 	}
 
-	// test unmarshalling
+	// test unmarshalling without TZ
 	{
-		timeStr := "<TestTime><Time>12:13:14</Time></TestTime>"
+		timeStr := "<TestTime><Time>12:13:14.000000004</Time></TestTime>"
 		parsedTime := TestTime{}
 		if err := xml.Unmarshal([]byte(timeStr), &parsedTime); err != nil {
 			t.Error(err)
 		} else {
-			if parsedTime.Time.Hour != 12 ||
-				parsedTime.Time.Minute != 13 ||
-				parsedTime.Time.Second != 14 {
-				t.Errorf("Got:      %#v\nExpected: %#v", parsedTime.Time, "12:13:14")
+			if parsedTime.Time.Hour() != 12 {
+				t.Errorf("Got hour %#v\nExpected: %#v", parsedTime.Time.Hour(), 12)
+			}
+			if parsedTime.Time.Minute() != 13 {
+				t.Errorf("Got minute %#v\nExpected: %#v", parsedTime.Time.Minute(), 13)
+			}
+			if parsedTime.Time.Second() != 14 {
+				t.Errorf("Got second %#v\nExpected: %#v", parsedTime.Time.Second(), 14)
+			}
+			if parsedTime.Time.Nanosecond() != 4 {
+				t.Errorf("Got nsec %#v\nExpected: %#v", parsedTime.Time.Nanosecond(), 4)
+			}
+			if parsedTime.Time.Location() != nil {
+				t.Errorf("Got location %v\nExpected: Nil/Undetermined", parsedTime.Time.Location().String())
+			}
+		}
+	}
+	// test unmarshalling with UTC
+	{
+		timeStr := "<TestTime><Time>12:13:14Z</Time></TestTime>"
+		parsedTime := TestTime{}
+		if err := xml.Unmarshal([]byte(timeStr), &parsedTime); err != nil {
+			t.Error(err)
+		} else {
+			if parsedTime.Time.Hour() != 12 {
+				t.Errorf("Got hour %#v\nExpected: %#v", parsedTime.Time.Hour(), 12)
+			}
+			if parsedTime.Time.Minute() != 13 {
+				t.Errorf("Got minute %#v\nExpected: %#v", parsedTime.Time.Minute(), 13)
+			}
+			if parsedTime.Time.Second() != 14 {
+				t.Errorf("Got second %#v\nExpected: %#v", parsedTime.Time.Second(), 14)
+			}
+			if parsedTime.Time.Nanosecond() != 0 {
+				t.Errorf("Got nsec %#v\nExpected: %#v", parsedTime.Time.Nanosecond(), 0)
+			}
+			if parsedTime.Time.Location().String() != "UTC" {
+				t.Errorf("Got location %v\nExpected: UTC", parsedTime.Time.Location().String())
+			}
+		}
+	}
+	// test unmarshalling with non-UTC Tz
+	{
+		timeStr := "<TestTime><Time>12:13:14-08:00</Time></TestTime>"
+		parsedTime := TestTime{}
+		if err := xml.Unmarshal([]byte(timeStr), &parsedTime); err != nil {
+			t.Error(err)
+		} else {
+			if parsedTime.Time.Hour() != 12 {
+				t.Errorf("Got hour %#v\nExpected: %#v", parsedTime.Time.Hour(), 12)
+			}
+			if parsedTime.Time.Minute() != 13 {
+				t.Errorf("Got minute %#v\nExpected: %#v", parsedTime.Time.Minute(), 13)
+			}
+			if parsedTime.Time.Second() != 14 {
+				t.Errorf("Got second %#v\nExpected: %#v", parsedTime.Time.Second(), 14)
+			}
+			if parsedTime.Time.Nanosecond() != 0 {
+				t.Errorf("Got nsec %#v\nExpected: %#v", parsedTime.Time.Nanosecond(), 0)
+			}
+			_, tzOffset := parsedTime.Time.innerTime.Zone()
+			if tzOffset != -8*3600 {
+				t.Errorf("Got location offset %v\nExpected: %v", tzOffset, -8*3600)
 			}
 		}
 	}
