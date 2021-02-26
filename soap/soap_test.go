@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type Ping struct {
@@ -248,10 +249,10 @@ func Test_Client_FaultDefault(t *testing.T) {
 			emptyFault: &[]SimpleNode{},
 		},
 		{
-			name:          "NestedNode",
+			name: "NestedNode",
 			wantErrString: "0.00: detail-1\n" +
 				"0.00: nested-2",
-			hasData:       true,
+			hasData: true,
 			fault: &SimpleNode{
 				Detail: "detail-1",
 				Num:    .003,
@@ -306,6 +307,9 @@ func Test_Client_FaultDefault(t *testing.T) {
 				t.Fatalf("call to ping() should have failed, but succeeded.")
 			}
 		})
+	}
+}
+
 // TestXsdDateTime checks the marshalled xsd datetime
 func TestXsdDateTime(t *testing.T) {
 	type TestDateTime struct {
