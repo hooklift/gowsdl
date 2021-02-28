@@ -137,7 +137,7 @@ type XSDElement struct {
 	Groups      []*XSDGroup     `xml:"group"`
 }
 
-// XSDElement represents a Schema element.
+// XSDAny represents a Schema element.
 type XSDAny struct {
 	XMLName         xml.Name `xml:"any"`
 	Doc             string   `xml:"annotation>documentation"`
