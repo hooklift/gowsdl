@@ -19,20 +19,20 @@ const (
 // DateTime struct
 //
 
-// XsdDateTime is a type for representing xsd:datetime in Golang
-type XsdDateTime struct {
+// XSDDateTime is a type for representing xsd:datetime in Golang
+type XSDDateTime struct {
 	innerTime time.Time
 	hasTz     bool
 }
 
 // StripTz removes TZ information from the datetime
-func (xdt *XsdDateTime) StripTz() {
+func (xdt *XSDDateTime) StripTz() {
 	xdt.hasTz = false
 }
 
 // ToGoTime converts the time to time.Time by checking if a TZ is specified.
 // If there is a TZ, that TZ is used, otherwise local TZ is used
-func (xdt *XsdDateTime) ToGoTime() time.Time {
+func (xdt *XSDDateTime) ToGoTime() time.Time {
 	if xdt.hasTz {
 		return xdt.innerTime
 	}
@@ -42,7 +42,7 @@ func (xdt *XsdDateTime) ToGoTime() time.Time {
 }
 
 // MarshalXML implementation on DateTime to skip "zero" time values. It also checks if nanoseconds and TZ exist.
-func (xdt XsdDateTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+func (xdt XSDDateTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if !xdt.innerTime.IsZero() {
 		dateTimeLayout := time.RFC3339Nano
 		if xdt.innerTime.Nanosecond() == 0 {
@@ -63,15 +63,15 @@ func (xdt XsdDateTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error 
 }
 
 // UnmarshalXML implementation on DateTimeg to use dateTimeLayout
-func (xdt *XsdDateTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+func (xdt *XSDDateTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var err error
 	xdt.innerTime, xdt.hasTz, err = unmarshalTime(d, start, time.RFC3339Nano)
 	return err
 }
 
 // CreateXsdDateTime creates an object represent xsd:datetime object in Golang
-func CreateXsdDateTime(dt time.Time, hasTz bool) XsdDateTime {
-	return XsdDateTime{
+func CreateXsdDateTime(dt time.Time, hasTz bool) XSDDateTime {
+	return XSDDateTime{
 		innerTime: dt,
 		hasTz:     hasTz,
 	}
@@ -118,20 +118,20 @@ func unmarshalTime(d *xml.Decoder, start xml.StartElement, format string) (time.
 	return t, hasTz, nil
 }
 
-// XsdDate is a type for representing xsd:date in Golang
-type XsdDate struct {
+// XSDDate is a type for representing xsd:date in Golang
+type XSDDate struct {
 	innerDate time.Time
 	hasTz     bool
 }
 
 // StripTz removes the TZ information from the date
-func (xd *XsdDate) StripTz() {
+func (xd *XSDDate) StripTz() {
 	xd.hasTz = false
 }
 
 // ToGoTime converts the date to Golang time.Time by checking if a TZ is specified.
 // If there is a TZ, that TZ is used, otherwise local TZ is used
-func (xd *XsdDate) ToGoTime() time.Time {
+func (xd *XSDDate) ToGoTime() time.Time {
 	if xd.hasTz {
 		return xd.innerDate
 	}
@@ -140,7 +140,7 @@ func (xd *XsdDate) ToGoTime() time.Time {
 }
 
 // MarshalXML implementation on DateTimeg to skip "zero" time values
-func (xd XsdDate) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+func (xd XSDDate) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if !xd.innerDate.IsZero() {
 		dateString := xd.innerDate.Format(dateLayout) // serialize with TZ
 		if !xd.hasTz {
@@ -162,28 +162,28 @@ func (xd XsdDate) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 }
 
 // UnmarshalXML implementation on DateTimeg to use dateTimeLayout
-func (xd *XsdDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+func (xd *XSDDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var err error
 	xd.innerDate, xd.hasTz, err = unmarshalTime(d, start, dateLayout)
 	return err
 }
 
 // CreateXsdDate creates an object represent xsd:datetime object in Golang
-func CreateXsdDate(date time.Time, hasTz bool) XsdDate {
-	return XsdDate{
+func CreateXsdDate(date time.Time, hasTz bool) XSDDate {
+	return XSDDate{
 		innerDate: date,
 		hasTz:     hasTz,
 	}
 }
 
-// XsdTime is a type for representing xsd:time
-type XsdTime struct {
+// XSDTime is a type for representing xsd:time
+type XSDTime struct {
 	innerTime time.Time
 	hasTz     bool
 }
 
 // MarshalXML implementation on DateTimeg to skip "zero" time values
-func (xt XsdTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+func (xt XSDTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	if !xt.innerTime.IsZero() {
 		dateTimeLayout := time.RFC3339Nano
 		if xt.innerTime.Nanosecond() == 0 {
@@ -204,7 +204,7 @@ func (xt XsdTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 }
 
 // UnmarshalXML implementation on DateTimeg to use dateTimeLayout
-func (xt *XsdTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+func (xt *XSDTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var t time.Time
 	var err error
 	var content string
@@ -230,27 +230,27 @@ func (xt *XsdTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 }
 
 // Hour returns hour of the xsd:time
-func (xt XsdTime) Hour() int {
+func (xt XSDTime) Hour() int {
 	return xt.innerTime.Hour()
 }
 
 // Minute returns minutes of the xsd:time
-func (xt XsdTime) Minute() int {
+func (xt XSDTime) Minute() int {
 	return xt.innerTime.Minute()
 }
 
 // Second returns seconds of the xsd:time
-func (xt XsdTime) Second() int {
+func (xt XSDTime) Second() int {
 	return xt.innerTime.Second()
 }
 
 // Nanosecond returns nanosecond of the xsd:time
-func (xt XsdTime) Nanosecond() int {
+func (xt XSDTime) Nanosecond() int {
 	return xt.innerTime.Nanosecond()
 }
 
 // Location returns the TZ information of the xsd:time
-func (xt XsdTime) Location() *time.Location {
+func (xt XSDTime) Location() *time.Location {
 	if xt.hasTz {
 		return xt.innerTime.Location()
 	}
@@ -258,12 +258,12 @@ func (xt XsdTime) Location() *time.Location {
 }
 
 // CreateXsdTime creates an object representing xsd:time in Golang
-func CreateXsdTime(hour int, min int, sec int, nsec int, loc *time.Location) XsdTime {
+func CreateXsdTime(hour int, min int, sec int, nsec int, loc *time.Location) XSDTime {
 	realLoc := loc
 	if loc == nil {
 		realLoc = time.Local
 	}
-	return XsdTime{
+	return XSDTime{
 		innerTime: time.Date(1951, 10, 22, hour, min, sec, nsec, realLoc),
 		hasTz:     loc != nil,
 	}
