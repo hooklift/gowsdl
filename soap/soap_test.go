@@ -314,7 +314,7 @@ func Test_Client_FaultDefault(t *testing.T) {
 func TestXsdDateTime(t *testing.T) {
 	type TestDateTime struct {
 		XMLName  xml.Name `xml:"TestDateTime"`
-		Datetime XsdDateTime
+		Datetime XSDDateTime
 	}
 	// test marshalling
 	{
@@ -404,7 +404,7 @@ func TestXsdDateTime(t *testing.T) {
 func TestXsdDate(t *testing.T) {
 	type TestDate struct {
 		XMLName xml.Name `xml:"TestDate"`
-		Date    XsdDate
+		Date    XSDDate
 	}
 
 	// test marshalling
@@ -479,7 +479,7 @@ func TestXsdDate(t *testing.T) {
 func TestXsdTime(t *testing.T) {
 	type TestTime struct {
 		XMLName xml.Name `xml:"TestTime"`
-		Time    XsdTime
+		Time    XSDTime
 	}
 
 	// test marshalling
