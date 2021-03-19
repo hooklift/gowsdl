@@ -601,8 +601,8 @@ func TestXsdTime(t *testing.T) {
 	}
 }
 
-func TestRequestError(t *testing.T) {
-	type requestErrorTest struct {
+func TestHTTPError(t *testing.T) {
+	type httpErrorTest struct {
 		name         string
 		responseCode int
 		responseBody string
@@ -610,7 +610,7 @@ func TestRequestError(t *testing.T) {
 		wantErrMsg   string
 	}
 
-	tests := []requestErrorTest{
+	tests := []httpErrorTest{
 		{
 			name:         "should error if server returns 500",
 			responseCode: http.StatusInternalServerError,
@@ -655,9 +655,9 @@ func TestRequestError(t *testing.T) {
 				if gotErr == nil {
 					t.Fatalf("Expected an error from call.  Received none")
 				}
-				requestError, ok := gotErr.(*RequestError)
+				requestError, ok := gotErr.(*HTTPError)
 				if !ok {
-					t.Fatalf("Expected a RequestError.  Received: %s", gotErr.Error())
+					t.Fatalf("Expected a HTTPError.  Received: %s", gotErr.Error())
 				}
 
 				if requestError.StatusCode != test.responseCode {

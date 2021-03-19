@@ -134,15 +134,15 @@ func (f *SOAPFault) Error() string {
 	return f.String
 }
 
-// RequestError is returned whenever the HTTP request to the server fails
-type RequestError struct {
+// HTTPError is returned whenever the HTTP request to the server fails
+type HTTPError struct {
 	//StatusCode is the status code returned in the HTTP response
 	StatusCode int
 	//ResponseBody contains the body returned in the HTTP response
 	ResponseBody []byte
 }
 
-func (e *RequestError) Error() string {
+func (e *HTTPError) Error() string {
 	return fmt.Sprintf("HTTP Status %d: %s", e.StatusCode, string(e.ResponseBody))
 }
 
@@ -328,7 +328,7 @@ func (s *Client) CallContext(ctx context.Context, soapAction string, request, re
 }
 
 // Call performs HTTP POST request.
-// Note that if the server returns a status code >= 400, a RequestError will be returned
+// Note that if the server returns a status code >= 400, a HTTPError will be returned
 func (s *Client) Call(soapAction string, request, response interface{}) error {
 	return s.call(context.Background(), soapAction, request, response, nil)
 }
@@ -418,7 +418,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 
 	if res.StatusCode >= 400 {
 		body, _ := ioutil.ReadAll(res.Body)
-		return &RequestError{
+		return &HTTPError{
 			StatusCode:   res.StatusCode,
 			ResponseBody: body,
 		}
