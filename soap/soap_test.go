@@ -600,3 +600,81 @@ func TestXsdTime(t *testing.T) {
 		}
 	}
 }
+
+func TestRequestError(t *testing.T) {
+	type requestErrorTest struct {
+		name         string
+		responseCode int
+		responseBody string
+		wantErr      bool
+		wantErrMsg   string
+	}
+
+	tests := []requestErrorTest{
+		{
+			name:         "should error if server returns 500",
+			responseCode: http.StatusInternalServerError,
+			responseBody: "internal server error",
+			wantErr:      true,
+			wantErrMsg:   "HTTP Status 500: internal server error",
+		},
+		{
+			name:         "should error if server returns 403",
+			responseCode: http.StatusForbidden,
+			responseBody: "forbidden",
+			wantErr:      true,
+			wantErrMsg:   "HTTP Status 403: forbidden",
+		},
+		{
+			name:         "should not error if server returns 200",
+			responseCode: http.StatusOK,
+			responseBody: `<?xml version="1.0" encoding="utf-8"?>
+							<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+								<soap:Body>
+									<PingResponse xmlns="http://example.com/service.xsd">
+										<PingResult>
+											<Message>Pong hi</Message>
+										</PingResult>
+									</PingResponse>
+								</soap:Body>
+							</soap:Envelope>`,
+			wantErr: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(test.responseCode)
+				w.Write([]byte(test.responseBody))
+			}))
+			defer ts.Close()
+			client := NewClient(ts.URL)
+			gotErr := client.Call("GetData", &Ping{}, &PingResponse{})
+			if test.wantErr {
+				if gotErr == nil {
+					t.Fatalf("Expected an error from call.  Received none")
+				}
+				requestError, ok := gotErr.(*RequestError)
+				if !ok {
+					t.Fatalf("Expected a RequestError.  Received: %s", gotErr.Error())
+				}
+
+				if requestError.StatusCode != test.responseCode {
+					t.Fatalf("Unexpected StatusCode.  Got %d", requestError.StatusCode)
+				}
+
+				if string(requestError.ResponseBody) != test.responseBody {
+					t.Fatalf("Unexpected ResponseBody.  Got %s", requestError.ResponseBody)
+				}
+
+				if requestError.Error() != test.wantErrMsg {
+					t.Fatalf("Unexpected Error message.  Got %s", requestError.Error())
+				}
+			} else if gotErr != nil {
+				t.Fatalf("Expected no error from call.  Received: %s", gotErr.Error())
+			}
+		})
+	}
+
+}
