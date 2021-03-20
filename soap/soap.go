@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
@@ -131,6 +132,18 @@ func (f *SOAPFault) Error() string {
 		return f.Detail.ErrorString()
 	}
 	return f.String
+}
+
+// HTTPError is returned whenever the HTTP request to the server fails
+type HTTPError struct {
+	//StatusCode is the status code returned in the HTTP response
+	StatusCode int
+	//ResponseBody contains the body returned in the HTTP response
+	ResponseBody []byte
+}
+
+func (e *HTTPError) Error() string {
+	return fmt.Sprintf("HTTP Status %d: %s", e.StatusCode, string(e.ResponseBody))
 }
 
 const (
@@ -314,7 +327,8 @@ func (s *Client) CallContext(ctx context.Context, soapAction string, request, re
 	return s.call(ctx, soapAction, request, response, nil)
 }
 
-// Call performs HTTP POST request
+// Call performs HTTP POST request.
+// Note that if the server returns a status code >= 400, a HTTPError will be returned
 func (s *Client) Call(soapAction string, request, response interface{}) error {
 	return s.call(context.Background(), soapAction, request, response, nil)
 }
@@ -401,6 +415,14 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		return err
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode >= 400 {
+		body, _ := ioutil.ReadAll(res.Body)
+		return &HTTPError{
+			StatusCode:   res.StatusCode,
+			ResponseBody: body,
+		}
+	}
 
 	respEnvelope := new(SOAPEnvelope)
 	respEnvelope.Body = SOAPBody{
