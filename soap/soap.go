@@ -21,20 +21,34 @@ type SOAPDecoder interface {
 	Decode(v interface{}) error
 }
 
+type SOAPEnvelopeResponse struct {
+	XMLName     xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
+	Header      *SOAPHeaderResponse
+	Body        SOAPBodyResponse
+	Attachments []MIMEMultipartAttachment `xml:"attachments,omitempty"`
+}
+
 type SOAPEnvelope struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	Header  *SOAPHeader
-	Body    SOAPBody
+	XMLName xml.Name `xml:"soap:Envelope"`
+	XmlNS   string   `xml:"xmlns:soap,attr"`
+
+	Header *SOAPHeader
+	Body   SOAPBody
 }
 
 type SOAPHeader struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"`
+	XMLName xml.Name `xml:"soap:Header"`
+
+	Headers []interface{}
+}
+type SOAPHeaderResponse struct {
+	XMLName xml.Name `xml:"Header"`
 
 	Headers []interface{}
 }
 
 type SOAPBody struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Body"`
+	XMLName xml.Name `xml:"soap:Body"`
 
 	Content interface{} `xml:",omitempty"`
 
@@ -45,8 +59,25 @@ type SOAPBody struct {
 	Fault         *SOAPFault `xml:",omitempty"`
 }
 
+type SOAPBodyResponse struct {
+	XMLName xml.Name `xml:"Body"`
+
+	Content interface{} `xml:",omitempty"`
+
+	// faultOccurred indicates whether the XML body included a fault;
+	// we cannot simply store SOAPFault as a pointer to indicate this, since
+	// fault is initialized to non-nil with user-provided detail type.
+	faultOccurred bool
+	Fault         *SOAPFault `xml:",omitempty"`
+}
+
+type MIMEMultipartAttachment struct {
+	Name string
+	Data []byte
+}
+
 // UnmarshalXML unmarshals SOAPBody xml
-func (b *SOAPBody) UnmarshalXML(d *xml.Decoder, _ xml.StartElement) error {
+func (b *SOAPBodyResponse) UnmarshalXML(d *xml.Decoder, _ xml.StartElement) error {
 	if b.Content == nil {
 		return xml.UnmarshalError("Content must be a pointer to a struct")
 	}
@@ -104,6 +135,14 @@ func (b *SOAPBody) ErrorFromFault() error {
 	return nil
 }
 
+func (b *SOAPBodyResponse) ErrorFromFault() error {
+	if b.faultOccurred {
+		return b.Fault
+	}
+	b.Fault = nil
+	return nil
+}
+
 type DetailContainer struct {
 	Detail interface{}
 }
@@ -152,6 +191,7 @@ const (
 	WssNsWSU        string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
 	WssNsType       string = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText"
 	mtomContentType string = `multipart/related; start-info="application/soap+xml"; type="application/xop+xml"; boundary="%s"`
+	XmlNsSoapEnv    string = "http://schemas.xmlsoap.org/soap/envelope/"
 )
 
 type WSSSecurityHeader struct {
@@ -212,6 +252,7 @@ type options struct {
 	client           HTTPClient
 	httpHeaders      map[string]string
 	mtom             bool
+	mma              bool
 }
 
 var defaultOptions = options{
@@ -285,11 +326,20 @@ func WithMTOM() Option {
 	}
 }
 
+// WithMIMEMultipartAttachments is an Option to set SOAP MIME Multipart attachment support.
+// Use Client.AddMIMEMultipartAttachment to add attachments of type MIMEMultipartAttachment to your SOAP request.
+func WithMIMEMultipartAttachments() Option {
+	return func(o *options) {
+		o.mma = true
+	}
+}
+
 // Client is soap client
 type Client struct {
-	url     string
-	opts    *options
-	headers []interface{}
+	url         string
+	opts        *options
+	headers     []interface{}
+	attachments []MIMEMultipartAttachment
 }
 
 // HTTPClient is a client which can make HTTP requests
@@ -316,6 +366,12 @@ func (s *Client) AddHeader(header interface{}) {
 	s.headers = append(s.headers, header)
 }
 
+// AddMIMEMultipartAttachment adds an attachment to the client that will be sent only if the
+// WithMIMEMultipartAttachments option is used
+func (s *Client) AddMIMEMultipartAttachment(attachment MIMEMultipartAttachment) {
+	s.attachments = append(s.attachments, attachment)
+}
+
 // SetHeaders sets envelope headers, overwriting any existing headers.
 // For correct behavior, every header must contain a `XMLName` field.  Refer to #121 for details
 func (s *Client) SetHeaders(headers ...interface{}) {
@@ -324,19 +380,27 @@ func (s *Client) SetHeaders(headers ...interface{}) {
 
 // CallContext performs HTTP POST request with a context
 func (s *Client) CallContext(ctx context.Context, soapAction string, request, response interface{}) error {
-	return s.call(ctx, soapAction, request, response, nil)
+	return s.call(ctx, soapAction, request, response, nil, nil)
 }
 
 // Call performs HTTP POST request.
 // Note that if the server returns a status code >= 400, a HTTPError will be returned
 func (s *Client) Call(soapAction string, request, response interface{}) error {
-	return s.call(context.Background(), soapAction, request, response, nil)
+	return s.call(context.Background(), soapAction, request, response, nil, nil)
+}
+
+// CallContextWithAttachmentsAndFaultDetail performs HTTP POST request.
+// Note that if SOAP fault is returned, it will be stored in the error.
+// On top the attachments array will be filled with attachments returned from the SOAP request.
+func (s *Client) CallContextWithAttachmentsAndFaultDetail(ctx context.Context, soapAction string, request,
+	response interface{}, faultDetail FaultError, attachments *[]MIMEMultipartAttachment) error {
+	return s.call(ctx, soapAction, request, response, faultDetail, attachments)
 }
 
 // CallContextWithFault performs HTTP POST request.
 // Note that if SOAP fault is returned, it will be stored in the error.
 func (s *Client) CallContextWithFaultDetail(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError) error {
-	return s.call(ctx, soapAction, request, response, faultDetail)
+	return s.call(ctx, soapAction, request, response, faultDetail, nil)
 }
 
 // CallWithFaultDetail performs HTTP POST request.
@@ -344,11 +408,15 @@ func (s *Client) CallContextWithFaultDetail(ctx context.Context, soapAction stri
 // the passed in fault detail is expected to implement FaultError interface,
 // which allows to condense the detail into a short error message.
 func (s *Client) CallWithFaultDetail(soapAction string, request, response interface{}, faultDetail FaultError) error {
-	return s.call(context.Background(), soapAction, request, response, faultDetail)
+	return s.call(context.Background(), soapAction, request, response, faultDetail, nil)
 }
 
-func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError) error {
-	envelope := SOAPEnvelope{}
+func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError,
+	retAttachments *[]MIMEMultipartAttachment) error {
+	// SOAP envelope capable of namespace prefixes
+	envelope := SOAPEnvelope{
+		XmlNS: XmlNsSoapEnv,
+	}
 
 	if s.headers != nil && len(s.headers) > 0 {
 		envelope.Header = &SOAPHeader{
@@ -359,8 +427,12 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	envelope.Body.Content = request
 	buffer := new(bytes.Buffer)
 	var encoder SOAPEncoder
-	if s.opts.mtom {
+	if s.opts.mtom && s.opts.mma {
+		return fmt.Errorf("cannot use MTOM (XOP) and MMA (MIME Multipart Attachments) option at the same time")
+	} else if s.opts.mtom {
 		encoder = newMtomEncoder(buffer)
+	} else if s.opts.mma {
+		encoder = newMmaEncoder(buffer, s.attachments)
 	} else {
 		encoder = xml.NewEncoder(buffer)
 	}
@@ -385,6 +457,8 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 
 	if s.opts.mtom {
 		req.Header.Add("Content-Type", fmt.Sprintf(mtomContentType, encoder.(*mtomEncoder).Boundary()))
+	} else if s.opts.mma {
+		req.Header.Add("Content-Type", fmt.Sprintf(mmaContentType, encoder.(*mmaEncoder).Boundary()))
 	} else {
 		req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
 	}
@@ -424,8 +498,10 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		}
 	}
 
-	respEnvelope := new(SOAPEnvelope)
-	respEnvelope.Body = SOAPBody{
+	// xml Decoder (used with and without MTOM) cannot handle namespace prefixes (yet),
+	// so we have to use a namespace-less response envelope
+	respEnvelope := new(SOAPEnvelopeResponse)
+	respEnvelope.Body = SOAPBodyResponse{
 		Content: response,
 		Fault: &SOAPFault{
 			Detail: faultDetail,
@@ -437,9 +513,19 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		return err
 	}
 
+	var mmaBoundary string
+	if s.opts.mma{
+		mmaBoundary, err = getMmaHeader(res.Header.Get("Content-Type"))
+		if err != nil {
+			return err
+		}
+	}
+
 	var dec SOAPDecoder
 	if mtomBoundary != "" {
 		dec = newMtomDecoder(res.Body, mtomBoundary)
+	} else if mmaBoundary != "" {
+		dec = newMmaDecoder(res.Body, mmaBoundary)
 	} else {
 		dec = xml.NewDecoder(res.Body)
 	}
@@ -448,5 +534,8 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 		return err
 	}
 
+	if respEnvelope.Attachments != nil {
+		*retAttachments = respEnvelope.Attachments
+	}
 	return respEnvelope.Body.ErrorFromFault()
 }
