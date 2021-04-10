@@ -2,6 +2,7 @@ package soap
 
 import (
 	"bytes"
+	"context"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
@@ -38,6 +39,13 @@ type PingReply struct {
 
 	Message    string `xml:"Message,omitempty"`
 	Attachment []byte `xml:"Attachment,omitempty"`
+}
+
+type AttachmentRequest struct {
+	XMLName xml.Name `xml:"http://example.com/service.xsd attachmentRequest"`
+
+	Name      string `xml:"name,omitempty"`
+	ContentID string `xml:"contentID,omitempty"`
 }
 
 func TestClient_Call(t *testing.T) {
@@ -123,6 +131,51 @@ func TestClient_Send_Correct_Headers(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestClient_Attachments_WithAttachmentResponse(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		for k, v := range r.Header {
+			w.Header().Set(k, v[0])
+		}
+		bodyBuf, _ := ioutil.ReadAll(r.Body)
+		_, err := w.Write(bodyBuf)
+		if err != nil {
+			panic(err)
+		}
+	}))
+	defer ts.Close()
+
+	// GIVEN
+	firstAtt := MIMEMultipartAttachment{
+		Name: "First_Attachment",
+		Data: []byte(`foobar`),
+	}
+	secondAtt := MIMEMultipartAttachment{
+		Name: "Second_Attachment",
+		Data: []byte(`tl;tr`),
+	}
+	client := NewClient(ts.URL, WithMIMEMultipartAttachments())
+	client.AddMIMEMultipartAttachment(firstAtt)
+	client.AddMIMEMultipartAttachment(secondAtt)
+	req := &AttachmentRequest{
+		Name:      "UploadMyFilePlease",
+		ContentID: "First_Attachment",
+	}
+	reply := new(AttachmentRequest)
+	retAttachments := make([]MIMEMultipartAttachment, 0)
+
+	// WHEN
+	if err := client.CallContextWithAttachmentsAndFaultDetail(context.TODO(), "''", req,
+		reply, nil, &retAttachments); err != nil {
+		t.Fatalf("couln't call service: %v", err)
+	}
+
+	// THEN
+	assert.Equal(t, req.ContentID, reply.ContentID)
+	assert.Len(t, retAttachments, 2)
+	assert.Equal(t, retAttachments[0], firstAtt)
+	assert.Equal(t, retAttachments[1], secondAtt)
 }
 
 func TestClient_MTOM(t *testing.T) {
