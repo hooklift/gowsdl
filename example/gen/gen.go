@@ -4,7 +4,7 @@ import (
 	"encoding/xml"
 	"time"
 
-	"github.com/hooklift/gowsdl/soap"
+	"github.com/nestoca/gowsdl/soap"
 )
 
 // against "unused imports"
