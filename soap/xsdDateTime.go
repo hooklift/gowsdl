@@ -41,8 +41,28 @@ func (xdt *XSDDateTime) ToGoTime() time.Time {
 		xdt.innerTime.Nanosecond(), time.Local)
 }
 
-// MarshalXML implementation on DateTime to skip "zero" time values. It also checks if nanoseconds and TZ exist.
+// MarshalXML implements xml.MarshalerAttr on XSDDateTime
 func (xdt XSDDateTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	xdtString := xdt.string()
+	if xdtString != "" {
+		return e.EncodeElement(xdtString, start)
+	}
+	return nil
+}
+
+// MarshalXMLAttr implements xml.MarshalerAttr on XSDDateTime
+func (xdt XSDDateTime) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
+	xdtString := xdt.string()
+	attr := xml.Attr{}
+	if xdtString != "" {
+		attr.Name = name
+		attr.Value = xdtString
+	}
+	return attr, nil
+}
+
+// returns string representation and skips "zero" time values. It also checks if nanoseconds and TZ exist.
+func (xdt XSDDateTime) string() string {
 	if !xdt.innerTime.IsZero() {
 		dateTimeLayout := time.RFC3339Nano
 		if xdt.innerTime.Nanosecond() == 0 {
@@ -57,33 +77,31 @@ func (xdt XSDDateTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error 
 			toks = strings.SplitN(toks[0], "-", 2)
 			dtString = dateAndTime[0] + "T" + toks[0]
 		}
-		e.EncodeElement(dtString, start)
+		return dtString
 	}
-	return nil
+	return ""
 }
 
-// UnmarshalXML implementation on DateTimeg to use dateTimeLayout
+// UnmarshalXML implements xml.Unmarshaler on XSDDateTime to use time.RFC3339Nano
 func (xdt *XSDDateTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	var err error
-	xdt.innerTime, xdt.hasTz, err = unmarshalTime(d, start, time.RFC3339Nano)
-	return err
-}
-
-// CreateXsdDateTime creates an object represent xsd:datetime object in Golang
-func CreateXsdDateTime(dt time.Time, hasTz bool) XSDDateTime {
-	return XSDDateTime{
-		innerTime: dt,
-		hasTz:     hasTz,
-	}
-}
-
-func unmarshalTime(d *xml.Decoder, start xml.StartElement, format string) (time.Time, bool, error) {
-	var t time.Time
 	var content string
 	err := d.DecodeElement(&content, &start)
 	if err != nil {
-		return t, true, err
+		return err
 	}
+	xdt.innerTime, xdt.hasTz, err = fromString(content, time.RFC3339Nano)
+	return err
+}
+
+// UnmarshalXMLAttr implements xml.UnmarshalerAttr on XSDDateTime to use time.RFC3339Nano
+func (xdt *XSDDateTime) UnmarshalXMLAttr(attr xml.Attr) error {
+	var err error
+	xdt.innerTime, xdt.hasTz, err = fromString(attr.Value, time.RFC3339Nano)
+	return err
+}
+
+func fromString(content string, format string) (time.Time, bool, error) {
+	var t time.Time
 	if content == "" {
 		return t, true, nil
 	}
@@ -114,8 +132,16 @@ func unmarshalTime(d *xml.Decoder, start xml.StartElement, format string) (time.
 			content += "Z"
 		}
 	}
-	t, err = time.Parse(format, content)
-	return t, hasTz, nil
+	t, err := time.Parse(format, content)
+	return t, hasTz, err
+}
+
+// CreateXsdDateTime creates an object represent xsd:datetime object in Golang
+func CreateXsdDateTime(dt time.Time, hasTz bool) XSDDateTime {
+	return XSDDateTime{
+		innerTime: dt,
+		hasTz:     hasTz,
+	}
 }
 
 // XSDDate is a type for representing xsd:date in Golang
@@ -139,8 +165,28 @@ func (xd *XSDDate) ToGoTime() time.Time {
 		0, 0, 0, 0, time.Local)
 }
 
-// MarshalXML implementation on DateTimeg to skip "zero" time values
+// MarshalXML implementation on XSDDate
 func (xd XSDDate) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	xdtString := xd.string()
+	if xdtString != "" {
+		return e.EncodeElement(xdtString, start)
+	}
+	return nil
+}
+
+// MarshalXMLAttr implementation on XSDDate
+func (xd XSDDate) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
+	xdString := xd.string()
+	attr := xml.Attr{}
+	if xdString != "" {
+		attr.Name = name
+		attr.Value = xdString
+	}
+	return attr, nil
+}
+
+// returns string representation and skips "zero" time values
+func (xd XSDDate) string() string {
 	if !xd.innerDate.IsZero() {
 		dateString := xd.innerDate.Format(dateLayout) // serialize with TZ
 		if !xd.hasTz {
@@ -156,15 +202,26 @@ func (xd XSDDate) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 				}
 			}
 		}
-		e.EncodeElement(dateString, start)
+		return dateString
 	}
-	return nil
+	return ""
 }
 
-// UnmarshalXML implementation on DateTimeg to use dateTimeLayout
+// UnmarshalXML implements xml.Unmarshaler on XSDDate to use dateLayout
 func (xd *XSDDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var content string
+	err := d.DecodeElement(&content, &start)
+	if err != nil {
+		return err
+	}
+	xd.innerDate, xd.hasTz, err = fromString(content, dateLayout)
+	return err
+}
+
+// UnmarshalXMLAttr implements xml.UnmarshalerAttr on XSDDate to use dateLayout
+func (xd *XSDDate) UnmarshalXMLAttr(attr xml.Attr) error {
 	var err error
-	xd.innerDate, xd.hasTz, err = unmarshalTime(d, start, dateLayout)
+	xd.innerDate, xd.hasTz, err = fromString(attr.Value, dateLayout)
 	return err
 }
 
@@ -182,8 +239,28 @@ type XSDTime struct {
 	hasTz     bool
 }
 
-// MarshalXML implementation on DateTimeg to skip "zero" time values
+// MarshalXML implements xml.Marshaler on XSDTime
 func (xt XSDTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	xdtString := xt.string()
+	if xdtString != "" {
+		return e.EncodeElement(xdtString, start)
+	}
+	return nil
+}
+
+// MarshalXMLAttr implements xml.MarshalerAttr on XSDTime
+func (xt XSDTime) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
+	xdString := xt.string()
+	attr := xml.Attr{}
+	if xdString != "" {
+		attr.Name = name
+		attr.Value = xdString
+	}
+	return attr, nil
+}
+
+// returns string representation and skips "zero" time values
+func (xt XSDTime) string() string {
 	if !xt.innerTime.IsZero() {
 		dateTimeLayout := time.RFC3339Nano
 		if xt.innerTime.Nanosecond() == 0 {
@@ -198,20 +275,30 @@ func (xt XSDTime) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 			toks = strings.SplitN(toks[0], "-", 2)
 			timeString = toks[0]
 		}
-		e.EncodeElement(timeString, start)
+		return timeString
 	}
-	return nil
+	return ""
 }
 
-// UnmarshalXML implementation on DateTimeg to use dateTimeLayout
+// UnmarshalXML implements xml.Unmarshaler on XSDTime to use dateTimeLayout
 func (xt *XSDTime) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	var t time.Time
 	var err error
 	var content string
 	err = d.DecodeElement(&content, &start)
 	if err != nil {
 		return err
 	}
+	return xt.fromString(content)
+}
+
+// UnmarshalXMLAttr implements xml.UnmarshalerAttr on XSDTime to use dateTimeLayout
+func (xt *XSDTime) UnmarshalXMLAttr(attr xml.Attr) error {
+	return xt.fromString(attr.Value)
+}
+
+func (xt *XSDTime) fromString(content string) error {
+	var t time.Time
+	var err error
 	if content == "" {
 		xt.innerTime = t
 		return nil
