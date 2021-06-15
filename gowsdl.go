@@ -119,9 +119,39 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 		return nil, err
 	}
 
+	resolveCollisions := map[string]string{}
+
+	// resolve complex type name collision
+	{
+		seen := map[string]int{}
+		for _, schema := range g.wsdl.Types.Schemas {
+			for _, complexType := range schema.ComplexTypes {
+				seen[complexType.Name] += 1
+			}
+		}
+		for k, v := range seen {
+			if v < 2 {
+				delete(seen, k)
+			}
+		}
+		for i := range g.wsdl.Types.Schemas {
+			schema := g.wsdl.Types.Schemas[i]
+			for j := range schema.ComplexTypes {
+				complexType := schema.ComplexTypes[j]
+				if num := seen[complexType.Name]; num > 0 {
+					org := complexType.Name
+					update := fmt.Sprintf("%s%d", org, num)
+					resolveCollisions[fmt.Sprintf("%s/%s", schema.TargetNamespace, org)] = update
+					complexType.Name = update
+					seen[org] -= 1
+				}
+			}
+		}
+	}
+
 	// Process WSDL nodes
 	for _, schema := range g.wsdl.Types.Schemas {
-		newTraverser(schema, g.wsdl.Types.Schemas).traverse()
+		newTraverser(schema, g.wsdl.Types.Schemas, resolveCollisions).traverse()
 	}
 
 	var wg sync.WaitGroup
