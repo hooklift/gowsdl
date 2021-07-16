@@ -148,9 +148,6 @@ var typesTmpl = `
 		{{else}}
 			type {{$name}} struct {
 				{{$typ := findNameByType .Name}}
-				{{if ne $name $typ}}
-					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$typ}}\"`" + `
-				{{end}}
 
 				{{if ne .ComplexContent.Extension.Base ""}}
 					{{template "ComplexContent" .ComplexContent}}

@@ -45,7 +45,11 @@ var opsTmpl = `
 		{{$responseType := findType .Output.Message | replaceReservedWords | makePublic}}
 		func (service *{{$privateType}}) {{makePublic .Name | replaceReservedWords}}Context (ctx context.Context, {{if ne $requestType ""}}request *{{$requestType}}{{end}}) ({{if ne $responseType ""}}*{{$responseType}}, {{end}}error) {
 			{{if ne $responseType ""}}response := new({{$responseType}}){{end}}
-			err := service.client.CallContext(ctx, "{{if ne $soapAction ""}}{{$soapAction}}{{else}}''{{end}}", {{if ne $requestType ""}}request{{else}}nil{{end}}, {{if ne $responseType ""}}response{{else}}struct{}{}{{end}})
+			{{if ne $requestType ""}}wrappedRequest := {{$requestType | makePrivate}}Wrapper {
+				{{$requestType}}: request,
+				XMLNS:   "{{getTargetNamespace}}",
+			}{{end}}
+			err := service.client.CallContext(ctx, "{{if ne $soapAction ""}}{{$soapAction}}{{else}}''{{end}}", {{if ne $requestType ""}}wrappedRequest{{else}}nil{{end}}, {{if ne $responseType ""}}response{{else}}struct{}{}{{end}})
 			if err != nil {
 				return {{if ne $responseType ""}}nil, {{end}}err
 			}
@@ -60,6 +64,12 @@ var opsTmpl = `
 			)
 		}
 
+		type {{$requestType | makePrivate}}Wrapper struct {
+			XMLName xml.Name ` + "`xml:\"tns:{{$requestType}}\"`" + `
+			XMLNS   string   ` + "`xml:\"xmlns:tns,attr\"`" + `
+
+			*{{$requestType}}
+		}
 	{{end}}
 {{end}}
 `

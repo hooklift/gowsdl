@@ -291,6 +291,7 @@ func (g *GoWSDL) genOperations() ([]byte, error) {
 		"findType":             g.findType,
 		"findSOAPAction":       g.findSOAPAction,
 		"findServiceAddress":   g.findServiceAddress,
+		"getTargetNamespace":   g.getTargetNamespace,
 	}
 
 	data := new(bytes.Buffer)
@@ -563,6 +564,10 @@ func (g *GoWSDL) findServiceAddress(name string) string {
 		}
 	}
 	return ""
+}
+
+func (g *GoWSDL) getTargetNamespace() string {
+	return g.wsdl.TargetNamespace
 }
 
 // TODO(c4milo): Add namespace support instead of stripping it
