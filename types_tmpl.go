@@ -94,7 +94,7 @@ var typesTmpl = `
 			{{end}}
 		{{else}}
 			{{if .Doc}}{{.Doc | comment}} {{end}}
-			{{replaceAttrReservedWords .Name | makeFieldPublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{toGoType .Type .Nillable }} ` + "`" + `xml:"{{.Name}},omitempty" json:"{{.Name}},omitempty"` + "`" + ` {{end}}
+			{{replaceAttrReservedWords .Name | makeFieldPublic}} {{if eq .MaxOccurs "unbounded"}}[]{{end}}{{toGoType .Type .Nillable }}{{if eq (toGoType .Type false) "string" "int32" "int64" "bool" "float32" "float64"}}{{else}}Intf{{end}} ` + "`" + `xml:"{{.Name}},omitempty" json:"{{.Name}},omitempty"` + "`" + ` {{end}}
 		{{end}}
 	{{end}}
 {{end}}
@@ -109,6 +109,10 @@ var typesTmpl = `
 	{{ $targetNamespace := .TargetNamespace }}
 
 	{{range .SimpleType}}
+		type {{.Name | replaceReservedWords | makePublic}}Intf interface {
+			_x{{.Name}}()
+		}
+
 		{{template "SimpleType" .}}
 	{{end}}
 
@@ -117,7 +121,13 @@ var typesTmpl = `
 		{{if not .Type}}
 			{{/* ComplexTypeLocal */}}
 			{{with .ComplexType}}
+				type {{$name | replaceReservedWords | makePublic}}Intf interface {
+					_x{{.Name}}()
+				}
+
 				type {{$name | replaceReservedWords | makePublic}} struct {
+					{{$name | replaceReservedWords | makePublic}}Intf
+
 					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$name}}\"`" + `
 					{{if ne .ComplexContent.Extension.Base ""}}
 						{{template "ComplexContent" .ComplexContent}}
@@ -146,7 +156,13 @@ var typesTmpl = `
 		{{if eq (toGoType .SimpleContent.Extension.Base false) "string"}}
 			type {{$name}} string
 		{{else}}
+			type {{$name | replaceReservedWords | makePublic}}Intf interface {
+				_x{{.Name}}()
+			}
+
 			type {{$name}} struct {
+				{{$name | replaceReservedWords | makePublic}}Intf
+
 				{{$typ := findNameByType .Name}}
 				{{if ne $name $typ}}
 					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$typ}}\"`" + `

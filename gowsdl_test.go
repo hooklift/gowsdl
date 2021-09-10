@@ -54,6 +54,8 @@ func TestComplexTypeWithInlineSimpleType(t *testing.T) {
 	}
 
 	expected := `type GetInfo struct {
+	GetInfoIntf
+
 	XMLName	xml.Name	` + "`" + `xml:"http://www.mnb.hu/webservices/ GetInfo"` + "`" + `
 
 	Id	string	` + "`" + `xml:"Id,omitempty" json:"Id,omitempty"` + "`" + `
@@ -80,6 +82,8 @@ func TestAttributeRef(t *testing.T) {
 	}
 
 	expected := `type ResponseStatus struct {
+	ResponseStatusIntf
+
 	Status	[]struct {
 		Value	string  ` + "`" + `xml:",chardata" json:"-,"` + "`" + `
 
