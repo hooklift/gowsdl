@@ -202,8 +202,8 @@ func getMtomHeader(contentType string) (string, error) {
 		}
 
 		startInfo, ok := params["start-info"]
-		if !ok || startInfo != "application/soap+xml" {
-			return "", fmt.Errorf(`Expected param start-info="application/soap+xml", got %s`, startInfo)
+		if !ok || strings.Index(contentType,"xml") == -1{
+			return "", fmt.Errorf(`Expected param start-info contains xml, got %s`, startInfo)
 		}
 		return boundary, nil
 	}
@@ -231,7 +231,7 @@ func (d *mtomDecoder) Decode(v interface{}) error {
 			return err
 		}
 		contentType := p.Header.Get("Content-Type")
-		if contentType == "application/xop+xml" {
+		if strings.HasPrefix(contentType,"application/xop+xml") {
 			err := xml.NewDecoder(p).Decode(v)
 			if err != nil {
 				return err
