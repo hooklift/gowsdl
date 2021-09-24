@@ -6,18 +6,18 @@ package gowsdl
 
 var typesTmpl = `
 {{define "SimpleType"}}
-	{{$type := replaceReservedWords .Name | makePublic}}
+	{{$typeName := replaceReservedWords .Name | makePublic}}
 	{{if .Doc}} {{.Doc | comment}} {{end}}
 	{{if ne .List.ItemType ""}}
-		type {{$type}} []{{toGoType .List.ItemType false}}
+		type {{$typeName}} []{{toGoType .List.ItemType false}}
 	{{else if ne .Union.MemberTypes ""}}
-		type {{$type}} string
+		type {{$typeName}} string
 	{{else if .Union.SimpleType}}
-		type {{$type}} string
+		type {{$typeName}} string
 	{{else if .Restriction.Base}}
-		type {{$type}} {{toGoType .Restriction.Base false}}
+		type {{$typeName}} {{toGoType .Restriction.Base false}}
     {{else}}
-		type {{$type}} interface{}
+		type {{$typeName}} interface{}
 	{{end}}
 
 	{{if .Restriction.Enumeration}}
@@ -25,7 +25,7 @@ var typesTmpl = `
 		{{with .Restriction}}
 			{{range .Enumeration}}
 				{{if .Doc}} {{.Doc | comment}} {{end}}
-				{{$type}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{goString .Value}}" {{end}}
+				{{$typeName}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$typeName}} = "{{goString .Value}}" {{end}}
 		{{end}}
 	)
 	{{end}}
@@ -114,10 +114,11 @@ var typesTmpl = `
 
 	{{range .Elements}}
 		{{$name := .Name}}
+		{{$typeName := replaceReservedWords $name | makePublic}}
 		{{if not .Type}}
 			{{/* ComplexTypeLocal */}}
 			{{with .ComplexType}}
-				type {{$name | replaceReservedWords | makePublic}} struct {
+				type {{$typeName}} struct {
 					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$name}}\"`" + `
 					{{if ne .ComplexContent.Extension.Base ""}}
 						{{template "ComplexContent" .ComplexContent}}
@@ -135,18 +136,17 @@ var typesTmpl = `
 			{{end}}
 			{{/* SimpleTypeLocal */}}
 			{{with .SimpleType}}
-				{{$type := replaceReservedWords $name | makePublic}}
 				{{if .Doc}} {{.Doc | comment}} {{end}}
 				{{if ne .List.ItemType ""}}
-					type {{$type}} []{{toGoType .List.ItemType false}}
+					type {{$typeName}} []{{toGoType .List.ItemType false}}
 				{{else if ne .Union.MemberTypes ""}}
-					type {{$type}} string
+					type {{$typeName}} string
 				{{else if .Union.SimpleType}}
-					type {{$type}} string
+					type {{$typeName}} string
 				{{else if .Restriction.Base}}
-					type {{$type}} {{toGoType .Restriction.Base false}}
+					type {{$typeName}} {{toGoType .Restriction.Base false}}
 				{{else}}
-					type {{$type}} interface{}
+					type {{$typeName}} interface{}
 				{{end}}
 			
 				{{if .Restriction.Enumeration}}
@@ -154,13 +154,12 @@ var typesTmpl = `
 					{{with .Restriction}}
 						{{range .Enumeration}}
 							{{if .Doc}} {{.Doc | comment}} {{end}}
-							{{$type}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{goString .Value}}" {{end}}
+							{{$typeName}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$typeName}} = "{{goString .Value}}" {{end}}
 					{{end}}
 				)
 				{{end}}
 			{{end}}
 		{{else}}
-			{{$typeName := replaceReservedWords $name | makePublic}}
 			{{$type := toGoType .Type .Nillable | removePointerFromType}}
 			{{if ne ($typeName) ($type)}}
 				type {{$typeName}} {{$type}}
@@ -195,14 +194,14 @@ var typesTmpl = `
 
 	{{range .ComplexTypes}}
 		{{/* ComplexTypeGlobal */}}
-		{{$name := replaceReservedWords .Name | makePublic}}
+		{{$typeName := replaceReservedWords .Name | makePublic}}
 		{{if eq (toGoType .SimpleContent.Extension.Base false) "string"}}
-			type {{$name}} string
+			type {{$typeName}} string
 		{{else}}
-			type {{$name}} struct {
-				{{$typ := findNameByType .Name}}
-				{{if ne $name $typ}}
-					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$typ}}\"`" + `
+			type {{$typeName}} struct {
+				{{$type := findNameByType .Name}}
+				{{if ne $typeName $type}}
+					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$type}}\"`" + `
 				{{end}}
 
 				{{if ne .ComplexContent.Extension.Base ""}}
