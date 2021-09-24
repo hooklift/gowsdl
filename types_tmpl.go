@@ -160,8 +160,35 @@ var typesTmpl = `
 				{{end}}
 			{{end}}
 		{{else}}
-			{{if ne ($name | replaceReservedWords | makePublic) (toGoType .Type .Nillable | removePointerFromType)}}
-				type {{$name | replaceReservedWords | makePublic}} {{toGoType .Type .Nillable | removePointerFromType}}
+			{{$typeName := replaceReservedWords $name | makePublic}}
+			{{$type := toGoType .Type .Nillable | removePointerFromType}}
+			{{if ne ($typeName) ($type)}}
+				type {{$typeName}} {{$type}}
+				{{if eq ($type) ("soap.XSDDateTime")}}
+					func (xdt {{$typeName}}) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+						return soap.XSDDateTime(xdt).MarshalXML(e, start)
+					}
+
+					func (xdt *{{$typeName}}) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+						return (*soap.XSDDateTime)(xdt).UnmarshalXML(d, start)
+					}
+				{{else if eq ($type) ("soap.XSDDate")}}
+					func (xd {{$typeName}}) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+						return soap.XSDDate(xd).MarshalXML(e, start)
+					}
+
+					func (xd *{{$typeName}}) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+						return (*soap.XSDDate)(xd).UnmarshalXML(d, start)
+					}
+				{{else if eq ($type) ("soap.XSDTime")}}
+					func (xt {{$typeName}}) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+						return soap.XSDTime(xt).MarshalXML(e, start)
+					}
+
+					func (xt *{{$typeName}}) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+						return (*soap.XSDTime)(xt).UnmarshalXML(d, start)
+					}
+				{{end}}
 			{{end}}
 		{{end}}
 	{{end}}
