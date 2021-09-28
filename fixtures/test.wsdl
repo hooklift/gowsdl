@@ -85,6 +85,12 @@
           </s:restriction>
         </s:simpleType>
       </s:element>
+      <!-- element of type dateTime -->
+      <s:element name="startDate" type="s:dateTime">
+        <s:annotation>
+          <s:documentation>The date and time when the process starts.</s:documentation>
+        </s:annotation>
+      </s:element>
     </s:schema>
   </wsdl:types>
   <wsdl:message name="GetInfoSoapIn">
