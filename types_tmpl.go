@@ -39,6 +39,7 @@ var typesTmpl = `
 
 	{{template "Elements" .Extension.Sequence}}
 	{{template "Elements" .Extension.Choice}}
+	{{template "Elements" .Extension.SequenceChoice}}
 	{{template "Attributes" .Extension.Attributes}}
 {{end}}
 
