@@ -524,7 +524,7 @@ func (g *GoWSDL) findType(message string) string {
 	return ""
 }
 
-// Given a type, check if there's SimpleType with that type, and return its name.
+// Given a type, check if there's an Element with that type, and return its name.
 func (g *GoWSDL) findNameByType(name string) string {
 	name = stripns(name)
 	for _, schema := range g.wsdl.Types.Schemas {
