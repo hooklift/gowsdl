@@ -526,15 +526,7 @@ func (g *GoWSDL) findType(message string) string {
 
 // Given a type, check if there's an Element with that type, and return its name.
 func (g *GoWSDL) findNameByType(name string) string {
-	name = stripns(name)
-	for _, schema := range g.wsdl.Types.Schemas {
-		for _, elem := range schema.Elements {
-			if stripns(elem.Type) == name {
-				return elem.Name
-			}
-		}
-	}
-	return name
+	return newTraverser(nil, g.wsdl.Types.Schemas).findNameByType(name)
 }
 
 // TODO(c4milo): Add support for namespaces instead of striping them out

@@ -191,7 +191,7 @@ type XSDExtension struct {
 	XMLName    xml.Name        `xml:"extension"`
 	Base       string          `xml:"base,attr"`
 	Attributes []*XSDAttribute `xml:"attribute"`
-	Sequence   []XSDElement    `xml:"sequence>element"`
+	Sequence   []*XSDElement   `xml:"sequence>element"`
 	Choice     []*XSDElement   `xml:"choice>element"`
 }
 
