@@ -202,7 +202,7 @@ func getMtomHeader(contentType string) (string, error) {
 		}
 
 		startInfo, ok := params["start-info"]
-		if !ok || strings.Index(contentType,"xml") == -1{
+		if !ok || strings.Index(startInfo,"xml") == -1{
 			return "", fmt.Errorf(`Expected param start-info contains xml, got %s`, startInfo)
 		}
 		return boundary, nil
