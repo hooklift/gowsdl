@@ -203,7 +203,7 @@ func getMtomHeader(contentType string) (string, error) {
 
 		startInfo, ok := params["start-info"]
 		if !ok || (!strings.Contains(startInfo, "application/soap+xml") && !strings.Contains(startInfo, "text/xml")) {
-			return "", fmt.Errorf(`Expected param start-info to contain "application/soap+xml", got %s`, startInfo)
+			return "", fmt.Errorf(`Expected param start-info to contain "application/soap+xml" or "text/xml", got %s`, startInfo)
 		}
 		return boundary, nil
 	}
