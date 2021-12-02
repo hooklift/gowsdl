@@ -43,12 +43,13 @@ var typesTmpl = `
 {{end}}
 
 {{define "Attributes"}}
+    {{ $targetNamespace := getNS }}
 	{{range .}}
 		{{if .Doc}} {{.Doc | comment}} {{end}}
 		{{ if ne .Type "" }}
-			{{ normalize .Name | makeFieldPublic}} {{toGoType .Type false}} ` + "`" + `xml:"{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
+			{{ normalize .Name | makeFieldPublic}} {{toGoType .Type false}} ` + "`" + `xml:"{{with $targetNamespace}}{{.}} {{end}}{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
 		{{ else }}
-			{{ normalize .Name | makeFieldPublic}} string ` + "`" + `xml:"{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
+			{{ normalize .Name | makeFieldPublic}} string ` + "`" + `xml:"{{with $targetNamespace}}{{.}} {{end}}{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
 		{{ end }}
 	{{end}}
 {{end}}
@@ -106,7 +107,7 @@ var typesTmpl = `
 {{end}}
 
 {{range .Schemas}}
-	{{ $targetNamespace := .TargetNamespace }}
+	{{ $targetNamespace := setNS .TargetNamespace }}
 
 	{{range .SimpleType}}
 		{{template "SimpleType" .}}

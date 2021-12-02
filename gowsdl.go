@@ -35,6 +35,18 @@ type GoWSDL struct {
 	wsdl                  *WSDL
 	resolvedXSDExternals  map[string]bool
 	currentRecursionLevel uint8
+	currentNamespace      string
+}
+
+// Method setNS sets (and returns) the currently active XML namespace.
+func (g *GoWSDL) setNS(ns string) string {
+	g.currentNamespace = ns
+	return ns
+}
+
+// Method setNS returns the currently active XML namespace.
+func (g *GoWSDL) getNS() string {
+	return g.currentNamespace
 }
 
 var cacheDir = filepath.Join(os.TempDir(), "gowsdl-cache")
@@ -268,6 +280,8 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"goString":                 goString,
 		"findNameByType":           g.findNameByType,
 		"removePointerFromType":    removePointerFromType,
+		"setNS":                    g.setNS,
+		"getNS":                    g.getNS,
 	}
 
 	data := new(bytes.Buffer)

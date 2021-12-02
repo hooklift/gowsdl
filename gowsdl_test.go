@@ -83,10 +83,10 @@ func TestAttributeRef(t *testing.T) {
 	Status	[]struct {
 		Value	string  ` + "`" + `xml:",chardata" json:"-,"` + "`" + `
 
-		Code	string	` + "`" + `xml:"code,attr,omitempty" json:"code,omitempty"` + "`" + `
+		Code	string	` + "`" + `xml:"http://www.mnb.hu/webservices/ code,attr,omitempty" json:"code,omitempty"` + "`" + `
 	}	` + "`" + `xml:"status,omitempty" json:"status,omitempty"` + "`" + `
 
-	ResponseCode	string	` + "`" + `xml:"responseCode,attr,omitempty" json:"responseCode,omitempty"` + "`" + `
+	ResponseCode	string	` + "`" + `xml:"http://www.mnb.hu/webservices/ responseCode,attr,omitempty" json:"responseCode,omitempty"` + "`" + `
 }`
 	actual = string(bytes.ReplaceAll([]byte(actual), []byte("\t"), []byte("  ")))
 	expected = string(bytes.ReplaceAll([]byte(expected), []byte("\t"), []byte("  ")))
