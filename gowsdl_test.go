@@ -95,6 +95,57 @@ func TestAttributeRef(t *testing.T) {
 	}
 }
 
+func TestElementWithLocalSimpleType(t *testing.T) {
+	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := g.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Type declaration
+	actual, err := getTypeDeclaration(resp, "ElementWithLocalSimpleType")
+	if err != nil {
+		fmt.Println(string(resp["types"]))
+		t.Fatal(err)
+	}
+
+	expected := `type ElementWithLocalSimpleType string`
+
+	if actual != expected {
+		t.Error("got \n" + actual + " want \n" + expected)
+	}
+
+	// Const declaration of first enum value
+	actual, err = getTypeDeclaration(resp, "ElementWithLocalSimpleTypeEnum1")
+	if err != nil {
+		fmt.Println(string(resp["types"]))
+		t.Fatal(err)
+	}
+
+	expected = `const ElementWithLocalSimpleTypeEnum1 ElementWithLocalSimpleType = "enum1"`
+
+	if actual != expected {
+		t.Error("got \n" + actual + " want \n" + expected)
+	}
+
+	// Const declaration of second enum value
+	actual, err = getTypeDeclaration(resp, "ElementWithLocalSimpleTypeEnum2")
+	if err != nil {
+		fmt.Println(string(resp["types"]))
+		t.Fatal(err)
+	}
+
+	expected = `const ElementWithLocalSimpleTypeEnum2 ElementWithLocalSimpleType = "enum2"`
+
+	if actual != expected {
+		t.Error("got \n" + actual + " want \n" + expected)
+	}
+}
+
 func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 	files, err := filepath.Glob("fixtures/*.wsdl")
 	if err != nil {

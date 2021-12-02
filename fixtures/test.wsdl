@@ -65,6 +65,26 @@
           </s:restriction>
         </s:simpleType>
       </s:attribute>
+      <!-- element with local simple type -->
+      <s:element name="elementWithLocalSimpleType">
+        <s:annotation>
+          <s:documentation>An element with a local simple type declaration including an enumeration.</s:documentation>
+        </s:annotation>
+        <s:simpleType>
+          <s:restriction base="s:string">
+            <s:enumeration value="enum1">
+              <s:annotation>
+                <s:documentation>First enum value</s:documentation>
+              </s:annotation>
+            </s:enumeration>
+            <s:enumeration value="enum2">
+              <s:annotation>
+                <s:documentation>Second enum value</s:documentation>
+              </s:annotation>
+            </s:enumeration>
+          </s:restriction>
+        </s:simpleType>
+      </s:element>
     </s:schema>
   </wsdl:types>
   <wsdl:message name="GetInfoSoapIn">
