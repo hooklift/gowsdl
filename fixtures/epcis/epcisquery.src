@@ -58,7 +58,11 @@ type Partner struct {
 	ContactInformation []*ContactInformation `xml:"ContactInformation,omitempty" json:"ContactInformation,omitempty"`
 }
 
-type PartnerIdentification string
+type PartnerIdentification struct {
+	Value string `xml:",chardata" json:"-,"`
+
+	Authority string `xml:"Authority,attr,omitempty" json:"Authority,omitempty"`
+}
 
 type ContactInformation struct {
 	Contact string `xml:"Contact,omitempty" json:"Contact,omitempty"`

@@ -143,7 +143,7 @@ var typesTmpl = `
 	{{range .ComplexTypes}}
 		{{/* ComplexTypeGlobal */}}
 		{{$name := replaceReservedWords .Name | makePublic}}
-		{{if eq (toGoType .SimpleContent.Extension.Base false) "string"}}
+		{{if and (eq (len .SimpleContent.Extension.Attributes) 0) (eq (toGoType .SimpleContent.Extension.Base false) "string") }}
 			type {{$name}} string
 		{{else}}
 			type {{$name}} struct {

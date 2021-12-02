@@ -153,6 +153,30 @@ func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 
 }
 
+func TestComplexTypeGeneratedCorrectly(t *testing.T) {
+	g, err := NewGoWSDL("fixtures/workday-time-min.wsdl", "myservice", false, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := g.Start()
+	if err != nil {
+		t.Error(err)
+	}
+
+	decl, err := getTypeDeclaration(resp, "WorkerObjectIDType")
+
+	expected := "type WorkerObjectIDType struct"
+	re := regexp.MustCompile(expected)
+	matches := re.FindStringSubmatch(decl)
+
+	if len(matches) != 1 {
+		t.Errorf("No match or too many matches found for WorkerObjectIDType")
+	} else if matches[0] != expected {
+		t.Errorf("WorkerObjectIDType got '%s' but expected '%s'", matches[1], expected)
+	}
+}
+
 func TestEPCISWSDL(t *testing.T) {
 	log.SetFlags(0)
 	log.SetOutput(os.Stdout)
