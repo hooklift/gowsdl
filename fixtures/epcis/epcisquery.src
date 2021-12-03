@@ -27,13 +27,13 @@ type Document struct {
 	// The version of the schema corresponding to which the instance conforms.
 	//
 
-	SchemaVersion float64 `xml:"schemaVersion,attr,omitempty" json:"schemaVersion,omitempty"`
+	SchemaVersion float64 `xml:"urn:epcglobal:xsd:1 schemaVersion,attr,omitempty" json:"schemaVersion,omitempty"`
 
 	//
 	// The date the message was created. Used for auditing and logging.
 	//
 
-	CreationDate soap.XSDDateTime `xml:"creationDate,attr,omitempty" json:"creationDate,omitempty"`
+	CreationDate soap.XSDDateTime `xml:"urn:epcglobal:xsd:1 creationDate,attr,omitempty" json:"creationDate,omitempty"`
 }
 
 type EPC string
@@ -58,7 +58,11 @@ type Partner struct {
 	ContactInformation []*ContactInformation `xml:"ContactInformation,omitempty" json:"ContactInformation,omitempty"`
 }
 
-type PartnerIdentification string
+type PartnerIdentification struct {
+	Value string `xml:",chardata" json:"-,"`
+
+	Authority string `xml:"Authority,attr,omitempty" json:"Authority,omitempty"`
+}
 
 type ContactInformation struct {
 	Contact string `xml:"Contact,omitempty" json:"Contact,omitempty"`
@@ -132,25 +136,25 @@ type BusinessService struct {
 }
 
 type ServiceTransaction struct {
-	TypeOfServiceTransaction *TypeOfServiceTransaction `xml:"TypeOfServiceTransaction,attr,omitempty" json:"TypeOfServiceTransaction,omitempty"`
+	TypeOfServiceTransaction *TypeOfServiceTransaction `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader TypeOfServiceTransaction,attr,omitempty" json:"TypeOfServiceTransaction,omitempty"`
 
-	IsNonRepudiationRequired string `xml:"IsNonRepudiationRequired,attr,omitempty" json:"IsNonRepudiationRequired,omitempty"`
+	IsNonRepudiationRequired string `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader IsNonRepudiationRequired,attr,omitempty" json:"IsNonRepudiationRequired,omitempty"`
 
-	IsAuthenticationRequired string `xml:"IsAuthenticationRequired,attr,omitempty" json:"IsAuthenticationRequired,omitempty"`
+	IsAuthenticationRequired string `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader IsAuthenticationRequired,attr,omitempty" json:"IsAuthenticationRequired,omitempty"`
 
-	IsNonRepudiationOfReceiptRequired string `xml:"IsNonRepudiationOfReceiptRequired,attr,omitempty" json:"IsNonRepudiationOfReceiptRequired,omitempty"`
+	IsNonRepudiationOfReceiptRequired string `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader IsNonRepudiationOfReceiptRequired,attr,omitempty" json:"IsNonRepudiationOfReceiptRequired,omitempty"`
 
-	IsIntegrityCheckRequired string `xml:"IsIntegrityCheckRequired,attr,omitempty" json:"IsIntegrityCheckRequired,omitempty"`
+	IsIntegrityCheckRequired string `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader IsIntegrityCheckRequired,attr,omitempty" json:"IsIntegrityCheckRequired,omitempty"`
 
-	IsApplicationErrorResponseRequested string `xml:"IsApplicationErrorResponseRequested,attr,omitempty" json:"IsApplicationErrorResponseRequested,omitempty"`
+	IsApplicationErrorResponseRequested string `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader IsApplicationErrorResponseRequested,attr,omitempty" json:"IsApplicationErrorResponseRequested,omitempty"`
 
-	TimeToAcknowledgeReceipt string `xml:"TimeToAcknowledgeReceipt,attr,omitempty" json:"TimeToAcknowledgeReceipt,omitempty"`
+	TimeToAcknowledgeReceipt string `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader TimeToAcknowledgeReceipt,attr,omitempty" json:"TimeToAcknowledgeReceipt,omitempty"`
 
-	TimeToAcknowledgeAcceptance string `xml:"TimeToAcknowledgeAcceptance,attr,omitempty" json:"TimeToAcknowledgeAcceptance,omitempty"`
+	TimeToAcknowledgeAcceptance string `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader TimeToAcknowledgeAcceptance,attr,omitempty" json:"TimeToAcknowledgeAcceptance,omitempty"`
 
-	TimeToPerform string `xml:"TimeToPerform,attr,omitempty" json:"TimeToPerform,omitempty"`
+	TimeToPerform string `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader TimeToPerform,attr,omitempty" json:"TimeToPerform,omitempty"`
 
-	Recurrence string `xml:"Recurrence,attr,omitempty" json:"Recurrence,omitempty"`
+	Recurrence string `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader Recurrence,attr,omitempty" json:"Recurrence,omitempty"`
 }
 
 type StandardBusinessDocumentHeader struct {
@@ -284,7 +288,7 @@ type VocabularyType struct {
 
 	Items []string `xml:",any" json:"items,omitempty"`
 
-	Type AnyURI `xml:"type,attr,omitempty" json:"type,omitempty"`
+	Type AnyURI `xml:"urn:epcglobal:epcis:xsd:1 type,attr,omitempty" json:"type,omitempty"`
 }
 
 type VocabularyElementListType struct {
@@ -304,7 +308,7 @@ type VocabularyElementType struct {
 
 	Items []string `xml:",any" json:"items,omitempty"`
 
-	Id AnyURI `xml:"id,attr,omitempty" json:"id,omitempty"`
+	Id AnyURI `xml:"urn:epcglobal:epcis:xsd:1 id,attr,omitempty" json:"id,omitempty"`
 }
 
 type AttributeType struct {
@@ -312,7 +316,7 @@ type AttributeType struct {
 
 	AnyType
 
-	Id AnyURI `xml:"id,attr,omitempty" json:"id,omitempty"`
+	Id AnyURI `xml:"urn:epcglobal:epcis:xsd:1 id,attr,omitempty" json:"id,omitempty"`
 }
 
 type IDListType struct {
@@ -428,7 +432,7 @@ type BusinessTransactionType struct {
 
 	Value *BusinessTransactionIDType `xml:",chardata" json:"-,"`
 
-	Type *BusinessTransactionTypeIDType `xml:"type,attr,omitempty" json:"type,omitempty"`
+	Type *BusinessTransactionTypeIDType `xml:"urn:epcglobal:epcis:xsd:1 type,attr,omitempty" json:"type,omitempty"`
 }
 
 type BusinessTransactionListType struct {
@@ -440,7 +444,7 @@ type BusinessTransactionListType struct {
 type SourceDestType struct {
 	Value *SourceDestIDType `xml:",chardata" json:"-,"`
 
-	Type *SourceDestTypeIDType `xml:"type,attr,omitempty" json:"type,omitempty"`
+	Type *SourceDestTypeIDType `xml:"urn:epcglobal:epcis:xsd:1 type,attr,omitempty" json:"type,omitempty"`
 }
 
 type SourceListType struct {

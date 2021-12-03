@@ -83,13 +83,64 @@ func TestAttributeRef(t *testing.T) {
 	Status	[]struct {
 		Value	string  ` + "`" + `xml:",chardata" json:"-,"` + "`" + `
 
-		Code	string	` + "`" + `xml:"code,attr,omitempty" json:"code,omitempty"` + "`" + `
+		Code	string	` + "`" + `xml:"http://www.mnb.hu/webservices/ code,attr,omitempty" json:"code,omitempty"` + "`" + `
 	}	` + "`" + `xml:"status,omitempty" json:"status,omitempty"` + "`" + `
 
-	ResponseCode	string	` + "`" + `xml:"responseCode,attr,omitempty" json:"responseCode,omitempty"` + "`" + `
+	ResponseCode	string	` + "`" + `xml:"http://www.mnb.hu/webservices/ responseCode,attr,omitempty" json:"responseCode,omitempty"` + "`" + `
 }`
 	actual = string(bytes.ReplaceAll([]byte(actual), []byte("\t"), []byte("  ")))
 	expected = string(bytes.ReplaceAll([]byte(expected), []byte("\t"), []byte("  ")))
+	if actual != expected {
+		t.Error("got \n" + actual + " want \n" + expected)
+	}
+}
+
+func TestElementWithLocalSimpleType(t *testing.T) {
+	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := g.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Type declaration
+	actual, err := getTypeDeclaration(resp, "ElementWithLocalSimpleType")
+	if err != nil {
+		fmt.Println(string(resp["types"]))
+		t.Fatal(err)
+	}
+
+	expected := `type ElementWithLocalSimpleType string`
+
+	if actual != expected {
+		t.Error("got \n" + actual + " want \n" + expected)
+	}
+
+	// Const declaration of first enum value
+	actual, err = getTypeDeclaration(resp, "ElementWithLocalSimpleTypeEnum1")
+	if err != nil {
+		fmt.Println(string(resp["types"]))
+		t.Fatal(err)
+	}
+
+	expected = `const ElementWithLocalSimpleTypeEnum1 ElementWithLocalSimpleType = "enum1"`
+
+	if actual != expected {
+		t.Error("got \n" + actual + " want \n" + expected)
+	}
+
+	// Const declaration of second enum value
+	actual, err = getTypeDeclaration(resp, "ElementWithLocalSimpleTypeEnum2")
+	if err != nil {
+		fmt.Println(string(resp["types"]))
+		t.Fatal(err)
+	}
+
+	expected = `const ElementWithLocalSimpleTypeEnum2 ElementWithLocalSimpleType = "enum2"`
+
 	if actual != expected {
 		t.Error("got \n" + actual + " want \n" + expected)
 	}
@@ -151,6 +202,30 @@ func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 	enumStringTest(t, "chromedata.wsdl", "DriveTrainFrontWheelDrive", "DriveTrain", "Front Wheel Drive")
 	enumStringTest(t, "vboxweb.wsdl", "SettingsVersionV1_14", "SettingsVersion", "v1_14")
 
+}
+
+func TestComplexTypeGeneratedCorrectly(t *testing.T) {
+	g, err := NewGoWSDL("fixtures/workday-time-min.wsdl", "myservice", false, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := g.Start()
+	if err != nil {
+		t.Error(err)
+	}
+
+	decl, err := getTypeDeclaration(resp, "WorkerObjectIDType")
+
+	expected := "type WorkerObjectIDType struct"
+	re := regexp.MustCompile(expected)
+	matches := re.FindStringSubmatch(decl)
+
+	if len(matches) != 1 {
+		t.Errorf("No match or too many matches found for WorkerObjectIDType")
+	} else if matches[0] != expected {
+		t.Errorf("WorkerObjectIDType got '%s' but expected '%s'", matches[1], expected)
+	}
 }
 
 func TestEPCISWSDL(t *testing.T) {

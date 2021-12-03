@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wd-wsdl="urn:com.workday/bsvc/Time_Tracking" xmlns:wd="urn:com.workday/bsvc" xmlns:nyw="urn:com.netyourwork/aod" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapbind="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:httpbind="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mimebind="http://schemas.xmlsoap.org/wsdl/mime/" name="Time_Tracking" targetNamespace="urn:com.workday/bsvc/Time_Tracking">
+  <wsdl:documentation>Operations for importing and exporting time and work schedule information.</wsdl:documentation>
+  <wsdl:types>
+    <xsd:schema elementFormDefault="qualified" attributeFormDefault="qualified" targetNamespace="urn:com.workday/bsvc">
+      <xsd:complexType name="WorkerObjectIDType">
+        <xsd:annotation>
+          <xsd:documentation>Contains a unique identifier for an instance of an object.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:simpleContent>
+          <xsd:extension base="xsd:string">
+            <xsd:attribute name="type" type="wd:WorkerReferenceEnumeration" use="required">
+              <xsd:annotation>
+                <xsd:documentation>The unique identifier type. Each "ID" for an instance of an object contains a type and a value. A single instance of an object can have multiple "ID" but only a single "ID" per "type".  Some "types" require a reference to a parent instance.</xsd:documentation>
+              </xsd:annotation>
+            </xsd:attribute>
+          </xsd:extension>
+        </xsd:simpleContent>
+      </xsd:complexType>
+    </xsd:schema>
+  </wsdl:types>
+</wsdl:definitions>

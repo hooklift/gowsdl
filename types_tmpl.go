@@ -39,16 +39,18 @@ var typesTmpl = `
 
 	{{template "Elements" .Extension.Sequence}}
 	{{template "Elements" .Extension.Choice}}
+	{{template "Elements" .Extension.SequenceChoice}}
 	{{template "Attributes" .Extension.Attributes}}
 {{end}}
 
 {{define "Attributes"}}
+    {{ $targetNamespace := getNS }}
 	{{range .}}
 		{{if .Doc}} {{.Doc | comment}} {{end}}
 		{{ if ne .Type "" }}
-			{{ normalize .Name | makeFieldPublic}} {{toGoType .Type false}} ` + "`" + `xml:"{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
+			{{ normalize .Name | makeFieldPublic}} {{toGoType .Type false}} ` + "`" + `xml:"{{with $targetNamespace}}{{.}} {{end}}{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
 		{{ else }}
-			{{ normalize .Name | makeFieldPublic}} string ` + "`" + `xml:"{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
+			{{ normalize .Name | makeFieldPublic}} string ` + "`" + `xml:"{{with $targetNamespace}}{{.}} {{end}}{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
 		{{ end }}
 	{{end}}
 {{end}}
@@ -106,7 +108,7 @@ var typesTmpl = `
 {{end}}
 
 {{range .Schemas}}
-	{{ $targetNamespace := .TargetNamespace }}
+	{{ $targetNamespace := setNS .TargetNamespace }}
 
 	{{range .SimpleType}}
 		{{template "SimpleType" .}}
@@ -133,6 +135,32 @@ var typesTmpl = `
 					{{end}}
 				}
 			{{end}}
+			{{/* SimpleTypeLocal */}}
+			{{with .SimpleType}}
+				{{$type := replaceReservedWords $name | makePublic}}
+				{{if .Doc}} {{.Doc | comment}} {{end}}
+				{{if ne .List.ItemType ""}}
+					type {{$type}} []{{toGoType .List.ItemType false}}
+				{{else if ne .Union.MemberTypes ""}}
+					type {{$type}} string
+				{{else if .Union.SimpleType}}
+					type {{$type}} string
+				{{else if .Restriction.Base}}
+					type {{$type}} {{toGoType .Restriction.Base false}}
+				{{else}}
+					type {{$type}} interface{}
+				{{end}}
+			
+				{{if .Restriction.Enumeration}}
+				const (
+					{{with .Restriction}}
+						{{range .Enumeration}}
+							{{if .Doc}} {{.Doc | comment}} {{end}}
+							{{$type}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{goString .Value}}" {{end}}
+					{{end}}
+				)
+				{{end}}
+			{{end}}
 		{{else}}
 			{{if ne ($name | replaceReservedWords | makePublic) (toGoType .Type .Nillable | removePointerFromType)}}
 				type {{$name | replaceReservedWords | makePublic}} {{toGoType .Type .Nillable | removePointerFromType}}
@@ -143,7 +171,7 @@ var typesTmpl = `
 	{{range .ComplexTypes}}
 		{{/* ComplexTypeGlobal */}}
 		{{$name := replaceReservedWords .Name | makePublic}}
-		{{if eq (toGoType .SimpleContent.Extension.Base false) "string"}}
+		{{if and (eq (len .SimpleContent.Extension.Attributes) 0) (eq (toGoType .SimpleContent.Extension.Base false) "string") }}
 			type {{$name}} string
 		{{else}}
 			type {{$name}} struct {
