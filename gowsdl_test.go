@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"go/ast"
 	"go/format"
 	"go/parser"
 	"go/printer"
@@ -140,6 +141,61 @@ func TestElementWithLocalSimpleType(t *testing.T) {
 	}
 
 	expected = `const ElementWithLocalSimpleTypeEnum2 ElementWithLocalSimpleType = "enum2"`
+
+	if actual != expected {
+		t.Error("got \n" + actual + " want \n" + expected)
+	}
+}
+
+func TestDateTimeType(t *testing.T) {
+	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := g.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Type declaration
+	actual, err := getTypeDeclaration(resp, "StartDate")
+	if err != nil {
+		fmt.Println(string(resp["types"]))
+		t.Fatal(err)
+	}
+
+	expected := `type StartDate soap.XSDDateTime`
+
+	if actual != expected {
+		t.Error("got \n" + actual + " want \n" + expected)
+	}
+
+	// Method declaration MarshalXML
+	actual, err = getFuncDeclaration(resp, "MarshalXML", "StartDate")
+	if err != nil {
+		fmt.Println(string(resp["types"]))
+		t.Fatal(err)
+	}
+
+	expected = `func (xdt StartDate) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	return soap.XSDDateTime(xdt).MarshalXML(e, start)
+}`
+
+	if actual != expected {
+		t.Error("got \n" + actual + " want \n" + expected)
+	}
+
+	// Method declaration UnmarshalXML
+	actual, err = getFuncDeclaration(resp, "UnmarshalXML", "StartDate")
+	if err != nil {
+		fmt.Println(string(resp["types"]))
+		t.Fatal(err)
+	}
+
+	expected = `func (xdt *StartDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	return (*soap.XSDDateTime)(xdt).UnmarshalXML(d, start)
+}`
 
 	if actual != expected {
 		t.Error("got \n" + actual + " want \n" + expected)
@@ -283,6 +339,58 @@ func getTypeDeclaration(resp map[string][]byte, name string) (string, error) {
 	buf.WriteString(o.Kind.String())
 	buf.WriteString(" ")
 	err = printer.Fprint(&buf, fset, o.Decl)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func findFuncDecl(f *ast.File, name string, recv string) *ast.Decl {
+	// Loop over all declarations
+	for _, decl := range f.Decls {
+		if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+			// Found FuncDecl declaration type
+			if funcDecl.Name.Name == name {
+				// Found match with function name
+				if recvType, ok := funcDecl.Recv.List[0].Type.(*ast.Ident); ok {
+					// Value receiver type
+					if recvType.Name == recv {
+						// Found receiver type match
+						return &decl
+					}
+				} else if recvTypePtr, ok := funcDecl.Recv.List[0].Type.(*ast.StarExpr); ok {
+					// Pointer receiver type
+					if recvType, ok := recvTypePtr.X.(*ast.Ident); ok {
+						if recvType.Name == recv {
+							// Found receiver type match
+							return &decl
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func getFuncDeclaration(resp map[string][]byte, name string, recv string) (string, error) {
+	source, err := format.Source([]byte(string(resp["header"]) + string(resp["types"])))
+	if err != nil {
+		return "", err
+	}
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, "myservice.go", string(source), parser.DeclarationErrors)
+	if err != nil {
+		return "", err
+	}
+
+	decl := findFuncDecl(f, name, recv)
+	if decl == nil {
+		return "", errors.New("Function declaration " + name + " not found")
+	}
+	var buf bytes.Buffer
+	err = printer.Fprint(&buf, fset, *decl)
 	if err != nil {
 		return "", err
 	}

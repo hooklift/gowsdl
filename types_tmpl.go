@@ -6,18 +6,18 @@ package gowsdl
 
 var typesTmpl = `
 {{define "SimpleType"}}
-	{{$type := replaceReservedWords .Name | makePublic}}
+	{{$typeName := replaceReservedWords .Name | makePublic}}
 	{{if .Doc}} {{.Doc | comment}} {{end}}
 	{{if ne .List.ItemType ""}}
-		type {{$type}} []{{toGoType .List.ItemType false}}
+		type {{$typeName}} []{{toGoType .List.ItemType false | removePointerFromType}}
 	{{else if ne .Union.MemberTypes ""}}
-		type {{$type}} string
+		type {{$typeName}} string
 	{{else if .Union.SimpleType}}
-		type {{$type}} string
+		type {{$typeName}} string
 	{{else if .Restriction.Base}}
-		type {{$type}} {{toGoType .Restriction.Base false}}
+		type {{$typeName}} {{toGoType .Restriction.Base false | removePointerFromType}}
     {{else}}
-		type {{$type}} interface{}
+		type {{$typeName}} interface{}
 	{{end}}
 
 	{{if .Restriction.Enumeration}}
@@ -25,7 +25,7 @@ var typesTmpl = `
 		{{with .Restriction}}
 			{{range .Enumeration}}
 				{{if .Doc}} {{.Doc | comment}} {{end}}
-				{{$type}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{goString .Value}}" {{end}}
+				{{$typeName}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$typeName}} = "{{goString .Value}}" {{end}}
 		{{end}}
 	)
 	{{end}}
@@ -116,10 +116,11 @@ var typesTmpl = `
 
 	{{range .Elements}}
 		{{$name := .Name}}
+		{{$typeName := replaceReservedWords $name | makePublic}}
 		{{if not .Type}}
 			{{/* ComplexTypeLocal */}}
 			{{with .ComplexType}}
-				type {{$name | replaceReservedWords | makePublic}} struct {
+				type {{$typeName}} struct {
 					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$name}}\"`" + `
 					{{if ne .ComplexContent.Extension.Base ""}}
 						{{template "ComplexContent" .ComplexContent}}
@@ -137,18 +138,17 @@ var typesTmpl = `
 			{{end}}
 			{{/* SimpleTypeLocal */}}
 			{{with .SimpleType}}
-				{{$type := replaceReservedWords $name | makePublic}}
 				{{if .Doc}} {{.Doc | comment}} {{end}}
 				{{if ne .List.ItemType ""}}
-					type {{$type}} []{{toGoType .List.ItemType false}}
+					type {{$typeName}} []{{toGoType .List.ItemType false | removePointerFromType}}
 				{{else if ne .Union.MemberTypes ""}}
-					type {{$type}} string
+					type {{$typeName}} string
 				{{else if .Union.SimpleType}}
-					type {{$type}} string
+					type {{$typeName}} string
 				{{else if .Restriction.Base}}
-					type {{$type}} {{toGoType .Restriction.Base false}}
+					type {{$typeName}} {{toGoType .Restriction.Base false | removePointerFromType}}
 				{{else}}
-					type {{$type}} interface{}
+					type {{$typeName}} interface{}
 				{{end}}
 			
 				{{if .Restriction.Enumeration}}
@@ -156,28 +156,54 @@ var typesTmpl = `
 					{{with .Restriction}}
 						{{range .Enumeration}}
 							{{if .Doc}} {{.Doc | comment}} {{end}}
-							{{$type}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{goString .Value}}" {{end}}
+							{{$typeName}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$typeName}} = "{{goString .Value}}" {{end}}
 					{{end}}
 				)
 				{{end}}
 			{{end}}
 		{{else}}
-			{{if ne ($name | replaceReservedWords | makePublic) (toGoType .Type .Nillable | removePointerFromType)}}
-				type {{$name | replaceReservedWords | makePublic}} {{toGoType .Type .Nillable | removePointerFromType}}
+			{{$type := toGoType .Type .Nillable | removePointerFromType}}
+			{{if ne ($typeName) ($type)}}
+				type {{$typeName}} {{$type}}
+				{{if eq ($type) ("soap.XSDDateTime")}}
+					func (xdt {{$typeName}}) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+						return soap.XSDDateTime(xdt).MarshalXML(e, start)
+					}
+
+					func (xdt *{{$typeName}}) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+						return (*soap.XSDDateTime)(xdt).UnmarshalXML(d, start)
+					}
+				{{else if eq ($type) ("soap.XSDDate")}}
+					func (xd {{$typeName}}) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+						return soap.XSDDate(xd).MarshalXML(e, start)
+					}
+
+					func (xd *{{$typeName}}) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+						return (*soap.XSDDate)(xd).UnmarshalXML(d, start)
+					}
+				{{else if eq ($type) ("soap.XSDTime")}}
+					func (xt {{$typeName}}) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+						return soap.XSDTime(xt).MarshalXML(e, start)
+					}
+
+					func (xt *{{$typeName}}) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+						return (*soap.XSDTime)(xt).UnmarshalXML(d, start)
+					}
+				{{end}}
 			{{end}}
 		{{end}}
 	{{end}}
 
 	{{range .ComplexTypes}}
 		{{/* ComplexTypeGlobal */}}
-		{{$name := replaceReservedWords .Name | makePublic}}
+		{{$typeName := replaceReservedWords .Name | makePublic}}
 		{{if and (eq (len .SimpleContent.Extension.Attributes) 0) (eq (toGoType .SimpleContent.Extension.Base false) "string") }}
-			type {{$name}} string
+			type {{$typeName}} string
 		{{else}}
-			type {{$name}} struct {
-				{{$typ := findNameByType .Name}}
+			type {{$typeName}} struct {
+				{{$type := findNameByType .Name}}
 				{{if ne .Name $type}}
-					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$typ}}\"`" + `
+					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$type}}\"`" + `
 				{{end}}
 
 				{{if ne .ComplexContent.Extension.Base ""}}
