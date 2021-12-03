@@ -9,13 +9,13 @@ var typesTmpl = `
 	{{$typeName := replaceReservedWords .Name | makePublic}}
 	{{if .Doc}} {{.Doc | comment}} {{end}}
 	{{if ne .List.ItemType ""}}
-		type {{$typeName}} []{{toGoType .List.ItemType false}}
+		type {{$typeName}} []{{toGoType .List.ItemType false | removePointerFromType}}
 	{{else if ne .Union.MemberTypes ""}}
 		type {{$typeName}} string
 	{{else if .Union.SimpleType}}
 		type {{$typeName}} string
 	{{else if .Restriction.Base}}
-		type {{$typeName}} {{toGoType .Restriction.Base false}}
+		type {{$typeName}} {{toGoType .Restriction.Base false | removePointerFromType}}
     {{else}}
 		type {{$typeName}} interface{}
 	{{end}}
@@ -140,13 +140,13 @@ var typesTmpl = `
 			{{with .SimpleType}}
 				{{if .Doc}} {{.Doc | comment}} {{end}}
 				{{if ne .List.ItemType ""}}
-					type {{$typeName}} []{{toGoType .List.ItemType false}}
+					type {{$typeName}} []{{toGoType .List.ItemType false | removePointerFromType}}
 				{{else if ne .Union.MemberTypes ""}}
 					type {{$typeName}} string
 				{{else if .Union.SimpleType}}
 					type {{$typeName}} string
 				{{else if .Restriction.Base}}
-					type {{$typeName}} {{toGoType .Restriction.Base false}}
+					type {{$typeName}} {{toGoType .Restriction.Base false | removePointerFromType}}
 				{{else}}
 					type {{$typeName}} interface{}
 				{{end}}
