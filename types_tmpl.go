@@ -6,18 +6,18 @@ package gowsdl
 
 var typesTmpl = `
 {{define "SimpleType"}}
-	{{$type := replaceReservedWords .Name | makePublic}}
+	{{$typeName := replaceReservedWords .Name | makePublic}}
 	{{if .Doc}} {{.Doc | comment}} {{end}}
 	{{if ne .List.ItemType ""}}
-		type {{$type}} []{{toGoType .List.ItemType false}}
+		type {{$typeName}} []{{toGoType .List.ItemType false | removePointerFromType}}
 	{{else if ne .Union.MemberTypes ""}}
-		type {{$type}} string
+		type {{$typeName}} string
 	{{else if .Union.SimpleType}}
-		type {{$type}} string
+		type {{$typeName}} string
 	{{else if .Restriction.Base}}
-		type {{$type}} {{toGoType .Restriction.Base false}}
+		type {{$typeName}} {{toGoType .Restriction.Base false | removePointerFromType}}
     {{else}}
-		type {{$type}} interface{}
+		type {{$typeName}} interface{}
 	{{end}}
 
 	{{if .Restriction.Enumeration}}
@@ -25,7 +25,7 @@ var typesTmpl = `
 		{{with .Restriction}}
 			{{range .Enumeration}}
 				{{if .Doc}} {{.Doc | comment}} {{end}}
-				{{$type}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$type}} = "{{goString .Value}}" {{end}}
+				{{$typeName}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$typeName}} = "{{goString .Value}}" {{end}}
 		{{end}}
 	)
 	{{end}}
@@ -39,16 +39,18 @@ var typesTmpl = `
 
 	{{template "Elements" .Extension.Sequence}}
 	{{template "Elements" .Extension.Choice}}
+	{{template "Elements" .Extension.SequenceChoice}}
 	{{template "Attributes" .Extension.Attributes}}
 {{end}}
 
 {{define "Attributes"}}
+    {{ $targetNamespace := getNS }}
 	{{range .}}
 		{{if .Doc}} {{.Doc | comment}} {{end}}
 		{{ if ne .Type "" }}
-			{{ normalize .Name | makeFieldPublic}} {{toGoType .Type false}} ` + "`" + `xml:"{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
+			{{ normalize .Name | makeFieldPublic}} {{toGoType .Type false}} ` + "`" + `xml:"{{with $targetNamespace}}{{.}} {{end}}{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
 		{{ else }}
-			{{ normalize .Name | makeFieldPublic}} string ` + "`" + `xml:"{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
+			{{ normalize .Name | makeFieldPublic}} string ` + "`" + `xml:"{{with $targetNamespace}}{{.}} {{end}}{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
 		{{ end }}
 	{{end}}
 {{end}}
@@ -106,7 +108,7 @@ var typesTmpl = `
 {{end}}
 
 {{range .Schemas}}
-	{{ $targetNamespace := .TargetNamespace }}
+	{{ $targetNamespace := setNS .TargetNamespace }}
 
 	{{range .SimpleType}}
 		{{template "SimpleType" .}}
@@ -114,10 +116,11 @@ var typesTmpl = `
 
 	{{range .Elements}}
 		{{$name := .Name}}
+		{{$typeName := replaceReservedWords $name | makePublic}}
 		{{if not .Type}}
 			{{/* ComplexTypeLocal */}}
 			{{with .ComplexType}}
-				type {{$name | replaceReservedWords | makePublic}} struct {
+				type {{$typeName}} struct {
 					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$name}}\"`" + `
 					{{if ne .ComplexContent.Extension.Base ""}}
 						{{template "ComplexContent" .ComplexContent}}
@@ -133,23 +136,74 @@ var typesTmpl = `
 					{{end}}
 				}
 			{{end}}
+			{{/* SimpleTypeLocal */}}
+			{{with .SimpleType}}
+				{{if .Doc}} {{.Doc | comment}} {{end}}
+				{{if ne .List.ItemType ""}}
+					type {{$typeName}} []{{toGoType .List.ItemType false | removePointerFromType}}
+				{{else if ne .Union.MemberTypes ""}}
+					type {{$typeName}} string
+				{{else if .Union.SimpleType}}
+					type {{$typeName}} string
+				{{else if .Restriction.Base}}
+					type {{$typeName}} {{toGoType .Restriction.Base false | removePointerFromType}}
+				{{else}}
+					type {{$typeName}} interface{}
+				{{end}}
+			
+				{{if .Restriction.Enumeration}}
+				const (
+					{{with .Restriction}}
+						{{range .Enumeration}}
+							{{if .Doc}} {{.Doc | comment}} {{end}}
+							{{$typeName}}{{$value := replaceReservedWords .Value}}{{$value | makePublic}} {{$typeName}} = "{{goString .Value}}" {{end}}
+					{{end}}
+				)
+				{{end}}
+			{{end}}
 		{{else}}
-			{{if ne ($name | replaceReservedWords | makePublic) (toGoType .Type .Nillable | removePointerFromType)}}
-				type {{$name | replaceReservedWords | makePublic}} {{toGoType .Type .Nillable | removePointerFromType}}
+			{{$type := toGoType .Type .Nillable | removePointerFromType}}
+			{{if ne ($typeName) ($type)}}
+				type {{$typeName}} {{$type}}
+				{{if eq ($type) ("soap.XSDDateTime")}}
+					func (xdt {{$typeName}}) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+						return soap.XSDDateTime(xdt).MarshalXML(e, start)
+					}
+
+					func (xdt *{{$typeName}}) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+						return (*soap.XSDDateTime)(xdt).UnmarshalXML(d, start)
+					}
+				{{else if eq ($type) ("soap.XSDDate")}}
+					func (xd {{$typeName}}) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+						return soap.XSDDate(xd).MarshalXML(e, start)
+					}
+
+					func (xd *{{$typeName}}) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+						return (*soap.XSDDate)(xd).UnmarshalXML(d, start)
+					}
+				{{else if eq ($type) ("soap.XSDTime")}}
+					func (xt {{$typeName}}) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+						return soap.XSDTime(xt).MarshalXML(e, start)
+					}
+
+					func (xt *{{$typeName}}) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+						return (*soap.XSDTime)(xt).UnmarshalXML(d, start)
+					}
+				{{end}}
 			{{end}}
 		{{end}}
 	{{end}}
 
 	{{range .ComplexTypes}}
 		{{/* ComplexTypeGlobal */}}
-		{{$name := replaceReservedWords .Name | makePublic}}
-		{{if eq (toGoType .SimpleContent.Extension.Base false) "string"}}
-			type {{$name}} string
+		{{$typeName := replaceReservedWords .Name | makePublic}}
+		{{if and (eq (len .SimpleContent.Extension.Attributes) 0) (eq (toGoType .SimpleContent.Extension.Base false) "string") }}
+			type {{$typeName}} string
 		{{else}}
-			type {{$name}} struct {
-				{{$typ := findNameByType .Name}}
-				{{if ne $name $typ}}
-					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$typ}}\"`" + `
+			type {{$typeName}} struct {
+				{{$type := findNameByType .Name}}
+				{{if ne .Name $type}}
+					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$type}}\"`" + `
 				{{end}}
 
 				{{if ne .ComplexContent.Extension.Base ""}}

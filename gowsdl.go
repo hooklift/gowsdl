@@ -35,6 +35,18 @@ type GoWSDL struct {
 	wsdl                  *WSDL
 	resolvedXSDExternals  map[string]bool
 	currentRecursionLevel uint8
+	currentNamespace      string
+}
+
+// Method setNS sets (and returns) the currently active XML namespace.
+func (g *GoWSDL) setNS(ns string) string {
+	g.currentNamespace = ns
+	return ns
+}
+
+// Method setNS returns the currently active XML namespace.
+func (g *GoWSDL) getNS() string {
+	return g.currentNamespace
 }
 
 var cacheDir = filepath.Join(os.TempDir(), "gowsdl-cache")
@@ -268,6 +280,8 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"goString":                 goString,
 		"findNameByType":           g.findNameByType,
 		"removePointerFromType":    removePointerFromType,
+		"setNS":                    g.setNS,
+		"getNS":                    g.getNS,
 	}
 
 	data := new(bytes.Buffer)
@@ -524,17 +538,9 @@ func (g *GoWSDL) findType(message string) string {
 	return ""
 }
 
-// Given a type, check if there's SimpleType with that type, and return its name.
+// Given a type, check if there's an Element with that type, and return its name.
 func (g *GoWSDL) findNameByType(name string) string {
-	name = stripns(name)
-	for _, schema := range g.wsdl.Types.Schemas {
-		for _, elem := range schema.Elements {
-			if stripns(elem.Type) == name {
-				return elem.Name
-			}
-		}
-	}
-	return name
+	return newTraverser(nil, g.wsdl.Types.Schemas).findNameByType(name)
 }
 
 // TODO(c4milo): Add support for namespaces instead of striping them out

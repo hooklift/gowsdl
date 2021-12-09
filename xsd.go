@@ -188,11 +188,12 @@ type XSDSimpleContent struct {
 
 // XSDExtension element extends an existing simpleType or complexType element.
 type XSDExtension struct {
-	XMLName    xml.Name        `xml:"extension"`
-	Base       string          `xml:"base,attr"`
-	Attributes []*XSDAttribute `xml:"attribute"`
-	Sequence   []XSDElement    `xml:"sequence>element"`
-	Choice     []*XSDElement   `xml:"choice>element"`
+	XMLName        xml.Name        `xml:"extension"`
+	Base           string          `xml:"base,attr"`
+	Attributes     []*XSDAttribute `xml:"attribute"`
+	Sequence       []*XSDElement   `xml:"sequence>element"`
+	Choice         []*XSDElement   `xml:"choice>element"`
+	SequenceChoice []*XSDElement   `xml:"sequence>choice>element"`
 }
 
 // XSDAttribute represent an element attribute. Simple elements cannot have
