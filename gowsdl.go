@@ -447,6 +447,10 @@ var xsd2GoTypes = map[string]string{
 	"datetime":      "soap.XSDDateTime",
 	"date":          "soap.XSDDate",
 	"time":          "soap.XSDTime",
+	"gyear":         "soap.GYear",
+	"gmonth":        "soap.GMonth",
+	"gmonthday":     "soap.GMonthDay",
+	"gday":          "soap.GDay",
 	"base64binary":  "[]byte",
 	"hexbinary":     "[]byte",
 	"unsignedint":   "uint32",
@@ -479,6 +483,7 @@ func toGoType(xsdType string, nillable bool) string {
 		t = r[1]
 	}
 
+	log.Println(strings.ToLower(t))
 	value := xsd2GoTypes[strings.ToLower(t)]
 
 	if value != "" {
