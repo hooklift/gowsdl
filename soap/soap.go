@@ -29,15 +29,15 @@ type SOAPEnvelopeResponse struct {
 }
 
 type SOAPEnvelope struct {
-	XMLName xml.Name `xml:"soap:Envelope"`
-	XmlNS   string   `xml:"xmlns:soap,attr"`
+	XMLName xml.Name `xml:"soap-env:Envelope"`
+	XmlNS   string   `xml:"xmlns:soap-env,attr"`
 
 	Header *SOAPHeader
 	Body   SOAPBody
 }
 
 type SOAPHeader struct {
-	XMLName xml.Name `xml:"soap:Header"`
+	XMLName xml.Name `xml:"soap-env:Header"`
 
 	Headers []interface{}
 }
@@ -48,7 +48,7 @@ type SOAPHeaderResponse struct {
 }
 
 type SOAPBody struct {
-	XMLName xml.Name `xml:"soap:Body"`
+	XMLName xml.Name `xml:"soap-env:Body"`
 
 	Content interface{} `xml:",omitempty"`
 
@@ -460,7 +460,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	} else if s.opts.mma {
 		req.Header.Add("Content-Type", fmt.Sprintf(mmaContentType, encoder.(*mmaEncoder).Boundary()))
 	} else {
-		req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
+		req.Header.Add("Content-Type", "application/soap+xml")
 	}
 	req.Header.Add("SOAPAction", soapAction)
 	req.Header.Set("User-Agent", "gowsdl/0.1")
