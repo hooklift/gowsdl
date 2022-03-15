@@ -245,8 +245,7 @@ func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-
-		re := regexp.MustCompile(varName + " " + typeName + " = \"([^\"]+)\"")
+		re := regexp.MustCompile(varName + " " + typeName + " = \"([^\"]*)\"")
 		matches := re.FindStringSubmatch(string(resp["types"]))
 
 		if len(matches) != 2 {
@@ -256,6 +255,7 @@ func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 		}
 	}
 	enumStringTest(t, "chromedata.wsdl", "DriveTrainFrontWheelDrive", "DriveTrain", "Front Wheel Drive")
+	enumStringTest(t, "chromedata.wsdl", "DriveTrainEmptyString", "DriveTrain", "")
 	enumStringTest(t, "vboxweb.wsdl", "SettingsVersionV1_14", "SettingsVersion", "v1_14")
 
 }
