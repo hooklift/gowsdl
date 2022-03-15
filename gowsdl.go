@@ -587,6 +587,9 @@ func makePublic(identifier string) string {
 	if isBasicType(identifier) {
 		return identifier
 	}
+	if identifier == "" {
+		return "EmptyString"
+	}
 	field := []rune(identifier)
 	if len(field) == 0 {
 		return identifier
