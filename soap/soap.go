@@ -340,6 +340,9 @@ type Client struct {
 	opts        *options
 	headers     []interface{}
 	attachments []MIMEMultipartAttachment
+
+	createEnvelopeFn      CreateEnvelopeFn
+	newSOAPEnvelopeEnable bool
 }
 
 // HTTPClient is a client which can make HTTP requests
@@ -357,6 +360,11 @@ func NewClient(url string, opt ...Option) *Client {
 	return &Client{
 		url:  url,
 		opts: &opts,
+
+		// set the default createEnvelope to newSOAPEnvelope
+		createEnvelopeFn: newSOAPEnvelope,
+		// reports whether using the default function newSOAPEnvelope to create envelope
+		newSOAPEnvelopeEnable: true,
 	}
 }
 
@@ -411,20 +419,39 @@ func (s *Client) CallWithFaultDetail(soapAction string, request, response interf
 	return s.call(context.Background(), soapAction, request, response, faultDetail, nil)
 }
 
-func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError,
-	retAttachments *[]MIMEMultipartAttachment) error {
-	// SOAP envelope capable of namespace prefixes
+// creates a new SOAPEnvelope instance.
+func newSOAPEnvelope(request interface{}) interface{} {
 	envelope := SOAPEnvelope{
 		XmlNS: XmlNsSoapEnv,
 	}
 
-	if s.headers != nil && len(s.headers) > 0 {
-		envelope.Header = &SOAPHeader{
-			Headers: s.headers,
+	envelope.Body.Content = request
+	return &envelope
+}
+
+// CreateEnvelopeFn function type which generates envelope according to the request.
+type CreateEnvelopeFn func(request interface{}) (envelope interface{})
+
+// SetCreateEnvelopeFn sets the Client's createEnvelope function to overwrite the default newSOAPEnvelope.
+func (s *Client) SetCreateEnvelopeFn(fn CreateEnvelopeFn) {
+	s.createEnvelopeFn = fn
+	s.newSOAPEnvelopeEnable = false
+}
+
+func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError,
+	retAttachments *[]MIMEMultipartAttachment) error {
+	// SOAP envelope capable of namespace prefixes
+	envelope := s.createEnvelopeFn(request)
+
+	if s.newSOAPEnvelopeEnable {
+		if s.headers != nil && len(s.headers) > 0 {
+			e := envelope.(*SOAPEnvelope)
+			e.Header = &SOAPHeader{
+				Headers: s.headers,
+			}
 		}
 	}
 
-	envelope.Body.Content = request
 	buffer := new(bytes.Buffer)
 	var encoder SOAPEncoder
 	if s.opts.mtom && s.opts.mma {
@@ -514,7 +541,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 
 	var mmaBoundary string
-	if s.opts.mma{
+	if s.opts.mma {
 		mmaBoundary, err = getMmaHeader(res.Header.Get("Content-Type"))
 		if err != nil {
 			return err
