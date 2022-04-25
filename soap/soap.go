@@ -342,7 +342,6 @@ type Client struct {
 	attachments []MIMEMultipartAttachment
 
 	createEnvelopeFn      CreateEnvelopeFn
-	newSOAPEnvelopeEnable bool
 }
 
 // HTTPClient is a client which can make HTTP requests
@@ -361,10 +360,8 @@ func NewClient(url string, opt ...Option) *Client {
 		url:  url,
 		opts: &opts,
 
-		// set the default createEnvelope to newSOAPEnvelope
+		// Set the default createEnvelopeFn to newSOAPEnvelope.
 		createEnvelopeFn: newSOAPEnvelope,
-		// reports whether using the default function newSOAPEnvelope to create envelope
-		newSOAPEnvelopeEnable: true,
 	}
 }
 
@@ -429,13 +426,12 @@ func newSOAPEnvelope(request interface{}) interface{} {
 	return &envelope
 }
 
-// CreateEnvelopeFn function type which generates envelope according to the request.
+// CreateEnvelopeFn the function type that creates envelope according to the request.
 type CreateEnvelopeFn func(request interface{}) (envelope interface{})
 
-// SetCreateEnvelopeFn sets the Client's createEnvelope function to overwrite the default newSOAPEnvelope.
+// SetCreateEnvelopeFn sets the Client's createEnvelopeFn to overwrite the default newSOAPEnvelope.
 func (s *Client) SetCreateEnvelopeFn(fn CreateEnvelopeFn) {
 	s.createEnvelopeFn = fn
-	s.newSOAPEnvelopeEnable = false
 }
 
 func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError,
@@ -443,9 +439,8 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	// SOAP envelope capable of namespace prefixes
 	envelope := s.createEnvelopeFn(request)
 
-	if s.newSOAPEnvelopeEnable {
-		if s.headers != nil && len(s.headers) > 0 {
-			e := envelope.(*SOAPEnvelope)
+	if s.headers != nil && len(s.headers) > 0 {
+		if e, ok := envelope.(*SOAPEnvelope); ok {
 			e.Header = &SOAPHeader{
 				Headers: s.headers,
 			}
