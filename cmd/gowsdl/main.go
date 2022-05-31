@@ -138,5 +138,24 @@ func main() {
 
 	file.Write(source)
 
+	// server
+	serverFile, err := os.Create(pkg + "/" + "server" + *outFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer serverFile.Close()
+
+	serverData := new(bytes.Buffer)
+	serverData.Write(gocode["server_header"])
+	serverData.Write(gocode["server_wsdl"])
+	serverData.Write(gocode["server"])
+
+	serverSource, err := format.Source(serverData.Bytes())
+	if err != nil {
+		serverFile.Write(serverData.Bytes())
+		log.Fatalln(err)
+	}
+	serverFile.Write(serverSource)
+
 	log.Println("Done 👍")
 }
