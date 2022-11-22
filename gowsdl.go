@@ -22,6 +22,8 @@ import (
 	"text/template"
 	"time"
 	"unicode"
+
+	"golang.org/x/text/encoding/charmap"
 )
 
 const maxRecursion uint8 = 20
@@ -176,7 +178,9 @@ func (g *GoWSDL) unmarshal() error {
 	}
 
 	g.wsdl = new(WSDL)
-	err = xml.Unmarshal(data, g.wsdl)
+	decoder := xml.NewDecoder(bytes.NewReader(data))
+	decoder.CharsetReader = makeCharsetReader
+	err = decoder.Decode(g.wsdl)
 	if err != nil {
 		return err
 	}
@@ -212,8 +216,8 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 		}
 
 		newschema := new(XSDSchema)
-
-		err = xml.Unmarshal(data, newschema)
+		reader := xml.NewDecoder(bytes.NewReader(data))
+		err = reader.Decode(newschema)
 		if err != nil {
 			return err
 		}
@@ -650,4 +654,12 @@ func comment(text string) string {
 		return output
 	}
 	return ""
+}
+
+func makeCharsetReader(charset string, input io.Reader) (io.Reader, error) {
+	if charset == "ISO-8859-1" {
+		// Windows-1252 is a superset of ISO-8859-1, so should do here
+		return charmap.Windows1252.NewDecoder().Reader(input), nil
+	}
+	return nil, fmt.Errorf("Unknown charset: %s", charset)
 }
