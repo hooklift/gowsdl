@@ -10,6 +10,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -508,6 +509,9 @@ func (g *GoWSDL) findType(message string) string {
 		}
 
 		part := msg.Parts[0]
+		if len(msg.Parts) > 1 && part.Name == "Security" {
+			part = msg.Parts[1]
+		}
 		if part.Type != "" {
 			return stripns(part.Type)
 		}
