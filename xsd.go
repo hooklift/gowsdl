@@ -155,6 +155,7 @@ type XSDComplexType struct {
 	Mixed          bool              `xml:"mixed,attr"`
 	Sequence       []*XSDElement     `xml:"sequence>element"`
 	Choice         []*XSDElement     `xml:"choice>element"`
+	ChoiceSequence []*XSDElement     `xml:"choice>sequence>element"`
 	SequenceChoice []*XSDElement     `xml:"sequence>choice>element"`
 	All            []*XSDElement     `xml:"all>element"`
 	ComplexContent XSDComplexContent `xml:"complexContent"`
@@ -165,11 +166,12 @@ type XSDComplexType struct {
 
 // XSDGroup element is used to define a group of elements to be used in complex type definitions.
 type XSDGroup struct {
-	Name     string       `xml:"name,attr"`
-	Ref      string       `xml:"ref,attr"`
-	Sequence []XSDElement `xml:"sequence>element"`
-	Choice   []XSDElement `xml:"choice>element"`
-	All      []XSDElement `xml:"all>element"`
+	Name           string        `xml:"name,attr"`
+	Ref            string        `xml:"ref,attr"`
+	Sequence       []XSDElement  `xml:"sequence>element"`
+	Choice         []XSDElement  `xml:"choice>element"`
+	ChoiceSequence []*XSDElement `xml:"choice>sequence>element"`
+	All            []XSDElement  `xml:"all>element"`
 }
 
 // XSDComplexContent element defines extensions or restrictions on a complex
@@ -188,11 +190,12 @@ type XSDSimpleContent struct {
 
 // XSDExtension element extends an existing simpleType or complexType element.
 type XSDExtension struct {
-	XMLName    xml.Name        `xml:"extension"`
-	Base       string          `xml:"base,attr"`
-	Attributes []*XSDAttribute `xml:"attribute"`
-	Sequence   []XSDElement    `xml:"sequence>element"`
-	Choice     []*XSDElement   `xml:"choice>element"`
+	XMLName        xml.Name        `xml:"extension"`
+	Base           string          `xml:"base,attr"`
+	Attributes     []*XSDAttribute `xml:"attribute"`
+	Sequence       []XSDElement    `xml:"sequence>element"`
+	Choice         []*XSDElement   `xml:"choice>element"`
+	ChoiceSequence []*XSDElement   `xml:"choice>sequence>element"`
 }
 
 // XSDAttribute represent an element attribute. Simple elements cannot have
