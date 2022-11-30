@@ -378,6 +378,17 @@ func (s *Client) SetHeaders(headers ...interface{}) {
 	s.headers = headers
 }
 
+// Get all currently available http headers from  client
+// Use case: For setting authentication header
+func (s *Client) GetHttpClientHeaders() map[string]string {
+	return s.opts.httpHeaders
+}
+
+// Update Http headers with latest header information
+func (s *Client) SetHttpClientHeaders(headers map[string]string) {
+	s.opts.httpHeaders = headers
+}
+
 // CallContext performs HTTP POST request with a context
 func (s *Client) CallContext(ctx context.Context, soapAction string, request, response interface{}) error {
 	return s.call(ctx, soapAction, request, response, nil, nil)
@@ -514,7 +525,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 
 	var mmaBoundary string
-	if s.opts.mma{
+	if s.opts.mma {
 		mmaBoundary, err = getMmaHeader(res.Header.Get("Content-Type"))
 		if err != nil {
 			return err
