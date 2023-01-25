@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hooklift/gowsdl/example/server/gen"
-	"github.com/hooklift/gowsdl/soap"
+	"github.com/ascendsoftware/gowsdl/example/server/gen"
+	"github.com/ascendsoftware/gowsdl/soap"
 )
 
 var done = make(chan struct{})
