@@ -8,8 +8,10 @@ Generates Go code from a WSDL file.
 
 ### Install
 
-* [Download binary release](https://github.com/hooklift/gowsdl/releases)
-* Download and build locally: `go get github.com/hooklift/gowsdl/...`
+* [Download release](https://github.com/hooklift/gowsdl/releases)
+* Download and build locally
+    * 1.15: `go get github.com/hooklift/gowsdl/...`
+    * 1.20: `go install github.com/hooklift/gowsdl/cmd/gowsdl@latest`
 * Install from Homebrew: `brew install gowsdl`
 
 ### Goals
