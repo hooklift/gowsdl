@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/xml"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -490,7 +491,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode >= 400 {
+	if res.StatusCode >= 400 && res.StatusCode != 500 {
 		body, _ := ioutil.ReadAll(res.Body)
 		return &HTTPError{
 			StatusCode:   res.StatusCode,
@@ -514,23 +515,42 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 
 	var mmaBoundary string
-	if s.opts.mma{
+	if s.opts.mma {
 		mmaBoundary, err = getMmaHeader(res.Header.Get("Content-Type"))
 		if err != nil {
 			return err
 		}
 	}
 
+	// we need to store the body in case of an error
+	// to return the right HTTPError/ResponseBody
+	body := res.Body
+	var cachedErrorBody []byte
+	if res.StatusCode == 500 {
+		cachedErrorBody, err = io.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+		body = io.NopCloser(bytes.NewReader(cachedErrorBody))
+	}
+
 	var dec SOAPDecoder
 	if mtomBoundary != "" {
-		dec = newMtomDecoder(res.Body, mtomBoundary)
+		dec = newMtomDecoder(body, mtomBoundary)
 	} else if mmaBoundary != "" {
-		dec = newMmaDecoder(res.Body, mmaBoundary)
+		dec = newMmaDecoder(body, mmaBoundary)
 	} else {
-		dec = xml.NewDecoder(res.Body)
+		dec = xml.NewDecoder(body)
 	}
 
 	if err := dec.Decode(respEnvelope); err != nil {
+		// the response doesn't contain a Fault/SOAPBody, so we return the original body
+		if res.StatusCode == 500 {
+			return &HTTPError{
+				StatusCode:   res.StatusCode,
+				ResponseBody: cachedErrorBody,
+			}
+		}
 		return err
 	}
 
