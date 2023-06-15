@@ -8,11 +8,11 @@ Generates Go code from a WSDL file.
 
 ### Install
 
-* [Download release](https://github.com/hooklift/gowsdl/releases)
-* Download and build locally
-    * 1.15: `go get github.com/hooklift/gowsdl/...`
-    * 1.20: `go install github.com/hooklift/gowsdl/cmd/gowsdl@latest`
-* Install from Homebrew: `brew install gowsdl`
+* Download and build locally: `go get github.com/swantide/gowsdl/...`
+  * Run `make build`
+  * The binary output will `build/gowsdl`
+  * Put this binary in your $GOPATH/bin directory
+  * Ensure that $GOPATH/bin is in your global $PATH
 
 ### Goals
 * Generate idiomatic Go code as much as possible
