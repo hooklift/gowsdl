@@ -486,6 +486,8 @@ func normalize(value string) string {
 		return -1
 	}
 
+	value = strings.ReplaceAll(value, "+", "Plus")
+
 	return strings.Map(mapping, value)
 }
 
