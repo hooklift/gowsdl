@@ -456,6 +456,14 @@ var reservedWordsInAttr = map[string]string{
 	"string":      "astring",
 }
 
+var specialCharacterMapping = map[string]string{
+	"+": "Plus",
+	"-": "Minus",
+	"@": "At",
+	"/": "Slash",
+	"$": "Dollar",
+}
+
 // Replaces Go reserved keywords to avoid compilation issues
 func replaceReservedWords(identifier string) string {
 	value := reservedWords[identifier]
@@ -486,7 +494,9 @@ func normalize(value string) string {
 		return -1
 	}
 
-	value = strings.ReplaceAll(value, "+", "Plus")
+	for k, v := range specialCharacterMapping {
+		value = strings.ReplaceAll(value, k, v)
+	}
 
 	return strings.Map(mapping, value)
 }
