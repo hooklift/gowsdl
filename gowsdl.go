@@ -458,10 +458,7 @@ var reservedWordsInAttr = map[string]string{
 
 var specialCharacterMapping = map[string]string{
 	"+": "Plus",
-	"-": "Minus",
 	"@": "At",
-	"/": "Slash",
-	"$": "Dollar",
 }
 
 // Replaces Go reserved keywords to avoid compilation issues
@@ -484,8 +481,12 @@ func replaceAttrReservedWords(identifier string) string {
 
 // Normalizes value to be used as a valid Go identifier, avoiding compilation issues
 func normalize(value string) string {
+	for k, v := range specialCharacterMapping {
+		value = strings.ReplaceAll(value, k, v)
+	}
+
 	mapping := func(r rune) rune {
-		if r == '.' {
+		if r == '.' || r == '-' {
 			return '_'
 		}
 		if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' {
@@ -494,15 +495,11 @@ func normalize(value string) string {
 		return -1
 	}
 
-	for k, v := range specialCharacterMapping {
-		value = strings.ReplaceAll(value, k, v)
-	}
-
 	return strings.Map(mapping, value)
 }
 
 func goString(s string) string {
-	return strings.Replace(s, "\"", "\\\"", -1)
+	return strings.ReplaceAll(s, "\"", "\\\"")
 }
 
 var xsd2GoTypes = map[string]string{
