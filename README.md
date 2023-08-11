@@ -32,8 +32,11 @@ Generates Go code from a WSDL file.
 Usage: gowsdl [options] myservice.wsdl
   -o string
         File where the generated code will be saved (default "myservice.go")
-  -p string
+  -p string 
         Package under which code will be generated (default "myservice")
   -i    Skips TLS Verification
   -v    Shows gowsdl version
-  ```
+```
+
+### Why forked
+In our case generated structure was invalid beacuese original gowsdl for ComplexTypes was adding XMLName only for complextypes which had type!=name.
