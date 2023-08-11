@@ -1,3 +1,8 @@
+## Why forked
+In our case generated structure was invalid beacuese original gowsdl for ComplexTypes was adding XMLName only for complextypes which had type!=name.
+* Download and build locally
+    * 1.15: `go get github.com/AnisaForWork/gowsdl/...`
+
 # WSDL to Go
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/hooklift/gowsdl?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -37,6 +42,3 @@ Usage: gowsdl [options] myservice.wsdl
   -i    Skips TLS Verification
   -v    Shows gowsdl version
 ```
-
-### Why forked
-In our case generated structure was invalid beacuese original gowsdl for ComplexTypes was adding XMLName only for complextypes which had type!=name.
