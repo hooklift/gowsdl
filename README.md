@@ -1,7 +1,5 @@
 ## Why forked
 In our case generated structure was invalid beacuese original gowsdl for ComplexTypes was adding XMLName only for complextypes which had type!=name.
-* Download and build locally
-    * 1.15: `go get github.com/AnisaForWork/gowsdl/...`
 
 # WSDL to Go
 
