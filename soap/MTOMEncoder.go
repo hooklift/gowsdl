@@ -152,18 +152,33 @@ func (e *mtomEncoder) Flush() error {
 func getBinaryFields(data interface{}, fields *[]reflect.Value) {
 	v := reflect.Indirect(reflect.ValueOf(data))
 
-	if v.Kind() != reflect.Struct {
-		return
-	}
-	for i := 0; i < v.NumField(); i++ {
-		if !v.Field(i).CanInterface() {
-			continue
+	switch v.Kind() {
+	case reflect.Ptr:
+		getBinaryFields(v.Elem(), fields)
+	case reflect.Struct:
+		for i := 0; i < v.NumField(); i++ {
+			if !v.Field(i).CanInterface() {
+				continue
+			}
+			f := v.Field(i)
+			if _, ok := f.Interface().(*Binary); ok {
+				*fields = append(*fields, f)
+			} else {
+				getBinaryFields(f.Interface(), fields)
+			}
 		}
-		f := v.Field(i)
-		if _, ok := f.Interface().(*Binary); ok {
-			*fields = append(*fields, f)
-		} else {
-			getBinaryFields(f.Interface(), fields)
+		break
+	case reflect.Slice:
+		for i := 0; i < v.Len(); i++ {
+			e := v.Index(i)
+			if !e.CanInterface() {
+				continue
+			}
+			if _, ok := e.Interface().(*Binary); ok {
+				*fields = append(*fields, v)
+			} else {
+				getBinaryFields(e.Interface(), fields)
+			}
 		}
 	}
 }
@@ -202,8 +217,8 @@ func getMtomHeader(contentType string) (string, error) {
 		}
 
 		startInfo, ok := params["start-info"]
-		if !ok || startInfo != "application/soap+xml" {
-			return "", fmt.Errorf(`Expected param start-info="application/soap+xml", got %s`, startInfo)
+		if !ok || (!strings.Contains(startInfo, "application/soap+xml") && !strings.Contains(startInfo, "text/xml")) {
+			return "", fmt.Errorf(`Expected param start-info to contain "application/soap+xml" or "text/xml", got %s`, startInfo)
 		}
 		return boundary, nil
 	}
@@ -218,9 +233,6 @@ func newMtomDecoder(r io.Reader, boundary string) *mtomDecoder {
 }
 
 func (d *mtomDecoder) Decode(v interface{}) error {
-	fields := make([]reflect.Value, 0)
-	getBinaryFields(v, &fields)
-
 	packages := make(map[string]*Binary, 0)
 	for {
 		p, err := d.reader.NextPart()
@@ -231,7 +243,7 @@ func (d *mtomDecoder) Decode(v interface{}) error {
 			return err
 		}
 		contentType := p.Header.Get("Content-Type")
-		if contentType == "application/xop+xml" {
+		if strings.HasPrefix(contentType, "application/xop+xml") {
 			err := xml.NewDecoder(p).Decode(v)
 			if err != nil {
 				return err
@@ -253,6 +265,10 @@ func (d *mtomDecoder) Decode(v interface{}) error {
 			}
 		}
 	}
+
+	// Get binary fields after reading the structure, so I have all fields mapped
+	fields := make([]reflect.Value, 0)
+	getBinaryFields(v, &fields)
 
 	// Set binary fields with correct content
 	for _, f := range fields {
