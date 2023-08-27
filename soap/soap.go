@@ -367,8 +367,8 @@ func (s *Client) AddMIMEMultipartAttachment(attachment MIMEMultipartAttachment) 
 	s.attachments = append(s.attachments, attachment)
 }
 
-// GetHeaders gets envelope headers.
-func (s *Client) GetHeaders() interface{} {
+// Headers retrieve envelope headers.
+func (s *Client) Headers() interface{} {
 	return s.headers
 }
 
