@@ -367,6 +367,11 @@ func (s *Client) AddMIMEMultipartAttachment(attachment MIMEMultipartAttachment) 
 	s.attachments = append(s.attachments, attachment)
 }
 
+// GetHeaders gets envelope headers.
+func (s *Client) GetHeaders() interface{} {
+	return s.headers
+}
+
 // SetHeaders sets envelope headers, overwriting any existing headers.
 // For correct behavior, every header must contain a `XMLName` field.  Refer to #121 for details
 func (s *Client) SetHeaders(headers ...interface{}) {
