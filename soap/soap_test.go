@@ -48,32 +48,80 @@ type AttachmentRequest struct {
 	ContentID string `xml:"contentID,omitempty"`
 }
 
+type TestSoapRequest struct {
+	XMLName xml.Name
+	Body    Body
+}
+
+type Body struct {
+	XMLName     xml.Name
+	PingRequest Ping `xml:"Ping"`
+}
+
 func TestClient_Call(t *testing.T) {
-	var pingRequest = new(Ping)
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		xml.NewDecoder(r.Body).Decode(pingRequest)
-		rsp := `<?xml version="1.0" encoding="utf-8"?>
+		var soapRequest TestSoapRequest
+		err := xml.NewDecoder(r.Body).Decode(&soapRequest)
+		assert.NoError(t, err)
+		rsp := fmt.Sprintf(`<?xml version="1.0" encoding="utf-8"?>
 		<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 			<soap:Body>
 				<PingResponse xmlns="http://example.com/service.xsd">
 					<PingResult>
-						<Message>Pong hi</Message>
+						<Message>Pong %s</Message>
 					</PingResult>
 				</PingResponse>
 			</soap:Body>
-		</soap:Envelope>`
+		</soap:Envelope>`, soapRequest.Body.PingRequest.Request.Message)
 		w.Write([]byte(rsp))
 	}))
 	defer ts.Close()
 
 	client := NewClient(ts.URL)
-	req := &Ping{Request: &PingRequest{Message: "Hi"}}
+	req := &Ping{Request: &PingRequest{Message: "Alex"}}
 	reply := &PingResponse{}
-	if err := client.Call("GetData", nil, req, reply); err != nil {
+	if err := client.Call("GetData", req, reply); err != nil {
 		t.Fatalf("couln't call service: %v", err)
 	}
 
-	wantedMsg := "Pong hi"
+	wantedMsg := "Pong Alex"
+	if reply.PingResult.Message != wantedMsg {
+		t.Errorf("got msg %s wanted %s", reply.PingResult.Message, wantedMsg)
+	}
+}
+
+func TestClient_CallEnvelope(t *testing.T) {
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var soapRequest TestSoapRequest
+		err := xml.NewDecoder(r.Body).Decode(&soapRequest)
+		assert.NoError(t, err)
+		rsp := fmt.Sprintf(`<?xml version="1.0" encoding="utf-8"?>
+		<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+			<soap:Body>
+				<PingResponse xmlns="http://example.com/service.xsd">
+					<PingResult>
+						<Message>Pong %s</Message>
+					</PingResult>
+				</PingResponse>
+			</soap:Body>
+		</soap:Envelope>`, soapRequest.Body.PingRequest.Request.Message)
+		w.Write([]byte(rsp))
+	}))
+	defer ts.Close()
+
+	client := NewClient(ts.URL)
+	req := &Ping{Request: &PingRequest{Message: "Bill"}}
+	var env TestSoapRequest
+	env.Body.PingRequest = *req
+
+	reply := &PingResponse{}
+	if err := client.CallWithEnvelope(context.Background(), "GetData", env, reply, nil, nil); err != nil {
+		t.Fatalf("couln't call service: %v", err)
+	}
+
+	wantedMsg := "Pong Bill"
 	if reply.PingResult.Message != wantedMsg {
 		t.Errorf("got msg %s wanted %s", reply.PingResult.Message, wantedMsg)
 	}
@@ -122,7 +170,7 @@ func TestClient_Send_Correct_Headers(t *testing.T) {
 		client := NewClient(ts.URL, WithHTTPHeaders(test.reqHeaders))
 		req := struct{}{}
 		reply := struct{}{}
-		client.Call(test.action, nil, req, reply)
+		client.Call(test.action, req, reply)
 
 		for k, v := range test.expectedHeaders {
 			h := gotHeaders.Get(k)
@@ -166,7 +214,7 @@ func TestClient_Attachments_WithAttachmentResponse(t *testing.T) {
 	retAttachments := make([]MIMEMultipartAttachment, 0)
 
 	// WHEN
-	if err := client.CallContextWithAttachmentsAndFaultDetail(context.TODO(), "''", nil, req,
+	if err := client.CallContextWithAttachmentsAndFaultDetail(context.TODO(), "''", req,
 		reply, nil, &retAttachments); err != nil {
 		t.Fatalf("couln't call service: %v", err)
 	}
@@ -191,7 +239,7 @@ func TestClient_MTOM(t *testing.T) {
 	client := NewClient(ts.URL, WithMTOM())
 	req := &PingRequest{Attachment: NewBinary([]byte("Attached data")).SetContentType("text/plain")}
 	reply := &PingRequest{}
-	if err := client.Call("GetData", nil, req, reply); err != nil {
+	if err := client.Call("GetData", req, reply); err != nil {
 		t.Fatalf("couln't call service: %v", err)
 	}
 
@@ -353,7 +401,7 @@ func Test_Client_FaultDefault(t *testing.T) {
 				Item:    tt.emptyFault,
 				hasData: tt.hasData,
 			}
-			if err := client.CallWithFaultDetail("GetData", nil, req, &reply, &fault); err != nil {
+			if err := client.CallWithFaultDetail("GetData", req, &reply, &fault); err != nil {
 				assert.EqualError(t, err, faultErrString)
 				assert.EqualValues(t, tt.fault, fault.Item)
 			} else {
@@ -824,7 +872,7 @@ func TestHTTPError(t *testing.T) {
 			}))
 			defer ts.Close()
 			client := NewClient(ts.URL)
-			gotErr := client.Call("GetData", nil, &Ping{}, &PingResponse{})
+			gotErr := client.Call("GetData", &Ping{}, &PingResponse{})
 			if test.wantErr {
 				if gotErr == nil {
 					t.Fatalf("Expected an error from call.  Received none")
