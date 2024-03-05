@@ -7,7 +7,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
@@ -374,48 +373,50 @@ func (s *Client) SetHeaders(headers ...interface{}) {
 }
 
 // CallContext performs HTTP POST request with a context
-func (s *Client) CallContext(ctx context.Context, soapAction string, request, response interface{}) error {
-	return s.call(ctx, soapAction, request, response, nil, nil)
+func (s *Client) CallContext(ctx context.Context, soapAction string, envelope, request, response interface{}) error {
+	return s.call(ctx, soapAction, envelope, request, response, nil, nil)
 }
 
 // Call performs HTTP POST request.
 // Note that if the server returns a status code >= 400, a HTTPError will be returned
-func (s *Client) Call(soapAction string, request, response interface{}) error {
-	return s.call(context.Background(), soapAction, request, response, nil, nil)
+func (s *Client) Call(soapAction string, envelope, request, response interface{}) error {
+	return s.call(context.Background(), soapAction, envelope, request, response, nil, nil)
 }
 
 // CallContextWithAttachmentsAndFaultDetail performs HTTP POST request.
 // Note that if SOAP fault is returned, it will be stored in the error.
 // On top the attachments array will be filled with attachments returned from the SOAP request.
-func (s *Client) CallContextWithAttachmentsAndFaultDetail(ctx context.Context, soapAction string, request,
+func (s *Client) CallContextWithAttachmentsAndFaultDetail(ctx context.Context, soapAction string, envelope, request,
 	response interface{}, faultDetail FaultError, attachments *[]MIMEMultipartAttachment) error {
-	return s.call(ctx, soapAction, request, response, faultDetail, attachments)
+	return s.call(ctx, soapAction, envelope, request, response, faultDetail, attachments)
 }
 
 // CallContextWithFault performs HTTP POST request.
 // Note that if SOAP fault is returned, it will be stored in the error.
-func (s *Client) CallContextWithFaultDetail(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError) error {
-	return s.call(ctx, soapAction, request, response, faultDetail, nil)
+func (s *Client) CallContextWithFaultDetail(ctx context.Context, soapAction string, envelope, request, response interface{}, faultDetail FaultError) error {
+	return s.call(ctx, soapAction, envelope, request, response, faultDetail, nil)
 }
 
 // CallWithFaultDetail performs HTTP POST request.
 // Note that if SOAP fault is returned, it will be stored in the error.
 // the passed in fault detail is expected to implement FaultError interface,
 // which allows to condense the detail into a short error message.
-func (s *Client) CallWithFaultDetail(soapAction string, request, response interface{}, faultDetail FaultError) error {
-	return s.call(context.Background(), soapAction, request, response, faultDetail, nil)
+func (s *Client) CallWithFaultDetail(soapAction string, envelope, request, response interface{}, faultDetail FaultError) error {
+	return s.call(context.Background(), soapAction, envelope, request, response, faultDetail, nil)
 }
 
-func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError,
+func (s *Client) call(ctx context.Context, soapAction string, envelope, request, response interface{}, faultDetail FaultError,
 	retAttachments *[]MIMEMultipartAttachment) error {
-	// SOAP envelope capable of namespace prefixes
-	envelope := SOAPEnvelope{
-		XmlNS: XmlNsSoapEnv,
+	if envelope == nil {
+		// SOAP envelope capable of namespace prefixes
+		soapEnvelope := SOAPEnvelope{
+			XmlNS: XmlNsSoapEnv,
+		}
+		soapEnvelope.Headers = s.headers
+		soapEnvelope.Body.Content = request
+		envelope = soapEnvelope
 	}
 
-	envelope.Headers = s.headers
-
-	envelope.Body.Content = request
 	buffer := new(bytes.Buffer)
 	var encoder SOAPEncoder
 	if s.opts.mtom && s.opts.mma {
@@ -482,7 +483,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	defer res.Body.Close()
 
 	if res.StatusCode >= 400 && res.StatusCode != 500 {
-		body, _ := ioutil.ReadAll(res.Body)
+		body, _ := io.ReadAll(res.Body)
 		return &HTTPError{
 			StatusCode:   res.StatusCode,
 			ResponseBody: body,
