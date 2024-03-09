@@ -15,9 +15,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type Ping struct {
-	XMLName xml.Name `xml:"http://example.com/service.xsd Ping"`
+// Ping -> PingRequest -> (Message, Attachment)
 
+// PingResponse -> PingReply -> (Message, Attachment)
+
+type Ping struct {
+	XMLName xml.Name     `xml:"http://example.com/service.xsd Ping"`
 	Request *PingRequest `xml:"request,omitempty"`
 }
 
@@ -29,9 +32,16 @@ type PingRequest struct {
 }
 
 type PingResponse struct {
-	XMLName xml.Name `xml:"http://example.com/service.xsd PingResponse"`
-
+	XMLName    xml.Name   `xml:"http://example.com/service.xsd PingResponse"`
 	PingResult *PingReply `xml:"PingResult,omitempty"`
+}
+
+func (b *TestResponseBody) ErrorFromFault() error {
+	return nil
+}
+
+func (b *TestResponseBody) SetContent(content interface{}) {
+	b.PingResponse = content.(*PingResponse)
 }
 
 type PingReply struct {
@@ -50,12 +60,48 @@ type AttachmentRequest struct {
 
 type TestSoapRequest struct {
 	XMLName xml.Name
-	Body    Body
+	Body    TestRequestBody
 }
 
-type Body struct {
+type TestRequestBody struct {
 	XMLName     xml.Name
 	PingRequest Ping `xml:"Ping"`
+}
+
+type TestResponseBody struct {
+	XMLName      xml.Name
+	PingResponse *PingResponse `xml:"PingResponse"`
+}
+
+type TestSoapResponse struct {
+	XMLName     xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
+	Header      *SOAPHeaderResponse
+	Body        SoapResponseBodyInterface `xml:"Body"`
+	Attachments []MIMEMultipartAttachment `xml:"attachments,omitempty"`
+}
+
+func (s *TestSoapResponse) GetBody() SoapResponseBodyInterface {
+	return s.Body
+}
+
+func (s *TestSoapResponse) GetHeader() interface{} {
+	return s.Header
+}
+
+func (s *TestSoapResponse) SetBody(body SoapResponseBodyInterface) {
+	s.Body = body
+}
+
+func (s *TestSoapResponse) SetHeader(header interface{}) {
+	s.Header = header.(*SOAPHeaderResponse)
+}
+
+func (s *TestSoapResponse) SetXMLName(xmlName xml.Name) {
+	s.XMLName = xmlName
+}
+
+func (s *TestSoapResponse) GetAttachments() []MIMEMultipartAttachment {
+	return s.Attachments
 }
 
 func TestClient_Call(t *testing.T) {
@@ -117,7 +163,14 @@ func TestClient_CallEnvelope(t *testing.T) {
 	env.Body.PingRequest = *req
 
 	reply := &PingResponse{}
-	if err := client.CallWithEnvelope(context.Background(), "GetData", env, reply, nil, nil); err != nil {
+	responeBody := TestResponseBody{}
+	responeBody.SetContent(reply)
+
+	respEnv := &TestSoapResponse{
+		Body: &responeBody,
+	}
+
+	if err := client.CallWithEnvelope(context.Background(), "GetData", env, respEnv, nil, nil); err != nil {
 		t.Fatalf("couln't call service: %v", err)
 	}
 
