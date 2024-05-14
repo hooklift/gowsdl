@@ -14,7 +14,7 @@ type SOAPBodyRequest struct {
 	{{range .}}
 		{{range .Operations}}
 				{{$requestType := findType .Input.Message | replaceReservedWords | makePublic}} ` + `
-  				{{$requestType}} *{{$requestType}} ` + "`" + `xml:,omitempty` + "`" + `
+  				{{$requestType}} *{{$requestType}} ` + "`" + `xml:",omitempty"` + "`" + `
 		{{end}}
 	{{end}}
 }

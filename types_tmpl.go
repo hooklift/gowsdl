@@ -4,6 +4,9 @@
 
 package gowsdl
 
+const XmlNameSpaceAttrAndEmpty = "`xml:\"xmlns:xsi,attr,omitempty\"`"
+const XmlPlatformCoreAttrAndEmpty = "`xml:\"xmlns:platformCore,attr,omitempty\"`"
+
 var typesTmpl = `
 {{define "SimpleType"}}
 	{{$typeName := replaceReservedWords .Name | makePublic}}
@@ -34,7 +37,7 @@ var typesTmpl = `
 {{define "ComplexContent"}}
 	{{$baseType := toGoType .Extension.Base false}}
 	{{ if $baseType }}
-		{{$baseType}}
+			{{$baseType}}
 	{{end}}
 
 	{{template "Elements" .Extension.Sequence}}
@@ -197,21 +200,88 @@ var typesTmpl = `
 	{{range .ComplexTypes}}
 		{{/* ComplexTypeGlobal */}}
 		{{$typeName := replaceReservedWords .Name | makePublic}}
+		type {{$typeName}}_AddRequest struct {
+			/* Here */
+			XMLName  xml.Name ` + "`xml:\"add\"`" + `
+			XmlNSXSI string ` + XmlNameSpaceAttrAndEmpty + `
+			XmlNSPC  string ` + XmlPlatformCoreAttrAndEmpty + `
+			XmlNS1   string ` + "`xml:\"xmlns:ns1,attr,omitempty\"`" + `
+			Record   *{{$typeName}} ` + "`xml:\"record,omitempty\" json:\"record,omitempty\"`" + `
+		}
+
+		type {{$typeName}}_AddResponse struct {
+			XMLName xml.Name ` + "`xml:\"addResponse\"`" + `
+			WriteResponse *{{$typeName}}_WriteResponse ` + "`xml:\"writeResponse,omitempty\" json:\"writeResponse,omitempty\"`" + `
+		}
+		
+		type {{$typeName}}_WriteResponse struct {
+			XMLName xml.Name ` + "`xml:\"writeResponse\"`" + `
+			Status  *Status  ` + "`xml:\"status,omitempty\" json:\"status,omitempty\"`" + `
+			BaseRef *BaseRef ` + "`xml:\"baseRef,omitempty\" json:\"baseRef,omitempty\"`" + `
+		}
+		
+		//----------------------------------------------------
+		
+		type {{$typeName}}_GetRequest struct {
+			XMLName  xml.Name ` + "`xml:\"get\"`" + `
+			XmlNSXSI string   ` + XmlNameSpaceAttrAndEmpty + `
+			XmlNSPC  string   ` + XmlPlatformCoreAttrAndEmpty + `
+			BaseRef  *BaseRef ` + "`xml:\"baseRef,omitempty\" json:\"baseRef,omitempty\"`" + `
+		}
+		
+		type {{$typeName}}_GetResponse struct {
+			//XMLName xml.Name ` + "`xml:\"urn:messages_2022_1.platform.webservices.netsuite.com getResponse\"`" + `
+			XMLName xml.Name ` + "`xml:\"getResponse\"`" + `
+			ReadResponse *{{$typeName}}_ReadResponse ` + "`xml:\"readResponse,omitempty\" json:\"readResponse,omitempty\"`" + `
+		}
+		
+		//----------------------------------------------------
+		
+		type {{$typeName}}_ReadResponse struct {
+			XMLName xml.Name  ` + "`xml:\"readResponse\"`" + `
+			Status  *Status   ` + "`xml:\"status,omitempty\" json:\"status,omitempty\"`" + `
+			Record  *{{$typeName}} ` + "`xml:\"record,omitempty\" json:\"record,omitempty\"`" + `
+		}		
+
+	{{end}}
+
+	{{range .ComplexTypes}}
+		{{/* ComplexTypeGlobal */}}
+		{{$typeName := replaceReservedWords .Name | makePublic}}
 		{{if and (eq (len .SimpleContent.Extension.Attributes) 0) (eq (toGoType .SimpleContent.Extension.Base false) "string") }}
 			type {{$typeName}} string
 		{{else}}
 			type {{$typeName}} struct {
+				/* Here Jay */
+				XsiType string ` + "`xml:\"xsi:type,attr,omitempty\"  json:\"-\"`" + `
+				{{if eq $typeName "BaseRef"}}
+					InternalId string ` + "`xml:\"internalId,attr,omitempty\" json:\"internalId,omitempty\"`" + `
+					ExternalId string ` + "`xml:\"externalId,attr,omitempty\" json:\"externalId,omitempty\"`" + `
+					Type *RecordType ` + "`xml:\"type,attr,omitempty\" json:\"type,omitempty\"`" + `
+				{{end}}
+				{{if eq $typeName "DeleteRequest"}}
+					XmlNSXSI string ` + XmlNameSpaceAttrAndEmpty + `
+					XmlNSPC string ` + XmlPlatformCoreAttrAndEmpty + `
+				{{end}}
+				{{if eq $typeName "DeleteResponse"}}
+					DeleteReturn *DeleteReturn ` + "`xml:\"deleteReturn,omitempty\" json:\"writeResponse,omitempty\"`" + `
+				{{end}}
 				{{$type := findNameByType .Name}}
 				{{if ne .Name $type}}
 					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$type}}\"`" + `
 				{{end}}
 
 				{{if ne .ComplexContent.Extension.Base ""}}
+					/* Jay 2 */
 					{{template "ComplexContent" .ComplexContent}}
 				{{else if ne .SimpleContent.Extension.Base ""}}
-					{{template "SimpleContent" .SimpleContent}}
+					/* Jay 3 */
+				{{template "SimpleContent" .SimpleContent}}
 				{{else}}
-					{{template "Elements" .Sequence}}
+					/* Jay 4 */
+					{{if ne $typeName "DeleteResponse"}}
+						{{template "Elements" .Sequence}}
+					{{end}}
 					{{template "Any" .Any}}
 					{{template "Elements" .Choice}}
 					{{template "Elements" .SequenceChoice}}
@@ -220,6 +290,47 @@ var typesTmpl = `
 				{{end}}
 			}
 		{{end}}
+	{{end}}
+
+	{{range .ComplexTypes}}
+		{{/* netSuitePortFuncs */}}
+		{{$typeName := replaceReservedWords .Name | makePublic}}
+
+		func (service *netSuitePortType) {{$typeName}}_AddContext(ctx context.Context, request *{{$typeName}}_AddRequest) (*{{$typeName}}_AddResponse, error) {
+			response := new({{$typeName}}_AddResponse)
+			err := service.client.CallContext(ctx, "add", request, response)
+			if err != nil {
+				return nil, err
+			}
+		
+			return response, nil
+		}
+
+
+		func (service *netSuitePortType) {{$typeName}}_Add(request *{{$typeName}}_AddRequest) (*{{$typeName}}_AddResponse, error) {
+			return service.{{$typeName}}_AddContext(
+				context.Background(),
+				request,
+			)
+		}
+
+		func (service *netSuitePortType) {{$typeName}}_GetContext(ctx context.Context, request *{{$typeName}}_GetRequest) (*{{$typeName}}_GetResponse, error) {
+			response := new({{$typeName}}_GetResponse)
+			err := service.client.CallContext(ctx, "get", request, response)
+			if err != nil {
+				return nil, err
+			}
+		
+			return response, nil
+		}
+		
+		func (service *netSuitePortType) {{$typeName}}_Get(request *{{$typeName}}_GetRequest) (*{{$typeName}}_GetResponse, error) {
+			return service.{{$typeName}}_GetContext(
+				context.Background(),
+				request,
+			)
+		}
+		
 	{{end}}
 {{end}}
 `

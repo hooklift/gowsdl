@@ -13,7 +13,6 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,8 +21,11 @@ import (
 	"testing"
 )
 
+const FixtureFile = "fixtures/test.wsdl"
+const ErrorMessage = "got \n%s want \n%s"
+
 func TestElementGenerationDoesntCommentOutStructProperty(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL(FixtureFile, "netsuite", false, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -40,7 +42,7 @@ func TestElementGenerationDoesntCommentOutStructProperty(t *testing.T) {
 }
 
 func TestComplexTypeWithInlineSimpleType(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL(FixtureFile, "netsuite", false, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -65,7 +67,7 @@ func TestComplexTypeWithInlineSimpleType(t *testing.T) {
 }
 
 func TestAttributeRef(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL(FixtureFile, "netsuite", false, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -92,12 +94,12 @@ func TestAttributeRef(t *testing.T) {
 	actual = string(bytes.ReplaceAll([]byte(actual), []byte("\t"), []byte("  ")))
 	expected = string(bytes.ReplaceAll([]byte(expected), []byte("\t"), []byte("  ")))
 	if actual != expected {
-		t.Error("got \n" + actual + " want \n" + expected)
+		t.Errorf(ErrorMessage, actual, expected)
 	}
 }
 
 func TestElementWithLocalSimpleType(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL(FixtureFile, "netsuite", false, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -117,7 +119,7 @@ func TestElementWithLocalSimpleType(t *testing.T) {
 	expected := `type ElementWithLocalSimpleType string`
 
 	if actual != expected {
-		t.Error("got \n" + actual + " want \n" + expected)
+		t.Errorf(ErrorMessage, actual, expected)
 	}
 
 	// Const declaration of first enum value
@@ -130,7 +132,7 @@ func TestElementWithLocalSimpleType(t *testing.T) {
 	expected = `const ElementWithLocalSimpleTypeEnum1 ElementWithLocalSimpleType = "enum1"`
 
 	if actual != expected {
-		t.Error("got \n" + actual + " want \n" + expected)
+		t.Errorf(ErrorMessage, actual, expected)
 	}
 
 	// Const declaration of second enum value
@@ -143,12 +145,12 @@ func TestElementWithLocalSimpleType(t *testing.T) {
 	expected = `const ElementWithLocalSimpleTypeEnum2 ElementWithLocalSimpleType = "enum2"`
 
 	if actual != expected {
-		t.Error("got \n" + actual + " want \n" + expected)
+		t.Errorf(ErrorMessage, actual, expected)
 	}
 }
 
 func TestDateTimeType(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL("fixtures/test.wsdl", "netsuite", false, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -168,7 +170,7 @@ func TestDateTimeType(t *testing.T) {
 	expected := `type StartDate soap.XSDDateTime`
 
 	if actual != expected {
-		t.Error("got \n" + actual + " want \n" + expected)
+		t.Errorf(ErrorMessage, actual, expected)
 	}
 
 	// Method declaration MarshalXML
@@ -183,7 +185,7 @@ func TestDateTimeType(t *testing.T) {
 }`
 
 	if actual != expected {
-		t.Error("got \n" + actual + " want \n" + expected)
+		t.Errorf(ErrorMessage, actual, expected)
 	}
 
 	// Method declaration UnmarshalXML
@@ -209,7 +211,7 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 	}
 
 	for _, file := range files {
-		g, err := NewGoWSDL(file, "myservice", false, true)
+		g, err := NewGoWSDL(file, "netsuite", false, true)
 		if err != nil {
 			t.Error(err)
 		}
@@ -228,7 +230,7 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 
 		_, err = format.Source(data.Bytes())
 		if err != nil {
-			fmt.Println(string(data.Bytes()))
+			fmt.Println(data.String())
 			t.Error(err)
 		}
 	}
@@ -236,7 +238,7 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 
 func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 	enumStringTest := func(t *testing.T, fixtureWsdl string, varName string, typeName string, enumString string) {
-		g, err := NewGoWSDL("fixtures/"+fixtureWsdl, "myservice", false, true)
+		g, err := NewGoWSDL("fixtures/"+fixtureWsdl, "netsuite", false, true)
 		if err != nil {
 			t.Error(err)
 		}
@@ -261,7 +263,7 @@ func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 }
 
 func TestComplexTypeGeneratedCorrectly(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/workday-time-min.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL("fixtures/workday-time-min.wsdl", "netsuite", false, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -271,7 +273,7 @@ func TestComplexTypeGeneratedCorrectly(t *testing.T) {
 		t.Error(err)
 	}
 
-	decl, err := getTypeDeclaration(resp, "WorkerObjectIDType")
+	decl, _ := getTypeDeclaration(resp, "WorkerObjectIDType")
 
 	expected := "type WorkerObjectIDType struct"
 	re := regexp.MustCompile(expected)
@@ -288,7 +290,7 @@ func TestEPCISWSDL(t *testing.T) {
 	log.SetFlags(0)
 	log.SetOutput(os.Stdout)
 
-	g, err := NewGoWSDL("./fixtures/epcis/EPCglobal-epcis-query-1_2.wsdl", "myservice", true, true)
+	g, err := NewGoWSDL("./fixtures/epcis/EPCglobal-epcis-query-1_2.wsdl", "netsuite", true, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -308,7 +310,7 @@ func TestEPCISWSDL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectedBytes, err := ioutil.ReadFile("./fixtures/epcis/epcisquery.src")
+	expectedBytes, err := os.ReadFile("./fixtures/epcis/epcisquery.src")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -316,7 +318,7 @@ func TestEPCISWSDL(t *testing.T) {
 	actual := string(source)
 	expected := string(expectedBytes)
 	if actual != expected {
-		_ = ioutil.WriteFile("./fixtures/epcis/epcisquery_gen.src", source, 0664)
+		_ = os.WriteFile("./fixtures/epcis/epcisquery_gen.src", source, 0664)
 		t.Error("got source ./fixtures/epcis/epcisquery_gen.src but expected ./fixtures/epcis/epcisquery.src")
 	}
 }

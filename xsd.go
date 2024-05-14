@@ -107,6 +107,10 @@ Loop:
 		}
 	}
 
+	// for _, complexType := range s.ComplexTypes {
+	// 	fmt.Println("ComplexType", complexType.Name)
+	// }
+
 	return nil
 }
 

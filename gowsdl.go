@@ -25,6 +25,7 @@ import (
 )
 
 const maxRecursion uint8 = 20
+const ByteArray = "[]byte"
 
 // GoWSDL defines the struct for WSDL generator.
 type GoWSDL struct {
@@ -82,7 +83,7 @@ func downloadFile(url string, ignoreTLS bool) ([]byte, error) {
 
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Received response code %d", resp.StatusCode)
+		return nil, fmt.Errorf("received response code %d", resp.StatusCode)
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
@@ -286,6 +287,34 @@ func (g *GoWSDL) resolveXSDExternals(schema *XSDSchema, loc *Location) error {
 	return nil
 }
 
+func complexTypeExists(schemas []*XSDSchema, index int, name string) bool {
+	previousSchemas := schemas[0:index]
+
+	for _, schema := range previousSchemas {
+		for _, complexType := range schema.ComplexTypes {
+			if complexType.Name == name {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func simpleTypeExists(schemas []*XSDSchema, index int, name string) bool {
+	previousSchemas := schemas[0:index]
+
+	for _, schema := range previousSchemas {
+		for _, simpleType := range schema.SimpleType {
+			if simpleType.Name == name {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func (g *GoWSDL) genTypes() ([]byte, error) {
 	funcMap := template.FuncMap{
 		"toGoType":                 toGoType,
@@ -304,12 +333,33 @@ func (g *GoWSDL) genTypes() ([]byte, error) {
 		"getNS":                    g.getNS,
 	}
 
+	for index, sc := range g.wsdl.Types.Schemas {
+		complexTypes := make([]*XSDComplexType, 0)
+		for _, ct := range sc.ComplexTypes {
+			fmt.Println(ct.Name)
+			if index == 0 || !complexTypeExists(g.wsdl.Types.Schemas, index, ct.Name) {
+				complexTypes = append(complexTypes, ct)
+			}
+		}
+		sc.ComplexTypes = complexTypes
+
+		simpleTypes := make([]*XSDSimpleType, 0)
+		for _, st := range sc.SimpleType {
+			if index == 0 || !simpleTypeExists(g.wsdl.Types.Schemas, index, st.Name) {
+				simpleTypes = append(simpleTypes, st)
+			}
+		}
+		sc.SimpleType = simpleTypes
+	}
+
 	data := new(bytes.Buffer)
 	tmpl := template.Must(template.New("types").Funcs(funcMap).Parse(typesTmpl))
 	err := tmpl.Execute(data, g.wsdl.Types)
 	if err != nil {
 		return nil, err
 	}
+
+	// fmt.Println("data", data)
 
 	return data.Bytes(), nil
 }
@@ -517,8 +567,8 @@ var xsd2GoTypes = map[string]string{
 	"datetime":           "soap.XSDDateTime",
 	"date":               "soap.XSDDate",
 	"time":               "soap.XSDTime",
-	"base64binary":       "[]byte",
-	"hexbinary":          "[]byte",
+	"base64binary":       ByteArray,
+	"hexbinary":          ByteArray,
 	"unsignedint":        "uint32",
 	"nonnegativeinteger": "uint32",
 	"unsignedshort":      "uint16",
@@ -563,7 +613,7 @@ func toGoType(xsdType string, nillable bool) string {
 }
 
 func removePointerFromType(goType string) string {
-	return regexp.MustCompile("^\\s*\\*").ReplaceAllLiteralString(goType, "")
+	return regexp.MustCompile(`^\s*\*`).ReplaceAllLiteralString(goType, "")
 }
 
 // Given a message, finds its type.
@@ -618,7 +668,8 @@ func (g *GoWSDL) findNameByType(name string) string {
 // TODO(c4milo): improve runtime complexity if performance turns out to be an issue.
 func (g *GoWSDL) findSOAPAction(operation, portType string) string {
 	for _, binding := range g.wsdl.Binding {
-		if strings.ToUpper(stripns(binding.Type)) != strings.ToUpper(portType) {
+		if !strings.EqualFold(stripns(binding.Type), portType) {
+			// if strings.ToUpper(stripns(binding.Type)) != strings.ToUpper(portType) {
 			continue
 		}
 
@@ -681,7 +732,7 @@ var basicTypes = map[string]string{
 	"int64":       "int64",
 	"bool":        "bool",
 	"time.Time":   "time.Time",
-	"[]byte":      "[]byte",
+	ByteArray:     ByteArray,
 	"byte":        "byte",
 	"uint16":      "uint16",
 	"uint32":      "uint32",
