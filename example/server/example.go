@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hooklift/gowsdl/example/server/gen"
+	"github.com/ParticleHealth/gowsdl/example/server/gen"
 	"github.com/hooklift/gowsdl/soap"
 )
 
