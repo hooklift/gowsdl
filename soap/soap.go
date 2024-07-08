@@ -248,6 +248,7 @@ type options struct {
 	httpHeaders      map[string]string
 	mtom             bool
 	mma              bool
+	reqLogger        func(s string) ()
 }
 
 var defaultOptions = options{
@@ -326,6 +327,12 @@ func WithMTOM() Option {
 func WithMIMEMultipartAttachments() Option {
 	return func(o *options) {
 		o.mma = true
+	}
+}
+
+func WithReqLogger(logger func (s string) ()) Option {
+	return func(o *options) {
+		o.reqLogger = logger
 	}
 }
 
@@ -445,6 +452,12 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 
 	if err := encoder.Flush(); err != nil {
 		return err
+	}
+
+	if s.opts.reqLogger != nil {
+		buf := buffer.String()
+		buffer.WriteString(buf)
+		s.opts.reqLogger(buf)
 	}
 
 	req, err := http.NewRequest("POST", s.url, buffer)

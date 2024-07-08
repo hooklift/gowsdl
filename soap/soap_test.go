@@ -66,7 +66,14 @@ func TestClient_Call(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := NewClient(ts.URL)
+	logger := func (s string) {
+		wantedReq := `<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><Ping xmlns="http://example.com/service.xsd"><request><Message>Hi</Message></request></Ping></soap:Body></soap:Envelope>`
+		if s != wantedReq {
+			t.Errorf("created req %s expected %s", s, wantedReq)
+		}
+	}
+
+	client := NewClient(ts.URL, WithReqLogger(logger))
 	req := &Ping{Request: &PingRequest{Message: "Hi"}}
 	reply := &PingResponse{}
 	if err := client.Call("GetData", req, reply); err != nil {
