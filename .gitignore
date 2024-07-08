@@ -4,3 +4,4 @@ build
 .DS_Store
 dist
 .idea/
+fixtures/epcis/epcisquery_gen.src

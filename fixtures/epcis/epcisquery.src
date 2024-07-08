@@ -59,9 +59,11 @@ type Partner struct {
 }
 
 type PartnerIdentification struct {
+	XMLName xml.Name `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader Identifier"`
+
 	Value string `xml:",chardata" json:"-,"`
 
-	Authority string `xml:"Authority,attr,omitempty" json:"Authority,omitempty"`
+	Authority string `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader Authority,attr,omitempty" json:"Authority,omitempty"`
 }
 
 type ContactInformation struct {
