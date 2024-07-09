@@ -455,9 +455,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 
 	if s.opts.reqLogger != nil {
-		buf := buffer.String()
-		buffer.WriteString(buf)
-		s.opts.reqLogger(buf)
+		s.opts.reqLogger(buffer.String())
 	}
 
 	req, err := http.NewRequest("POST", s.url, buffer)
