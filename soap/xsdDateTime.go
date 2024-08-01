@@ -5,6 +5,7 @@
 package soap
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"strings"
 	"time"
@@ -183,6 +184,11 @@ func (xd XSDDate) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
 		attr.Value = xdString
 	}
 	return attr, nil
+}
+
+func (xd XSDDate) MarshalJSON() ([]byte, error) {
+	xdString := xd.string()
+	return json.Marshal(xdString)
 }
 
 // returns string representation and skips "zero" time values

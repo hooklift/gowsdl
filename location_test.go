@@ -5,6 +5,7 @@
 package gowsdl
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -88,9 +89,9 @@ func TestLocation_Parse_File(t *testing.T) {
 		ref      string
 		expected string
 	}{
-		{"fixtures/test.wsdl", "some.xsd", "fixtures/some.xsd"},
-		{"fixtures/test.wsdl", "../xsd/some.xsd", "xsd/some.xsd"},
-		{"fixtures/test.wsdl", "xsd/some.xsd", "fixtures/xsd/some.xsd"},
+		{"fixtures/test.wsdl", "some.xsd", fmt.Sprintf("fixtures%csome.xsd", os.PathSeparator)},
+		{"fixtures/test.wsdl", "../xsd/some.xsd", fmt.Sprintf("xsd%csome.xsd", os.PathSeparator)},
+		{"fixtures/test.wsdl", "xsd/some.xsd", fmt.Sprintf("fixtures%cxsd%csome.xsd", os.PathSeparator, os.PathSeparator)},
 	}
 	for _, test := range tests {
 		r, err := ParseLocation(test.name)
