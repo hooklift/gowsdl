@@ -662,11 +662,27 @@ func makePublic(identifier string) string {
 		return "EmptyString"
 	}
 	field := []rune(identifier)
+
+	l := len(field)
 	if len(field) == 0 {
 		return identifier
 	}
 
-	field[0] = unicode.ToUpper(field[0])
+	i := 0
+	for ; i < l; i++ {
+		if (field[i] > 'a' && field[i] < 'z') ||
+			(field[i] > 'A' && field[i] < 'Z') {
+			break
+		}
+	}
+
+	if i == l {
+		return identifier
+	}
+
+	field[i] = unicode.ToUpper(field[i])
+	field = field[i:]
+
 	return string(field)
 }
 
