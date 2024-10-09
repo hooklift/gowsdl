@@ -150,7 +150,7 @@ var typesTmpl = `
 				{{else}}
 					type {{$typeName}} interface{}
 				{{end}}
-			
+
 				{{if .Restriction.Enumeration}}
 				const (
 					{{with .Restriction}}
@@ -164,7 +164,7 @@ var typesTmpl = `
 		{{else}}
 			{{$type := toGoType .Type .Nillable | removePointerFromType}}
 			{{if ne ($typeName) ($type)}}
-				type {{$typeName}} {{$type}}
+				type {{$typeName}} = {{$type}}
 				{{if eq ($type) ("soap.XSDDateTime")}}
 					func (xdt {{$typeName}}) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 						return soap.XSDDateTime(xdt).MarshalXML(e, start)

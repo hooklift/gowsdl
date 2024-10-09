@@ -165,7 +165,7 @@ func TestDateTimeType(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := `type StartDate soap.XSDDateTime`
+	expected := `type StartDate = soap.XSDDateTime`
 
 	if actual != expected {
 		t.Error("got \n" + actual + " want \n" + expected)
