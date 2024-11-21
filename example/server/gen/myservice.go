@@ -36,14 +36,35 @@ type GetInfoResponse struct {
 	GetInfoResult string `xml:"GetInfoResult,omitempty" json:"GetInfoResult,omitempty"`
 }
 
+type ElementWithLocalSimpleType string
+
+const (
+
+	// First enum value
+	ElementWithLocalSimpleTypeEnum1 ElementWithLocalSimpleType = "enum1"
+
+	// Second enum value
+	ElementWithLocalSimpleTypeEnum2 ElementWithLocalSimpleType = "enum2"
+)
+
+type StartDate soap.XSDDateTime
+
+func (xdt StartDate) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	return soap.XSDDateTime(xdt).MarshalXML(e, start)
+}
+
+func (xdt *StartDate) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	return (*soap.XSDDateTime)(xdt).UnmarshalXML(d, start)
+}
+
 type ResponseStatus struct {
 	Status []struct {
 		Value string `xml:",chardata" json:"-,"`
 
-		Code string `xml:"code,attr,omitempty" json:"code,omitempty"`
+		Code string `xml:"http://www.mnb.hu/webservices/ code,attr,omitempty" json:"code,omitempty"`
 	} `xml:"status,omitempty" json:"status,omitempty"`
 
-	ResponseCode string `xml:"responseCode,attr,omitempty" json:"responseCode,omitempty"`
+	ResponseCode string `xml:"http://www.mnb.hu/webservices/ responseCode,attr,omitempty" json:"responseCode,omitempty"`
 }
 
 type MNBArfolyamServiceType interface {

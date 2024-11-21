@@ -60,19 +60,35 @@ type SOAPBodyResponse struct { ` + `
 
 }
 
+type SOAPService interface {
 {{range .}}
 	{{range .Operations}}
 		{{$responseType := findType .Output.Message | replaceReservedWords | makePublic}}
 		{{$requestType := findType .Input.Message | replaceReservedWords | makePublic}}
 		{{$requestTypeSource := findType .Input.Message | replaceReservedWords }}
-func (service *SOAPBodyRequest) {{$requestType}}Func(request *{{$requestType}}) (*{{$responseType}}, error) {
+	{{$requestType}}Func(request *{{$requestType}}) (*{{$responseType}}, error)
+	{{end}}
+{{end}}
+}
+
+type BaseSOAPService struct {}
+
+var _ SOAPService = (*BaseSOAPService)(nil)
+
+{{range .}}
+	{{range .Operations}}
+		{{$responseType := findType .Output.Message | replaceReservedWords | makePublic}}
+		{{$requestType := findType .Input.Message | replaceReservedWords | makePublic}}
+		{{$requestTypeSource := findType .Input.Message | replaceReservedWords }}
+func (service *BaseSOAPService) {{$requestType}}Func(request *{{$requestType}}) (*{{$responseType}}, error) {
 	return nil, WSDLUndefinedError
 }
 	{{end}}
 {{end}}
 
 
-func (service *SOAPEnvelopeRequest) call(w http.ResponseWriter, r *http.Request) {
+func call(s SOAPService, w http.ResponseWriter, r *http.Request) {
+	service := &SOAPEnvelopeRequest{}
 	w.Header().Add("Content-Type", "text/xml; charset=utf-8")
 	val := reflect.ValueOf(&service.Body).Elem()
 	n := val.NumField()
@@ -125,7 +141,7 @@ func (service *SOAPEnvelopeRequest) call(w http.ResponseWriter, r *http.Request)
 	if !find {
 		panic(WSDLUndefinedError)
 	} else {
-		m := val.Addr().MethodByName(name + "Func")
+		m := reflect.ValueOf(s).MethodByName(name + "Func")
 		if !m.IsValid() {
 			panic(WSDLUndefinedError)
 		}
@@ -140,9 +156,16 @@ func (service *SOAPEnvelopeRequest) call(w http.ResponseWriter, r *http.Request)
 
 }
 
+func CreateEndpoint(service SOAPService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		call(service, w, r)
+	}
+}
+
+// Deprecated: Use CreateEndpoint instead.
 func Endpoint(w http.ResponseWriter, r *http.Request) {
-	request := SOAPEnvelopeRequest{}
-	request.call(w, r)
+	service := BaseSOAPService{}
+	call(&service, w, r)
 }
 
 `

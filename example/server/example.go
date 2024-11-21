@@ -9,6 +9,8 @@ import (
 	"github.com/hooklift/gowsdl/soap"
 )
 
+//go:generate go run ../../cmd/gowsdl -p gen ../../fixtures/test.wsdl
+
 var done = make(chan struct{})
 
 func client() {
@@ -21,9 +23,19 @@ func client() {
 	done <- struct{}{}
 }
 
+type server struct {
+	*gen.BaseSOAPService
+}
+
+func (s server) GetInfoFunc(request *gen.GetInfo) (*gen.GetInfoResponse, error) {
+	return &gen.GetInfoResponse{
+		GetInfoResult: "gowsdl, " + request.Id,
+	}, nil
+}
+
 // use fixtures/test.wsdl
 func main() {
-	http.HandleFunc("/", gen.Endpoint)
+	http.HandleFunc("/", gen.CreateEndpoint(&server{}))
 	go func() {
 		time.Sleep(time.Second * 1)
 		client()

@@ -9,6 +9,8 @@ import (
 	"github.com/hooklift/gowsdl/soap"
 )
 
+//go:generate go run ../cmd/gowsdl -p gen -o gen.go ../fixtures/stock.wsdl
+
 func ExampleBasicUsage() {
 	client := soap.NewClient("http://svc.asmx")
 	service := gen.NewStockQuotePortType(client)

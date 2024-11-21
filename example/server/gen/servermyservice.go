@@ -78,6 +78,32 @@ var wsdl = `<?xml version="1.0" encoding="utf-8"?>
           </s:restriction>
         </s:simpleType>
       </s:attribute>
+      <!-- element with local simple type -->
+      <s:element name="elementWithLocalSimpleType">
+        <s:annotation>
+          <s:documentation>An element with a local simple type declaration including an enumeration.</s:documentation>
+        </s:annotation>
+        <s:simpleType>
+          <s:restriction base="s:string">
+            <s:enumeration value="enum1">
+              <s:annotation>
+                <s:documentation>First enum value</s:documentation>
+              </s:annotation>
+            </s:enumeration>
+            <s:enumeration value="enum2">
+              <s:annotation>
+                <s:documentation>Second enum value</s:documentation>
+              </s:annotation>
+            </s:enumeration>
+          </s:restriction>
+        </s:simpleType>
+      </s:element>
+      <!-- element of type dateTime -->
+      <s:element name="startDate" type="s:dateTime">
+        <s:annotation>
+          <s:documentation>The date and time when the process starts.</s:documentation>
+        </s:annotation>
+      </s:element>
     </s:schema>
   </wsdl:types>
   <wsdl:message name="GetInfoSoapIn">
@@ -159,13 +185,20 @@ type SOAPBodyResponse struct {
 	GetInfo *GetInfoResponse `xml:",omitempty"`
 }
 
-func (service *SOAPBodyRequest) GetInfoFunc(request *GetInfo) (*GetInfoResponse, error) {
-	return &GetInfoResponse{
-		GetInfoResult: "gowsdl, " + request.Id,
-	}, nil
+type SOAPService interface {
+	GetInfoFunc(request *GetInfo) (*GetInfoResponse, error)
 }
 
-func (service *SOAPEnvelopeRequest) call(w http.ResponseWriter, r *http.Request) {
+type BaseSOAPService struct{}
+
+var _ SOAPService = (*BaseSOAPService)(nil)
+
+func (service *BaseSOAPService) GetInfoFunc(request *GetInfo) (*GetInfoResponse, error) {
+	return nil, WSDLUndefinedError
+}
+
+func call(s SOAPService, w http.ResponseWriter, r *http.Request) {
+	service := &SOAPEnvelopeRequest{}
 	w.Header().Add("Content-Type", "text/xml; charset=utf-8")
 	val := reflect.ValueOf(&service.Body).Elem()
 	n := val.NumField()
@@ -218,7 +251,7 @@ func (service *SOAPEnvelopeRequest) call(w http.ResponseWriter, r *http.Request)
 	if !find {
 		panic(WSDLUndefinedError)
 	} else {
-		m := val.Addr().MethodByName(name + "Func")
+		m := reflect.ValueOf(s).MethodByName(name + "Func")
 		if !m.IsValid() {
 			panic(WSDLUndefinedError)
 		}
@@ -233,7 +266,14 @@ func (service *SOAPEnvelopeRequest) call(w http.ResponseWriter, r *http.Request)
 
 }
 
+func CreateEndpoint(service SOAPService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		call(service, w, r)
+	}
+}
+
+// Deprecated: Use CreateEndpoint instead.
 func Endpoint(w http.ResponseWriter, r *http.Request) {
-	request := SOAPEnvelopeRequest{}
-	request.call(w, r)
+	service := BaseSOAPService{}
+	call(&service, w, r)
 }
