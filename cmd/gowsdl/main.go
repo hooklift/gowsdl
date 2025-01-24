@@ -70,6 +70,9 @@ var outFile = flag.String("o", "myservice.go", "File where the generated code wi
 var dir = flag.String("d", "./", "Directory under which package directory will be created")
 var insecure = flag.Bool("i", false, "Skips TLS Verification")
 var makePublic = flag.Bool("make-public", true, "Make the generated types public/exported")
+var unqualifiedAttrs = flag.Bool("unqualified", false, "Make attribute name unqualified")
+var clientStub = flag.Bool("client", true, "Generate client stub")
+var serverStub = flag.Bool("server", false, "Generate server stub")
 
 func init() {
 	log.SetFlags(0)
@@ -103,7 +106,7 @@ func main() {
 	}
 
 	// load wsdl
-	gowsdl, err := gen.NewGoWSDL(wsdlPath, *pkg, *insecure, *makePublic)
+	gowsdl, err := gen.NewGoWSDL(wsdlPath, *pkg, *insecure, *makePublic, *unqualifiedAttrs)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -115,47 +118,54 @@ func main() {
 	}
 
 	pkg := filepath.Join(*dir, *pkg)
-	err = os.Mkdir(pkg, 0744)
-
-	file, err := os.Create(filepath.Join(pkg, *outFile))
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer file.Close()
-
-	data := new(bytes.Buffer)
-	data.Write(gocode["header"])
-	data.Write(gocode["types"])
-	data.Write(gocode["operations"])
-	data.Write(gocode["soap"])
-
-	// go fmt the generated code
-	source, err := format.Source(data.Bytes())
-	if err != nil {
-		file.Write(data.Bytes())
-		log.Fatalln(err)
+	if *clientStub || *serverStub {
+		os.Mkdir(pkg, 0744)
 	}
 
-	file.Write(source)
+	if *clientStub {
+		// Generate client code
+		file, err := os.Create(filepath.Join(pkg, *outFile))
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer file.Close()
 
-	// server
-	serverFile, err := os.Create(pkg + "/" + "server" + *outFile)
-	if err != nil {
-		log.Fatalln(err)
+		data := new(bytes.Buffer)
+		data.Write(gocode["header"])
+		data.Write(gocode["types"])
+		data.Write(gocode["operations"])
+		data.Write(gocode["soap"])
+
+		// go fmt the generated code
+		source, err := format.Source(data.Bytes())
+		if err != nil {
+			file.Write(data.Bytes())
+			log.Fatalln(err)
+		}
+
+		file.Write(source)
 	}
-	defer serverFile.Close()
 
-	serverData := new(bytes.Buffer)
-	serverData.Write(gocode["server_header"])
-	serverData.Write(gocode["server_wsdl"])
-	serverData.Write(gocode["server"])
+	if *serverStub {
+		// Generate server stub
+		serverFile, err := os.Create(pkg + "/" + "server" + *outFile)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		defer serverFile.Close()
 
-	serverSource, err := format.Source(serverData.Bytes())
-	if err != nil {
-		serverFile.Write(serverData.Bytes())
-		log.Fatalln(err)
+		serverData := new(bytes.Buffer)
+		serverData.Write(gocode["server_header"])
+		serverData.Write(gocode["server_wsdl"])
+		serverData.Write(gocode["server"])
+
+		serverSource, err := format.Source(serverData.Bytes())
+		if err != nil {
+			serverFile.Write(serverData.Bytes())
+			log.Fatalln(err)
+		}
+		serverFile.Write(serverSource)
 	}
-	serverFile.Write(serverSource)
 
 	log.Println("Done 👍")
 }

@@ -24,12 +24,4 @@ import (
 var _ time.Time
 var _ xml.Name
 
-type AnyType struct {
-	InnerXML string ` + "`" + `xml:",innerxml"` + "`" + `
-}
-
-type AnyURI string
-
-type NCName string
-
 `

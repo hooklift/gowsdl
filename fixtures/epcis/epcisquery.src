@@ -13,14 +13,6 @@ import (
 var _ time.Time
 var _ xml.Name
 
-type AnyType struct {
-	InnerXML string `xml:",innerxml"`
-}
-
-type AnyURI string
-
-type NCName string
-
 type Document struct {
 
 	//
@@ -59,9 +51,11 @@ type Partner struct {
 }
 
 type PartnerIdentification struct {
+	XMLName xml.Name `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader Identifier"`
+
 	Value string `xml:",chardata" json:"-,"`
 
-	Authority string `xml:"Authority,attr,omitempty" json:"Authority,omitempty"`
+	Authority string `xml:"http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader Authority,attr,omitempty" json:"Authority,omitempty"`
 }
 
 type ContactInformation struct {
@@ -96,7 +90,7 @@ type Manifest struct {
 type ManifestItem struct {
 	MimeTypeQualifierCode *MimeTypeQualifier `xml:"MimeTypeQualifierCode,omitempty" json:"MimeTypeQualifierCode,omitempty"`
 
-	UniformResourceIdentifier AnyURI `xml:"UniformResourceIdentifier,omitempty" json:"UniformResourceIdentifier,omitempty"`
+	UniformResourceIdentifier soap.AnyURI `xml:"UniformResourceIdentifier,omitempty" json:"UniformResourceIdentifier,omitempty"`
 
 	Description string `xml:"Description,omitempty" json:"Description,omitempty"`
 
@@ -111,7 +105,7 @@ const (
 	TypeOfServiceTransactionRespondingServiceTransaction TypeOfServiceTransaction = "RespondingServiceTransaction"
 )
 
-type ScopeInformation AnyType
+type ScopeInformation soap.AnyType
 
 type BusinessScope struct {
 	Scope []*Scope `xml:"Scope,omitempty" json:"Scope,omitempty"`
@@ -187,33 +181,33 @@ const (
 	ActionTypeDELETE ActionType = "DELETE"
 )
 
-type ParentIDType AnyURI
+type ParentIDType soap.AnyURI
 
-type BusinessStepIDType AnyURI
+type BusinessStepIDType soap.AnyURI
 
-type DispositionIDType AnyURI
+type DispositionIDType soap.AnyURI
 
-type EPCClassType AnyURI
+type EPCClassType soap.AnyURI
 
 type UOMType string
 
-type ReadPointIDType AnyURI
+type ReadPointIDType soap.AnyURI
 
-type BusinessLocationIDType AnyURI
+type BusinessLocationIDType soap.AnyURI
 
-type BusinessTransactionIDType AnyURI
+type BusinessTransactionIDType soap.AnyURI
 
-type BusinessTransactionTypeIDType AnyURI
+type BusinessTransactionTypeIDType soap.AnyURI
 
-type SourceDestIDType AnyURI
+type SourceDestIDType soap.AnyURI
 
-type SourceDestTypeIDType AnyURI
+type SourceDestTypeIDType soap.AnyURI
 
-type TransformationIDType AnyURI
+type TransformationIDType soap.AnyURI
 
-type EventIDType AnyURI
+type EventIDType soap.AnyURI
 
-type ErrorReasonIDType AnyURI
+type ErrorReasonIDType soap.AnyURI
 
 type EPCISDocument EPCISDocumentType
 
@@ -288,7 +282,7 @@ type VocabularyType struct {
 
 	Items []string `xml:",any" json:"items,omitempty"`
 
-	Type AnyURI `xml:"urn:epcglobal:epcis:xsd:1 type,attr,omitempty" json:"type,omitempty"`
+	Type soap.AnyURI `xml:"urn:epcglobal:epcis:xsd:1 type,attr,omitempty" json:"type,omitempty"`
 }
 
 type VocabularyElementListType struct {
@@ -308,21 +302,21 @@ type VocabularyElementType struct {
 
 	Items []string `xml:",any" json:"items,omitempty"`
 
-	Id AnyURI `xml:"urn:epcglobal:epcis:xsd:1 id,attr,omitempty" json:"id,omitempty"`
+	Id soap.AnyURI `xml:"urn:epcglobal:epcis:xsd:1 id,attr,omitempty" json:"id,omitempty"`
 }
 
 type AttributeType struct {
 	XMLName xml.Name `xml:"urn:epcglobal:epcis:xsd:1 attribute"`
 
-	AnyType
+	soap.AnyType
 
-	Id AnyURI `xml:"urn:epcglobal:epcis:xsd:1 id,attr,omitempty" json:"id,omitempty"`
+	Id soap.AnyURI `xml:"urn:epcglobal:epcis:xsd:1 id,attr,omitempty" json:"id,omitempty"`
 }
 
 type IDListType struct {
 	XMLName xml.Name `xml:"urn:epcglobal:epcis:xsd:1 children"`
 
-	Id []AnyURI `xml:"id,omitempty" json:"id,omitempty"`
+	Id []soap.AnyURI `xml:"id,omitempty" json:"id,omitempty"`
 }
 
 type VocabularyExtensionType struct {
@@ -719,7 +713,7 @@ type TransformationEventExtensionType struct {
 	Items []string `xml:",any" json:"items,omitempty"`
 }
 
-type ImplementationExceptionSeverity NCName
+type ImplementationExceptionSeverity soap.NCName
 
 const (
 	ImplementationExceptionSeverityERROR ImplementationExceptionSeverity = "ERROR"
@@ -828,7 +822,7 @@ type Subscribe struct {
 
 	Params *QueryParams `xml:"params,omitempty" json:"params,omitempty"`
 
-	Dest AnyURI `xml:"dest,omitempty" json:"dest,omitempty"`
+	Dest soap.AnyURI `xml:"dest,omitempty" json:"dest,omitempty"`
 
 	Controls *SubscriptionControls `xml:"controls,omitempty" json:"controls,omitempty"`
 
@@ -864,7 +858,7 @@ type SubscriptionControls struct {
 
 	Schedule *QuerySchedule `xml:"schedule,omitempty" json:"schedule,omitempty"`
 
-	Trigger AnyURI `xml:"trigger,omitempty" json:"trigger,omitempty"`
+	Trigger soap.AnyURI `xml:"trigger,omitempty" json:"trigger,omitempty"`
 
 	InitialRecordTime soap.XSDDateTime `xml:"initialRecordTime,omitempty" json:"initialRecordTime,omitempty"`
 
@@ -918,7 +912,7 @@ type QueryParam struct {
 
 	Name string `xml:"name,omitempty" json:"name,omitempty"`
 
-	Value AnyType `xml:"value,omitempty" json:"value,omitempty"`
+	Value soap.AnyType `xml:"value,omitempty" json:"value,omitempty"`
 }
 
 type QueryResults struct {

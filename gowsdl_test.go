@@ -13,7 +13,6 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -23,7 +22,7 @@ import (
 )
 
 func TestElementGenerationDoesntCommentOutStructProperty(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -40,7 +39,7 @@ func TestElementGenerationDoesntCommentOutStructProperty(t *testing.T) {
 }
 
 func TestComplexTypeWithInlineSimpleType(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -65,7 +64,7 @@ func TestComplexTypeWithInlineSimpleType(t *testing.T) {
 }
 
 func TestAttributeRef(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,7 +96,7 @@ func TestAttributeRef(t *testing.T) {
 }
 
 func TestElementWithLocalSimpleType(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -148,7 +147,7 @@ func TestElementWithLocalSimpleType(t *testing.T) {
 }
 
 func TestDateTimeType(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL("fixtures/test.wsdl", "myservice", false, true, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -209,7 +208,7 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 	}
 
 	for _, file := range files {
-		g, err := NewGoWSDL(file, "myservice", false, true)
+		g, err := NewGoWSDL(file, "myservice", false, true, false)
 		if err != nil {
 			t.Error(err)
 		}
@@ -236,7 +235,7 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 
 func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 	enumStringTest := func(t *testing.T, fixtureWsdl string, varName string, typeName string, enumString string) {
-		g, err := NewGoWSDL("fixtures/"+fixtureWsdl, "myservice", false, true)
+		g, err := NewGoWSDL("fixtures/"+fixtureWsdl, "myservice", false, true, false)
 		if err != nil {
 			t.Error(err)
 		}
@@ -261,7 +260,7 @@ func TestEnumerationsGeneratedCorrectly(t *testing.T) {
 }
 
 func TestComplexTypeGeneratedCorrectly(t *testing.T) {
-	g, err := NewGoWSDL("fixtures/workday-time-min.wsdl", "myservice", false, true)
+	g, err := NewGoWSDL("fixtures/workday-time-min.wsdl", "myservice", false, true, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -288,7 +287,7 @@ func TestEPCISWSDL(t *testing.T) {
 	log.SetFlags(0)
 	log.SetOutput(os.Stdout)
 
-	g, err := NewGoWSDL("./fixtures/epcis/EPCglobal-epcis-query-1_2.wsdl", "myservice", true, true)
+	g, err := NewGoWSDL("./fixtures/epcis/EPCglobal-epcis-query-1_2.wsdl", "myservice", true, true, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -308,7 +307,7 @@ func TestEPCISWSDL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectedBytes, err := ioutil.ReadFile("./fixtures/epcis/epcisquery.src")
+	expectedBytes, err := os.ReadFile("./fixtures/epcis/epcisquery.src")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -316,7 +315,7 @@ func TestEPCISWSDL(t *testing.T) {
 	actual := string(source)
 	expected := string(expectedBytes)
 	if actual != expected {
-		_ = ioutil.WriteFile("./fixtures/epcis/epcisquery_gen.src", source, 0664)
+		_ = os.WriteFile("./fixtures/epcis/epcisquery_gen.src", source, 0664)
 		t.Error("got source ./fixtures/epcis/epcisquery_gen.src but expected ./fixtures/epcis/epcisquery.src")
 	}
 }

@@ -2,11 +2,10 @@ package soap
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime"
 	"mime/multipart"
 	"net/textproto"
@@ -96,10 +95,10 @@ func getMmaHeader(contentType string) (string, error) {
 			return "", fmt.Errorf("invalid multipart boundary: %s", boundary)
 		}
 
-		startInfo, ok := params["start"]
-		if !ok || startInfo != "<soaprequest@gowsdl.lib>" {
-			return "", fmt.Errorf(`expected param start="<soaprequest@gowsdl.lib>", got %s`, startInfo)
-		}
+		//	startInfo, ok := params["start"]
+		//	if !ok || startInfo != "<soaprequest@gowsdl.lib>" {
+		//		return "", fmt.Errorf(`expected param start="<soaprequest@gowsdl.lib>", got %s`, startInfo)
+		//	}
 		return boundary, nil
 	}
 
@@ -118,7 +117,7 @@ func (d *mmaDecoder) Decode(v interface{}) error {
 			return err
 		}
 		contentType := p.Header.Get("Content-Type")
-		if contentType == "text/xml;charset=UTF-8" {
+		if strings.HasPrefix(contentType, "text/xml") {
 			// decode SOAP part
 			err := xml.NewDecoder(p).Decode(v)
 			if err != nil {
@@ -126,18 +125,20 @@ func (d *mmaDecoder) Decode(v interface{}) error {
 			}
 		} else {
 			// decode attachment parts
-			contentID := p.Header.Get("Content-Id")
-			if contentID == "" {
-				return errors.New("Invalid multipart content ID")
+			var r io.Reader = p
+
+			// Handle part encoding
+			if p.Header.Get("Content-Transfer-Encoding") == "base64" {
+				r = base64.NewDecoder(base64.StdEncoding, p)
 			}
-			content, err := ioutil.ReadAll(p)
+
+			content, err := io.ReadAll(r)
 			if err != nil {
 				return err
 			}
 
-			contentID = strings.Trim(contentID, "<>")
 			attachments = append(attachments, MIMEMultipartAttachment{
-				Name: contentID,
+				Name: strings.Trim(p.Header.Get("Content-Id"), "<>"),
 				Data: content,
 			})
 		}

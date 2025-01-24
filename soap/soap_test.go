@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -138,7 +138,7 @@ func TestClient_Attachments_WithAttachmentResponse(t *testing.T) {
 		for k, v := range r.Header {
 			w.Header().Set(k, v[0])
 		}
-		bodyBuf, _ := ioutil.ReadAll(r.Body)
+		bodyBuf, _ := io.ReadAll(r.Body)
 		_, err := w.Write(bodyBuf)
 		if err != nil {
 			panic(err)
@@ -163,11 +163,10 @@ func TestClient_Attachments_WithAttachmentResponse(t *testing.T) {
 		ContentID: "First_Attachment",
 	}
 	reply := new(AttachmentRequest)
-	retAttachments := make([]MIMEMultipartAttachment, 0)
+	retAttachments, err := client.CallContextWithAttachmentsAndFaultDetail(context.TODO(), "''", req, reply, nil)
 
 	// WHEN
-	if err := client.CallContextWithAttachmentsAndFaultDetail(context.TODO(), "''", req,
-		reply, nil, &retAttachments); err != nil {
+	if err != nil {
 		t.Fatalf("couln't call service: %v", err)
 	}
 
@@ -183,7 +182,7 @@ func TestClient_MTOM(t *testing.T) {
 		for k, v := range r.Header {
 			w.Header().Set(k, v[0])
 		}
-		bodyBuf, _ := ioutil.ReadAll(r.Body)
+		bodyBuf, _ := io.ReadAll(r.Body)
 		w.Write(bodyBuf)
 	}))
 	defer ts.Close()
@@ -247,8 +246,7 @@ func Test_SimpleNode(t *testing.T) {
   <Num>6.005</Num>
 </SimpleNode>`
 	decoder := xml.NewDecoder(strings.NewReader(input))
-	var simple interface{}
-	simple = &SimpleNode{}
+	simple := &SimpleNode{}
 	if err := decoder.Decode(&simple); err != nil {
 		t.Fatalf("error decoding: %v", err)
 	}

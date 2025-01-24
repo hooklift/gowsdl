@@ -7,11 +7,18 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
 )
+
+type AnyType struct {
+	InnerXML string `xml:",innerxml"`
+}
+
+type AnyURI string
+
+type NCName string
 
 type SOAPEncoder interface {
 	Encode(v interface{}) error
@@ -392,27 +399,29 @@ func (s *Client) SetHttpClientHeaders(headers map[string]string) {
 
 // CallContext performs HTTP POST request with a context
 func (s *Client) CallContext(ctx context.Context, soapAction string, request, response interface{}) error {
-	return s.call(ctx, soapAction, request, response, nil, nil)
+	_, err := s.call(ctx, soapAction, request, response, nil)
+	return err
 }
 
 // Call performs HTTP POST request.
 // Note that if the server returns a status code >= 400, a HTTPError will be returned
 func (s *Client) Call(soapAction string, request, response interface{}) error {
-	return s.call(context.Background(), soapAction, request, response, nil, nil)
+	_, err := s.call(context.Background(), soapAction, request, response, nil)
+	return err
 }
 
 // CallContextWithAttachmentsAndFaultDetail performs HTTP POST request.
 // Note that if SOAP fault is returned, it will be stored in the error.
 // On top the attachments array will be filled with attachments returned from the SOAP request.
-func (s *Client) CallContextWithAttachmentsAndFaultDetail(ctx context.Context, soapAction string, request,
-	response interface{}, faultDetail FaultError, attachments *[]MIMEMultipartAttachment) error {
-	return s.call(ctx, soapAction, request, response, faultDetail, attachments)
+func (s *Client) CallContextWithAttachmentsAndFaultDetail(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError) ([]MIMEMultipartAttachment, error) {
+	return s.call(ctx, soapAction, request, response, faultDetail)
 }
 
 // CallContextWithFault performs HTTP POST request.
 // Note that if SOAP fault is returned, it will be stored in the error.
 func (s *Client) CallContextWithFaultDetail(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError) error {
-	return s.call(ctx, soapAction, request, response, faultDetail, nil)
+	_, err := s.call(ctx, soapAction, request, response, faultDetail)
+	return err
 }
 
 // CallWithFaultDetail performs HTTP POST request.
@@ -420,17 +429,17 @@ func (s *Client) CallContextWithFaultDetail(ctx context.Context, soapAction stri
 // the passed in fault detail is expected to implement FaultError interface,
 // which allows to condense the detail into a short error message.
 func (s *Client) CallWithFaultDetail(soapAction string, request, response interface{}, faultDetail FaultError) error {
-	return s.call(context.Background(), soapAction, request, response, faultDetail, nil)
+	_, err := s.call(context.Background(), soapAction, request, response, faultDetail)
+	return err
 }
 
-func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError,
-	retAttachments *[]MIMEMultipartAttachment) error {
+func (s *Client) call(ctx context.Context, soapAction string, request, response interface{}, faultDetail FaultError) ([]MIMEMultipartAttachment, error) {
 	// SOAP envelope capable of namespace prefixes
 	envelope := SOAPEnvelope{
 		XmlNS: XmlNsSoapEnv,
 	}
 
-	if s.headers != nil && len(s.headers) > 0 {
+	if len(s.headers) > 0 {
 		envelope.Header = &SOAPHeader{
 			Headers: s.headers,
 		}
@@ -440,7 +449,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	buffer := new(bytes.Buffer)
 	var encoder SOAPEncoder
 	if s.opts.mtom && s.opts.mma {
-		return fmt.Errorf("cannot use MTOM (XOP) and MMA (MIME Multipart Attachments) option at the same time")
+		return nil, fmt.Errorf("cannot use MTOM (XOP) and MMA (MIME Multipart Attachments) option at the same time")
 	} else if s.opts.mtom {
 		encoder = newMtomEncoder(buffer)
 	} else if s.opts.mma {
@@ -450,16 +459,16 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 
 	if err := encoder.Encode(envelope); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := encoder.Flush(); err != nil {
-		return err
+		return nil, err
 	}
 
 	req, err := http.NewRequest("POST", s.url, buffer)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if s.opts.auth != nil {
 		req.SetBasicAuth(s.opts.auth.Login, s.opts.auth.Password)
@@ -498,13 +507,13 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 
 	res, err := client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode >= 400 && res.StatusCode != 500 {
-		body, _ := ioutil.ReadAll(res.Body)
-		return &HTTPError{
+		body, _ := io.ReadAll(res.Body)
+		return nil, &HTTPError{
 			StatusCode:   res.StatusCode,
 			ResponseBody: body,
 		}
@@ -522,15 +531,13 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 
 	mtomBoundary, err := getMtomHeader(res.Header.Get("Content-Type"))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var mmaBoundary string
-	if s.opts.mma{
-		mmaBoundary, err = getMmaHeader(res.Header.Get("Content-Type"))
-		if err != nil {
-			return err
-		}
+	mmaBoundary, err = getMmaHeader(res.Header.Get("Content-Type"))
+	if err != nil {
+		return nil, err
 	}
 
 	// we need to store the body in case of an error
@@ -540,7 +547,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	if res.StatusCode == 500 {
 		cachedErrorBody, err = io.ReadAll(res.Body)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		body = io.NopCloser(bytes.NewReader(cachedErrorBody))
 	}
@@ -557,16 +564,13 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	if err := dec.Decode(respEnvelope); err != nil {
 		// the response doesn't contain a Fault/SOAPBody, so we return the original body
 		if res.StatusCode == 500 {
-			return &HTTPError{
+			return nil, &HTTPError{
 				StatusCode:   res.StatusCode,
 				ResponseBody: cachedErrorBody,
 			}
 		}
-		return err
+		return nil, err
 	}
 
-	if respEnvelope.Attachments != nil {
-		*retAttachments = respEnvelope.Attachments
-	}
-	return respEnvelope.Body.ErrorFromFault()
+	return respEnvelope.Attachments, respEnvelope.Body.ErrorFromFault()
 }

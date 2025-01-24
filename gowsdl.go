@@ -10,7 +10,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -32,6 +32,7 @@ type GoWSDL struct {
 	rawWSDL               []byte
 	pkg                   string
 	ignoreTLS             bool
+	unqualifiedAttrs      bool
 	makePublicFn          func(string) string
 	wsdl                  *WSDL
 	resolvedXSDExternals  map[string]bool
@@ -47,6 +48,10 @@ func (g *GoWSDL) setNS(ns string) string {
 
 // Method setNS returns the currently active XML namespace.
 func (g *GoWSDL) getNS() string {
+	if g.unqualifiedAttrs {
+		return ""
+	}
+
 	return g.currentNamespace
 }
 
@@ -85,7 +90,7 @@ func downloadFile(url string, ignoreTLS bool) ([]byte, error) {
 		return nil, fmt.Errorf("Received response code %d", resp.StatusCode)
 	}
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +99,7 @@ func downloadFile(url string, ignoreTLS bool) ([]byte, error) {
 }
 
 // NewGoWSDL initializes WSDL generator.
-func NewGoWSDL(file, pkg string, ignoreTLS bool, exportAllTypes bool) (*GoWSDL, error) {
+func NewGoWSDL(file, pkg string, ignoreTLS bool, exportAllTypes bool, unqualifiedAttrs bool) (*GoWSDL, error) {
 	file = strings.TrimSpace(file)
 	if file == "" {
 		return nil, errors.New("WSDL file is required to generate Go proxy")
@@ -115,10 +120,11 @@ func NewGoWSDL(file, pkg string, ignoreTLS bool, exportAllTypes bool) (*GoWSDL, 
 	}
 
 	return &GoWSDL{
-		loc:          r,
-		pkg:          pkg,
-		ignoreTLS:    ignoreTLS,
-		makePublicFn: makePublicFn,
+		loc:              r,
+		pkg:              pkg,
+		ignoreTLS:        ignoreTLS,
+		makePublicFn:     makePublicFn,
+		unqualifiedAttrs: unqualifiedAttrs,
 	}, nil
 }
 
@@ -192,7 +198,7 @@ func (g *GoWSDL) Start() (map[string][]byte, error) {
 func (g *GoWSDL) fetchFile(loc *Location) (data []byte, err error) {
 	if loc.f != "" {
 		log.Println("Reading", "file", loc.f)
-		data, err = ioutil.ReadFile(loc.f)
+		data, err = os.ReadFile(loc.f)
 	} else {
 		log.Println("Downloading", "file", loc.u.String())
 		data, err = downloadFile(loc.u.String(), g.ignoreTLS)
@@ -325,6 +331,7 @@ func (g *GoWSDL) genOperations() ([]byte, error) {
 		"findType":             g.findType,
 		"findSOAPAction":       g.findSOAPAction,
 		"findServiceAddress":   g.findServiceAddress,
+		"responseAttachments":  g.responseAttachments,
 	}
 
 	data := new(bytes.Buffer)
@@ -524,9 +531,9 @@ var xsd2GoTypes = map[string]string{
 	"unsignedshort":      "uint16",
 	"unsignedbyte":       "byte",
 	"unsignedlong":       "uint64",
-	"anytype":            "AnyType",
-	"ncname":             "NCName",
-	"anyuri":             "AnyURI",
+	"anytype":            "soap.AnyType",
+	"ncname":             "soap.NCName",
+	"anyuri":             "soap.AnyURI",
 }
 
 func removeNS(xsdType string) string {
@@ -640,6 +647,25 @@ func (g *GoWSDL) findServiceAddress(name string) string {
 		}
 	}
 	return ""
+}
+
+// Finds parts of the specified response message that may be returned as an attachment
+// Parts whose name ends with the '-attachment' suffix are marked as response attachments
+func (g *GoWSDL) responseAttachments(message string) []*WSDLPart {
+	message = stripns(message)
+	attachmentParts := make([]*WSDLPart, 0)
+	for _, msg := range g.wsdl.Messages {
+		if msg.Name != message {
+			continue
+		}
+
+		for _, part := range msg.Parts {
+			if strings.HasSuffix(part.Name, "-attachment") {
+				attachmentParts = append(attachmentParts, part)
+			}
+		}
+	}
+	return attachmentParts
 }
 
 // TODO(c4milo): Add namespace support instead of stripping it
