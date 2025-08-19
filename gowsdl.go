@@ -454,6 +454,7 @@ var reservedWordsInAttr = map[string]string{
 	"return":      "return_",
 	"var":         "var_",
 	"string":      "astring",
+	"int":         "aint",
 }
 
 var specialCharacterMapping = map[string]string{
