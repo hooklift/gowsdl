@@ -12,19 +12,70 @@ const xmlschema11 = "http://www.w3.org/2001/XMLSchema"
 
 // XSDSchema represents an entire Schema structure.
 type XSDSchema struct {
-	XMLName            xml.Name          `xml:"schema"`
-	Xmlns              map[string]string `xml:"-"`
-	Tns                string            `xml:"xmlns tns,attr"`
-	Xs                 string            `xml:"xmlns xs,attr"`
-	Version            string            `xml:"version,attr"`
-	TargetNamespace    string            `xml:"targetNamespace,attr"`
-	ElementFormDefault string            `xml:"elementFormDefault,attr"`
-	Includes           []*XSDInclude     `xml:"include"`
-	Imports            []*XSDImport      `xml:"import"`
-	Elements           []*XSDElement     `xml:"element"`
-	Attributes         []*XSDAttribute   `xml:"attribute"`
-	ComplexTypes       []*XSDComplexType `xml:"complexType"` // global
-	SimpleType         []*XSDSimpleType  `xml:"simpleType"`
+	XMLName              xml.Name          `xml:"schema"`
+	Xmlns                map[string]string `xml:"-"`
+	Tns                  string            `xml:"xmlns tns,attr"`
+	Xs                   string            `xml:"xmlns xs,attr"`
+	Version              string            `xml:"version,attr"`
+	TargetNamespace      string            `xml:"targetNamespace,attr"`
+	ElementFormDefault   string            `xml:"elementFormDefault,attr"`
+	AttributeFormDefault string            `xml:"attributeFormDefault,attr"`
+	Includes             []*XSDInclude     `xml:"include"`
+	Imports              []*XSDImport      `xml:"import"`
+	Elements             []*XSDElement     `xml:"element"`
+	Attributes           []*XSDAttribute   `xml:"attribute"`
+	ComplexTypes         []*XSDComplexType `xml:"complexType"` // global
+	SimpleType           []*XSDSimpleType  `xml:"simpleType"`
+}
+
+// See https://www.w3.org/TR/xmlschema11-1/#declare-element
+func (s *XSDSchema) XMLNameForElement(e *XSDElement) (xn xml.Name) {
+	var isTopLevel bool
+	for _, el := range s.Elements {
+		if el == e {
+			isTopLevel = true
+			break
+		}
+	}
+
+	xn.Local = e.Name
+	if isTopLevel {
+		xn.Space = s.TargetNamespace
+		return
+	}
+	if e.TargetNamespace != "" {
+		xn.Space = e.TargetNamespace
+		return
+	}
+	if e.Form == "qualified" || (e.Form == "" && s.ElementFormDefault == "qualified") {
+		xn.Space = s.TargetNamespace
+		return
+	}
+	return xn
+}
+
+func (s *XSDSchema) XMLNameForAttribute(attr *XSDAttribute) (xn xml.Name) {
+	var isTopLevel bool
+	for _, a := range s.Attributes {
+		if a == attr {
+			isTopLevel = true
+			break
+		}
+	}
+	xn.Local = attr.Name
+	if isTopLevel {
+		xn.Space = s.TargetNamespace
+		return
+	}
+	if attr.TargetNamespace != "" {
+		xn.Space = attr.TargetNamespace
+		return
+	}
+	if attr.Form == "qualified" || (attr.Form == "" && s.AttributeFormDefault == "qualified") {
+		xn.Space = s.TargetNamespace
+		return
+	}
+	return
 }
 
 // UnmarshalXML implements interface xml.Unmarshaler for XSDSchema.
@@ -44,6 +95,8 @@ func (s *XSDSchema) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 			s.TargetNamespace = attr.Value
 		case "elementFormDefault":
 			s.ElementFormDefault = attr.Value
+		case "attributeFormDefault":
+			s.AttributeFormDefault = attr.Value
 		}
 	}
 
@@ -124,17 +177,19 @@ type XSDImport struct {
 
 // XSDElement represents a Schema element.
 type XSDElement struct {
-	XMLName     xml.Name        `xml:"element"`
-	Name        string          `xml:"name,attr"`
-	Doc         string          `xml:"annotation>documentation"`
-	Nillable    bool            `xml:"nillable,attr"`
-	Type        string          `xml:"type,attr"`
-	Ref         string          `xml:"ref,attr"`
-	MinOccurs   string          `xml:"minOccurs,attr"`
-	MaxOccurs   string          `xml:"maxOccurs,attr"`
-	ComplexType *XSDComplexType `xml:"complexType"` // local
-	SimpleType  *XSDSimpleType  `xml:"simpleType"`
-	Groups      []*XSDGroup     `xml:"group"`
+	XMLName         xml.Name        `xml:"element"`
+	Name            string          `xml:"name,attr"`
+	Doc             string          `xml:"annotation>documentation"`
+	Nillable        bool            `xml:"nillable,attr"`
+	Type            string          `xml:"type,attr"`
+	Ref             string          `xml:"ref,attr"`
+	MinOccurs       string          `xml:"minOccurs,attr"`
+	MaxOccurs       string          `xml:"maxOccurs,attr"`
+	ComplexType     *XSDComplexType `xml:"complexType"` // local
+	SimpleType      *XSDSimpleType  `xml:"simpleType"`
+	Groups          []*XSDGroup     `xml:"group"`
+	TargetNamespace string          `xml:"targetNamespace,attr"`
+	Form            string          `xml:"form,attr"`
 }
 
 // XSDAny represents a Schema element.
@@ -200,13 +255,15 @@ type XSDExtension struct {
 // attributes. If an element has attributes, it is considered to be of a
 // complex type. But the attribute itself is always declared as a simple type.
 type XSDAttribute struct {
-	Doc        string         `xml:"annotation>documentation"`
-	Name       string         `xml:"name,attr"`
-	Ref        string         `xml:"ref,attr"`
-	Type       string         `xml:"type,attr"`
-	Use        string         `xml:"use,attr"`
-	Fixed      string         `xml:"fixed,attr"`
-	SimpleType *XSDSimpleType `xml:"simpleType"`
+	Doc             string         `xml:"annotation>documentation"`
+	Name            string         `xml:"name,attr"`
+	Ref             string         `xml:"ref,attr"`
+	Type            string         `xml:"type,attr"`
+	Use             string         `xml:"use,attr"`
+	Fixed           string         `xml:"fixed,attr"`
+	SimpleType      *XSDSimpleType `xml:"simpleType"`
+	TargetNamespace string         `xml:"targetNamespace,attr"`
+	Form            string         `xml:"form,attr"`
 }
 
 // XSDSimpleType element defines a simple type and specifies the constraints

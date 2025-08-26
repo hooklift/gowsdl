@@ -13,7 +13,6 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -84,7 +83,7 @@ func TestAttributeRef(t *testing.T) {
 	Status	[]struct {
 		Value	string  ` + "`" + `xml:",chardata" json:"-,"` + "`" + `
 
-		Code	string	` + "`" + `xml:"http://www.mnb.hu/webservices/ code,attr,omitempty" json:"code,omitempty"` + "`" + `
+		Code	string	` + "`" + `xml:"code,attr,omitempty" json:"code,omitempty"` + "`" + `
 	}	` + "`" + `xml:"status,omitempty" json:"status,omitempty"` + "`" + `
 
 	ResponseCode	string	` + "`" + `xml:"http://www.mnb.hu/webservices/ responseCode,attr,omitempty" json:"responseCode,omitempty"` + "`" + `
@@ -209,28 +208,34 @@ func TestVboxGeneratesWithoutSyntaxErrors(t *testing.T) {
 	}
 
 	for _, file := range files {
-		g, err := NewGoWSDL(file, "myservice", false, true)
-		if err != nil {
-			t.Error(err)
-		}
-
-		resp, err := g.Start()
-		if err != nil {
+		if file == "fixtures/vim.wsdl" {
+			// This fixture references missing .xsd files from the VMWare SDK, which aren't actually
+			// vendored. We use it explicitly from test_wsdl.go to test unmarshalling, but not here.
 			continue
-			//t.Error(err)
 		}
+		t.Run(file, func(t *testing.T) {
+			g, err := NewGoWSDL(file, "myservice", false, true)
+			if err != nil {
+				t.Error(err)
+			}
 
-		data := new(bytes.Buffer)
-		data.Write(resp["header"])
-		data.Write(resp["types"])
-		data.Write(resp["operations"])
-		data.Write(resp["soap"])
+			resp, err := g.Start()
+			if err != nil {
+				t.Error(err)
+			}
 
-		_, err = format.Source(data.Bytes())
-		if err != nil {
-			fmt.Println(string(data.Bytes()))
-			t.Error(err)
-		}
+			data := new(bytes.Buffer)
+			data.Write(resp["header"])
+			data.Write(resp["types"])
+			data.Write(resp["operations"])
+			data.Write(resp["soap"])
+
+			_, err = format.Source(data.Bytes())
+			if err != nil {
+				fmt.Println(data.String())
+				t.Error(err)
+			}
+		})
 	}
 }
 
@@ -308,7 +313,7 @@ func TestEPCISWSDL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectedBytes, err := ioutil.ReadFile("./fixtures/epcis/epcisquery.src")
+	expectedBytes, err := os.ReadFile("./fixtures/epcis/epcisquery.src")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -316,7 +321,7 @@ func TestEPCISWSDL(t *testing.T) {
 	actual := string(source)
 	expected := string(expectedBytes)
 	if actual != expected {
-		_ = ioutil.WriteFile("./fixtures/epcis/epcisquery_gen.src", source, 0664)
+		_ = os.WriteFile("./fixtures/epcis/epcisquery_gen.src", source, 0664)
 		t.Error("got source ./fixtures/epcis/epcisquery_gen.src but expected ./fixtures/epcis/epcisquery.src")
 	}
 }

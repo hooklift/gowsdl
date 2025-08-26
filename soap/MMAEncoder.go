@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime"
 	"mime/multipart"
 	"net/textproto"
@@ -130,7 +129,7 @@ func (d *mmaDecoder) Decode(v interface{}) error {
 			if contentID == "" {
 				return errors.New("Invalid multipart content ID")
 			}
-			content, err := ioutil.ReadAll(p)
+			content, err := io.ReadAll(p)
 			if err != nil {
 				return err
 			}

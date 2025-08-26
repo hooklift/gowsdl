@@ -44,14 +44,17 @@ var typesTmpl = `
 {{end}}
 
 {{define "Attributes"}}
-    {{ $targetNamespace := getNS }}
+    {{ $schema := getCurrentSchema }}
 	{{range .}}
+	    {{$normalizedName := normalize .Name | makeFieldPublic}}
+		{{$xmlName := $schema.XMLNameForAttribute .}}
 		{{if .Doc}} {{.Doc | comment}} {{end}}
 		{{ if ne .Type "" }}
-			{{ normalize .Name | makeFieldPublic}} {{toGoType .Type false}} ` + "`" + `xml:"{{with $targetNamespace}}{{.}} {{end}}{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
+			{{$normalizedName}} {{toGoType .Type false}} ` + "`" + `xml:"{{renderXMLName $xmlName}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
 		{{ else }}
-			{{ normalize .Name | makeFieldPublic}} string ` + "`" + `xml:"{{with $targetNamespace}}{{.}} {{end}}{{.Name}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
+			{{$normalizedName}} string ` + "`" + `xml:"{{renderXMLName $xmlName}},attr,omitempty" json:"{{.Name}},omitempty"` + "`" + `
 		{{ end }}
+
 	{{end}}
 {{end}}
 
@@ -108,20 +111,22 @@ var typesTmpl = `
 {{end}}
 
 {{range .Schemas}}
-	{{ $targetNamespace := setNS .TargetNamespace }}
+	{{ $schema := . }}
+    {{ $currentSchema := setCurrentSchema . }}
 
 	{{range .SimpleType}}
 		{{template "SimpleType" .}}
 	{{end}}
 
 	{{range .Elements}}
+		{{$element := .}}
 		{{$name := .Name}}
 		{{$typeName := replaceReservedWords $name | makePublic}}
 		{{if not .Type}}
 			{{/* ComplexTypeLocal */}}
 			{{with .ComplexType}}
 				type {{$typeName}} struct {
-					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$name}}\"`" + `
+					XMLName xml.Name {{renderXMLTag ($schema.XMLNameForElement $element) }}
 					{{if ne .ComplexContent.Extension.Base ""}}
 						{{template "ComplexContent" .ComplexContent}}
 					{{else if ne .SimpleContent.Extension.Base ""}}
@@ -201,9 +206,12 @@ var typesTmpl = `
 			type {{$typeName}} string
 		{{else}}
 			type {{$typeName}} struct {
-				{{$type := findNameByType .Name}}
-				{{if ne .Name $type}}
-					XMLName xml.Name ` + "`xml:\"{{$targetNamespace}} {{$type}}\"`" + `
+				{{$originalTypeName := .Name}}
+				{{$xmlName := xmlNameForType .Name $schema}}
+				{{with $xmlName}}
+				{{if ne .Local $originalTypeName}}
+					XMLName xml.Name {{renderXMLTag .}}
+				{{end}}
 				{{end}}
 
 				{{if ne .ComplexContent.Extension.Base ""}}

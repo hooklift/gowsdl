@@ -7,7 +7,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
@@ -503,7 +502,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	defer res.Body.Close()
 
 	if res.StatusCode >= 400 && res.StatusCode != 500 {
-		body, _ := ioutil.ReadAll(res.Body)
+		body, _ := io.ReadAll(res.Body)
 		return &HTTPError{
 			StatusCode:   res.StatusCode,
 			ResponseBody: body,
@@ -526,7 +525,7 @@ func (s *Client) call(ctx context.Context, soapAction string, request, response 
 	}
 
 	var mmaBoundary string
-	if s.opts.mma{
+	if s.opts.mma {
 		mmaBoundary, err = getMmaHeader(res.Header.Get("Content-Type"))
 		if err != nil {
 			return err

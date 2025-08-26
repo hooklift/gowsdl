@@ -6,12 +6,12 @@ package gowsdl
 
 import (
 	"encoding/xml"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
 func TestUnmarshal(t *testing.T) {
-	data, err := ioutil.ReadFile("fixtures/vim.wsdl")
+	data, err := os.ReadFile("fixtures/vim.wsdl")
 	if err != nil {
 		t.Errorf("incorrect result\ngot:  %#v\nwant: %#v", err, nil)
 	}
